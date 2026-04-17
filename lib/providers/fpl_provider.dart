@@ -200,68 +200,109 @@ class FplProvider extends ChangeNotifier {
         .toList();
   }
 
+  /// Returns the next-gameweek fixture difficulty (1–5) for [teamId].
+  /// Defaults to 3 (medium) if no fixture is found.
+  int getNextFixtureDifficulty(int teamId) {
+    final gwId = _currentGameweek?.id ?? 1;
+    final gwFixtures = getFixturesForGameweek(gwId);
+    for (final f in gwFixtures) {
+      if (f.homeTeamId == teamId) return f.teamHDifficulty;
+      if (f.awayTeamId == teamId) return f.teamADifficulty;
+    }
+    return 3;
+  }
+
+  /// Composite score combining form, ICT, PPG, value, fixture difficulty
+  /// and availability to rank players for the upcoming gameweek.
+  double computePlayerScore(Player p) {
+    double score = 0;
+
+    // Season total points (baseline)
+    score += p.totalPoints * 0.3;
+
+    // Recent form – most predictive of next-GW output
+    score += p.formValue * 12.0;
+
+    // Points per game
+    score += p.ppgValue * 6.0;
+
+    // ICT index
+    score += p.ictValue * 0.25;
+
+    // Value (pts per million)
+    score += p.valueSeasonValue * 1.5;
+
+    // Fixture difficulty: easier opponent → higher bonus
+    final diff = getNextFixtureDifficulty(p.teamId);
+    score += (6 - diff) * 4.0;
+
+    // Availability penalty
+    if (p.chanceOfPlayingNextRound != null) {
+      score *= (p.chanceOfPlayingNextRound! / 100.0);
+    } else if (p.status != 'a') {
+      score *= 0.5;
+    }
+
+    // Transfer momentum (normalised, capped)
+    score += (p.transfersInEvent / 100000.0).clamp(0.0, 3.0);
+
+    return score;
+  }
+
   Map<String, List<Player>> getBestTeam() {
     const budget = 1000; // £100m in tenths
 
     final gks = List<Player>.from(getPlayersByPosition(1))
-      ..sort((a, b) => b.totalPoints.compareTo(a.totalPoints));
+      ..sort((a, b) => computePlayerScore(b).compareTo(computePlayerScore(a)));
     final defs = List<Player>.from(getPlayersByPosition(2))
-      ..sort((a, b) => b.totalPoints.compareTo(a.totalPoints));
+      ..sort((a, b) => computePlayerScore(b).compareTo(computePlayerScore(a)));
     final mids = List<Player>.from(getPlayersByPosition(3))
-      ..sort((a, b) => b.totalPoints.compareTo(a.totalPoints));
+      ..sort((a, b) => computePlayerScore(b).compareTo(computePlayerScore(a)));
     final fwds = List<Player>.from(getPlayersByPosition(4))
-      ..sort((a, b) => b.totalPoints.compareTo(a.totalPoints));
+      ..sort((a, b) => computePlayerScore(b).compareTo(computePlayerScore(a)));
 
-    List<Player> picked = [];
+    final List<Player> picked = [];
     int spent = 0;
+    final teamCount = <int, int>{};
+
+    bool canPickFromTeam(int teamId) => (teamCount[teamId] ?? 0) < 3;
+
+    void pickPlayer(Player p) {
+      picked.add(p);
+      spent += p.nowCost;
+      teamCount[p.teamId] = (teamCount[p.teamId] ?? 0) + 1;
+    }
 
     // Pick 2 GKs
-    int gkCount = 0;
+    int count = 0;
     for (final p in gks) {
-      if (gkCount < 2 && spent + p.nowCost <= budget - (5 - 0) * 40) {
-        picked.add(p);
-        spent += p.nowCost;
-        gkCount++;
-      }
-      if (gkCount == 2) break;
+      if (count >= 2) break;
+      if (canPickFromTeam(p.teamId)) { pickPlayer(p); count++; }
     }
 
     // Pick 5 DEFs
-    int defCount = 0;
+    count = 0;
     for (final p in defs) {
-      if (defCount < 5) {
-        picked.add(p);
-        spent += p.nowCost;
-        defCount++;
-      }
-      if (defCount == 5) break;
+      if (count >= 5) break;
+      if (canPickFromTeam(p.teamId)) { pickPlayer(p); count++; }
     }
 
     // Pick 5 MIDs
-    int midCount = 0;
+    count = 0;
     for (final p in mids) {
-      if (midCount < 5) {
-        picked.add(p);
-        spent += p.nowCost;
-        midCount++;
-      }
-      if (midCount == 5) break;
+      if (count >= 5) break;
+      if (canPickFromTeam(p.teamId)) { pickPlayer(p); count++; }
     }
 
     // Pick 3 FWDs
-    int fwdCount = 0;
+    count = 0;
     for (final p in fwds) {
-      if (fwdCount < 3) {
-        picked.add(p);
-        spent += p.nowCost;
-        fwdCount++;
-      }
-      if (fwdCount == 3) break;
+      if (count >= 3) break;
+      if (canPickFromTeam(p.teamId)) { pickPlayer(p); count++; }
     }
 
     // Handle budget overflow by swapping out expensive players with cheaper alternatives
     while (spent > budget && picked.isNotEmpty) {
-      // Find and replace the most expensive player that has a cheaper alternative
       picked.sort((a, b) => b.nowCost.compareTo(a.nowCost));
       final expensive = picked.first;
       final posPlayers = switch (expensive.elementType) {
@@ -272,15 +313,21 @@ class FplProvider extends ChangeNotifier {
         _ => <Player>[]
       };
       final pickedIds = picked.map((p) => p.id).toSet();
+      // Temporarily free the team slot so the budget swap can consider same team
+      teamCount[expensive.teamId] = (teamCount[expensive.teamId] ?? 1) - 1;
       final cheaper = posPlayers.lastWhere(
         (p) => !pickedIds.contains(p.id) && p.nowCost < expensive.nowCost,
         orElse: () => expensive,
       );
-      if (cheaper.id == expensive.id) break;
+      if (cheaper.id == expensive.id) {
+        teamCount[expensive.teamId] = (teamCount[expensive.teamId] ?? 0) + 1;
+        break;
+      }
       spent -= expensive.nowCost;
       spent += cheaper.nowCost;
       picked.remove(expensive);
       picked.add(cheaper);
+      teamCount[cheaper.teamId] = (teamCount[cheaper.teamId] ?? 0) + 1;
     }
 
     final startingGks = picked.where((p) => p.elementType == 1).take(1).toList();

@@ -81,6 +81,7 @@ class _BestTeamScreenState extends State<BestTeamScreen> {
           _buildStats(totalCost, totalPts, _formation),
           _buildPitch(context, gks, defs, mids, fwds, provider),
           _buildSubsSection(context, subs, provider),
+          _buildSelectionCriteria(),
           _buildChipAdvice(),
           const SizedBox(height: 20),
         ],
@@ -156,9 +157,17 @@ class _BestTeamScreenState extends State<BestTeamScreen> {
     if (players.isEmpty) return const SizedBox.shrink();
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: players.map((p) => _PitchPlayer(player: p, posColor: posColor, onTap: () {
-        Navigator.push(context, MaterialPageRoute(builder: (_) => PlayerDetailScreen(player: p)));
-      })).toList(),
+      children: players.map((p) {
+        final diff = provider.getNextFixtureDifficulty(p.teamId);
+        return _PitchPlayer(
+          player: p,
+          posColor: posColor,
+          nextFixtureDifficulty: diff,
+          onTap: () {
+            Navigator.push(context, MaterialPageRoute(builder: (_) => PlayerDetailScreen(player: p)));
+          },
+        );
+      }).toList(),
     );
   }
 
@@ -182,16 +191,70 @@ class _BestTeamScreenState extends State<BestTeamScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: subs.take(4).map((p) {
+              final diff = provider.getNextFixtureDifficulty(p.teamId);
               return _PitchPlayer(
                 player: p,
                 posColor: getPositionColor(p.elementType),
                 isSub: true,
+                nextFixtureDifficulty: diff,
                 onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => PlayerDetailScreen(player: p))),
               );
             }).toList(),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildSelectionCriteria() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.all(16),
+      decoration: AppTheme.gradientCard(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(
+            children: [
+              Icon(Icons.analytics, color: AppColors.accent, size: 18),
+              SizedBox(width: 8),
+              Text('Smart Selection Algorithm', style: TextStyle(color: AppColors.textPrimary, fontSize: 15, fontWeight: FontWeight.w700)),
+            ],
+          ),
+          const SizedBox(height: 12),
+          const Text(
+            'Players selected using a composite score based on:',
+            style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            runSpacing: 6,
+            children: [
+              _criteriaChip('📈 Recent Form', AppColors.primary),
+              _criteriaChip('⚡ ICT Index', AppColors.warning),
+              _criteriaChip('🎯 Points/Game', AppColors.accent),
+              _criteriaChip('💰 Value', const Color(0xFF69F0AE)),
+              _criteriaChip('🏟 Fixture Difficulty', const Color(0xFFB388FF)),
+              _criteriaChip('🩺 Availability', AppColors.error),
+              _criteriaChip('🔄 Transfer Momentum', AppColors.textSecondary),
+              _criteriaChip('👥 Max 3/Club', AppColors.textSecondary),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _criteriaChip(String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withAlpha(26),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withAlpha(77)),
+      ),
+      child: Text(label, style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.w500)),
     );
   }
 
@@ -248,37 +311,62 @@ class _PitchPlayer extends StatelessWidget {
   final Color posColor;
   final bool isSub;
   final VoidCallback? onTap;
+  final int? nextFixtureDifficulty;
 
   const _PitchPlayer({
     required this.player,
     required this.posColor,
     this.isSub = false,
     this.onTap,
+    this.nextFixtureDifficulty,
   });
 
   @override
   Widget build(BuildContext context) {
+    final diffColor = nextFixtureDifficulty != null
+        ? (DifficultyConstants.colors[nextFixtureDifficulty] ?? AppColors.textSecondary)
+        : null;
+
     return GestureDetector(
       onTap: onTap,
       child: SizedBox(
         width: 64,
         child: Column(
           children: [
-            Container(
-              width: isSub ? 48 : 56,
-              height: isSub ? 48 : 56,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.cardDark,
-                border: Border.all(color: posColor, width: 2),
-              ),
-              clipBehavior: Clip.antiAlias,
-              child: CachedNetworkImage(
-                imageUrl: player.photoUrl,
-                fit: BoxFit.cover,
-                placeholder: (_, __) => Icon(Icons.person, color: AppColors.textSecondary, size: isSub ? 24 : 28),
-                errorWidget: (_, __, ___) => Icon(Icons.person, color: AppColors.textSecondary, size: isSub ? 24 : 28),
-              ),
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Container(
+                  width: isSub ? 48 : 56,
+                  height: isSub ? 48 : 56,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppColors.cardDark,
+                    border: Border.all(color: posColor, width: 2),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: CachedNetworkImage(
+                    imageUrl: player.photoUrl,
+                    fit: BoxFit.cover,
+                    placeholder: (_, __) => Icon(Icons.person, color: AppColors.textSecondary, size: isSub ? 24 : 28),
+                    errorWidget: (_, __, ___) => Icon(Icons.person, color: AppColors.textSecondary, size: isSub ? 24 : 28),
+                  ),
+                ),
+                if (diffColor != null)
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: Container(
+                      width: 12,
+                      height: 12,
+                      decoration: BoxDecoration(
+                        color: diffColor,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: AppColors.cardDark, width: 1.5),
+                      ),
+                    ),
+                  ),
+              ],
             ),
             const SizedBox(height: 4),
             Container(
@@ -301,7 +389,7 @@ class _PitchPlayer extends StatelessWidget {
                 borderRadius: BorderRadius.circular(3),
               ),
               child: Text(
-                '${player.totalPoints}',
+                player.form,
                 style: const TextStyle(color: AppColors.secondary, fontSize: 10, fontWeight: FontWeight.w800),
               ),
             ),

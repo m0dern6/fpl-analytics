@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../providers/fpl_provider.dart';
 import '../models/player.dart';
@@ -347,6 +348,24 @@ class _DashboardContent extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
+                    // Player photo
+                    Container(
+                      width: 36,
+                      height: 36,
+                      clipBehavior: Clip.antiAlias,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: AppColors.cardMedium,
+                      ),
+                      child: CachedNetworkImage(
+                        imageUrl: player.photoUrl,
+                        fit: BoxFit.cover,
+                        placeholder: (_, __) => const Icon(Icons.person, color: AppColors.textSecondary, size: 18),
+                        errorWidget: (_, __, ___) => const Icon(Icons.person, color: AppColors.textSecondary, size: 18),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    // Rank badge
                     Container(
                       width: 20,
                       height: 20,
@@ -365,7 +384,7 @@ class _DashboardContent extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 10),
+                    const SizedBox(width: 8),
                     Expanded(
                       flex: 3,
                       child: Column(
@@ -462,6 +481,22 @@ class _DashboardContent extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
                 child: Row(
                   children: [
+                    Container(
+                      width: 30,
+                      height: 30,
+                      clipBehavior: Clip.antiAlias,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: AppColors.cardMedium,
+                      ),
+                      child: CachedNetworkImage(
+                        imageUrl: p.photoUrl,
+                        fit: BoxFit.cover,
+                        placeholder: (_, __) => const Icon(Icons.person, color: AppColors.textSecondary, size: 14),
+                        errorWidget: (_, __, ___) => const Icon(Icons.person, color: AppColors.textSecondary, size: 14),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         p.webName,
@@ -518,10 +553,28 @@ class _DashboardContent extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: Text(
-              home?.shortName ?? '?',
-              style: const TextStyle(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w600),
-              textAlign: TextAlign.right,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Flexible(
+                  child: Text(
+                    home?.shortName ?? '?',
+                    style: const TextStyle(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w600),
+                    textAlign: TextAlign.right,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                if (home != null)
+                  CachedNetworkImage(
+                    imageUrl: home.badgeUrl,
+                    width: 26,
+                    height: 26,
+                    fit: BoxFit.contain,
+                    placeholder: (_, __) => const SizedBox(width: 26, height: 26),
+                    errorWidget: (_, __, ___) => const SizedBox(width: 26, height: 26),
+                  ),
+              ],
             ),
           ),
           const SizedBox(width: 8),
@@ -543,9 +596,26 @@ class _DashboardContent extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           Expanded(
-            child: Text(
-              away?.shortName ?? '?',
-              style: const TextStyle(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w600),
+            child: Row(
+              children: [
+                if (away != null)
+                  CachedNetworkImage(
+                    imageUrl: away.badgeUrl,
+                    width: 26,
+                    height: 26,
+                    fit: BoxFit.contain,
+                    placeholder: (_, __) => const SizedBox(width: 26, height: 26),
+                    errorWidget: (_, __, ___) => const SizedBox(width: 26, height: 26),
+                  ),
+                const SizedBox(width: 6),
+                Flexible(
+                  child: Text(
+                    away?.shortName ?? '?',
+                    style: const TextStyle(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w600),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
             ),
           ),
           Row(
