@@ -71,7 +71,7 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen>
               controller: _tabController,
               children: [
                 _OverviewTab(player: widget.player, team: team, summary: summary),
-                _HistoryTab(player: widget.player, summary: summary),
+                _HistoryTab(player: widget.player, summary: summary, provider: provider),
                 _FixturesTab(player: widget.player, summary: summary, provider: provider),
               ],
             );
@@ -425,8 +425,9 @@ class _StatItem {
 class _HistoryTab extends StatelessWidget {
   final Player player;
   final PlayerSummary? summary;
+  final FplProvider provider;
 
-  const _HistoryTab({required this.player, this.summary});
+  const _HistoryTab({required this.player, this.summary, required this.provider});
 
   @override
   Widget build(BuildContext context) {
@@ -562,12 +563,7 @@ class _HistoryTab extends StatelessWidget {
                       child: Text('${h.round}', style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
                     ),
                     Expanded(
-                      child: Text(
-                        '${h.wasHome ? 'vs' : '@'} ${h.opponentTeam}',
-                        style: const TextStyle(color: AppColors.textPrimary, fontSize: 12),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                      child: _buildOpponentCell(h),
                     ),
                     SizedBox(
                       width: 32,
@@ -598,6 +594,37 @@ class _HistoryTab extends StatelessWidget {
               )),
         ],
       ),
+    );
+  }
+
+  Widget _buildOpponentCell(PlayerHistory h) {
+    final opp = provider.getTeamById(h.opponentTeam);
+    return Row(
+      children: [
+        Text(
+          h.wasHome ? 'vs' : '@',
+          style: const TextStyle(color: AppColors.textSecondary, fontSize: 11),
+        ),
+        const SizedBox(width: 4),
+        if (opp != null)
+          CachedNetworkImage(
+            imageUrl: opp.badgeUrl,
+            width: 16,
+            height: 16,
+            fit: BoxFit.contain,
+            placeholder: (_, __) => const SizedBox(width: 16, height: 16),
+            errorWidget: (_, __, ___) => const SizedBox(width: 16, height: 16),
+          ),
+        const SizedBox(width: 4),
+        Flexible(
+          child: Text(
+            opp?.shortName ?? '${h.opponentTeam}',
+            style: const TextStyle(color: AppColors.textPrimary, fontSize: 12),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -644,6 +671,17 @@ class _FixturesTab extends StatelessWidget {
               Expanded(
                 child: Row(
                   children: [
+                    if (opponent != null) ...[
+                      CachedNetworkImage(
+                        imageUrl: opponent.badgeUrl,
+                        width: 24,
+                        height: 24,
+                        fit: BoxFit.contain,
+                        placeholder: (_, __) => const SizedBox(width: 24, height: 24),
+                        errorWidget: (_, __, ___) => const SizedBox(width: 24, height: 24),
+                      ),
+                      const SizedBox(width: 6),
+                    ],
                     Text(
                       opponent?.shortName ?? '?',
                       style: const TextStyle(color: AppColors.textPrimary, fontSize: 14, fontWeight: FontWeight.w600),

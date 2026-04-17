@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../providers/fpl_provider.dart';
 import '../models/fixture.dart';
+import '../models/team.dart';
 import '../utils/app_theme.dart';
 import '../utils/constants.dart';
 import '../utils/formatters.dart';
@@ -153,7 +155,7 @@ class _FixtureCard extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: _teamDisplay(home?.shortName ?? '?', fixture.teamHDifficulty, true),
+                child: _teamDisplay(home, fixture.teamHDifficulty, true),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
@@ -185,7 +187,7 @@ class _FixtureCard extends StatelessWidget {
                       ),
               ),
               Expanded(
-                child: _teamDisplay(away?.shortName ?? '?', fixture.teamADifficulty, false),
+                child: _teamDisplay(away, fixture.teamADifficulty, false),
               ),
             ],
           ),
@@ -208,17 +210,45 @@ class _FixtureCard extends StatelessWidget {
     );
   }
 
-  Widget _teamDisplay(String shortName, int difficulty, bool isHome) {
+  Widget _teamDisplay(Team? team, int difficulty, bool isHome) {
+    final badge = CachedNetworkImage(
+      imageUrl: team?.badgeUrl ?? '',
+      width: 32,
+      height: 32,
+      fit: BoxFit.contain,
+      placeholder: (_, __) => const SizedBox(width: 32, height: 32),
+      errorWidget: (_, __, ___) => const SizedBox(width: 32, height: 32),
+    );
+
     return Column(
       children: [
-        Text(
-          shortName,
-          style: const TextStyle(
-            color: AppColors.textPrimary,
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-          ),
-          textAlign: isHome ? TextAlign.right : TextAlign.left,
+        Row(
+          mainAxisAlignment: isHome ? MainAxisAlignment.end : MainAxisAlignment.start,
+          children: isHome
+              ? [
+                  Text(
+                    team?.shortName ?? '?',
+                    style: const TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  badge,
+                ]
+              : [
+                  badge,
+                  const SizedBox(width: 6),
+                  Text(
+                    team?.shortName ?? '?',
+                    style: const TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
         ),
         const SizedBox(height: 4),
         Row(
