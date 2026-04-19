@@ -628,7 +628,7 @@ class _BuilderSlot extends StatelessWidget {
               constraints: const BoxConstraints(maxWidth: 72),
               child: Text(
                 player!.webName.length > 9
-                    ? player!.webName.substring(0, 8)
+                    ? player!.webName.substring(0, player!.webName.length.clamp(0, 8))
                     : player!.webName,
                 style: const TextStyle(
                     color: Colors.white,

@@ -19,7 +19,8 @@ class UserTeamsProvider extends ChangeNotifier {
     notifyListeners();
     try {
       _teams = await _storage.getTeams();
-    } catch (_) {
+    } catch (e, st) {
+      debugPrint('UserTeamsProvider.loadTeams error: $e\n$st');
       _teams = [];
     } finally {
       _isLoading = false;

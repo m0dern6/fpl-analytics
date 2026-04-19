@@ -1,4 +1,4 @@
-import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user_team.dart';
 
@@ -16,7 +16,8 @@ class LocalStorageService {
         .map((s) {
           try {
             return UserTeam.fromJsonString(s);
-          } catch (_) {
+          } catch (e, st) {
+            debugPrint('LocalStorageService: failed to parse team: $e\n$st');
             return null;
           }
         })

@@ -423,7 +423,7 @@ class _DashboardContent extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     p.webName.length > 7
-                        ? p.webName.substring(0, 6)
+                        ? p.webName.substring(0, p.webName.length.clamp(0, 6))
                         : p.webName,
                     style: const TextStyle(
                         color: Colors.white,

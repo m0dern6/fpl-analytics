@@ -297,7 +297,8 @@ class FplProvider extends ChangeNotifier {
   /// Compute AI team for a given chip/mode.
   /// Free Hit has no budget cap; others use £100m.
   Map<String, List<Player>> computeAiTeam(AiPickMode mode) {
-    final budget = mode == AiPickMode.freeHit ? 9999 : 1000;
+    // Free Hit has no budget restriction; all other modes use £100m (1000 in tenths)
+    final budget = mode == AiPickMode.freeHit ? 0x7FFFFFFF : 1000;
 
     List<Player> ranked(int pos) => (List<Player>.from(getPlayersByPosition(pos))
       ..sort((a, b) => _computeScore(b, mode: mode)
