@@ -37,19 +37,13 @@ class _AiPicksScreenState extends State<AiPicksScreen>
   void initState() {
     super.initState();
     _tabCtrl = TabController(length: _tabs.length, vsync: this);
-    _tabCtrl.addListener(_onTabChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) => _analyse(AiPickMode.bestXi));
   }
 
   @override
   void dispose() {
-    _tabCtrl.removeListener(_onTabChanged);
     _tabCtrl.dispose();
     super.dispose();
-  }
-
-  void _onTabChanged() {
-    // Handled by mode selector; no-op here.
   }
 
   Future<void> _analyse(AiPickMode mode) async {

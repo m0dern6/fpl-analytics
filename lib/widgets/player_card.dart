@@ -199,7 +199,7 @@ class PlayerCard extends StatelessWidget {
                             formatDouble(player.ictIndex, decimals: 1),
                             AppColors.warning),
                         const SizedBox(width: 14),
-                        _miniStat('Sel',
+                        _miniStat('Sel%',
                             formatPercent(player.selectedByPercent),
                             AppColors.textSecondary),
                       ],
