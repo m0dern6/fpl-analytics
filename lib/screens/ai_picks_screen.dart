@@ -37,20 +37,13 @@ class _AiPicksScreenState extends State<AiPicksScreen>
   void initState() {
     super.initState();
     _tabCtrl = TabController(length: _tabs.length, vsync: this);
-    _tabCtrl.addListener(_onTabChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) => _analyse(AiPickMode.bestXi));
   }
 
   @override
   void dispose() {
-    _tabCtrl.removeListener(_onTabChanged);
     _tabCtrl.dispose();
     super.dispose();
-  }
-
-  void _onTabChanged() {
-    if (!_tabCtrl.indexIsChanging) return;
-    _analyse(_tabs[_tabCtrl.index].mode);
   }
 
   Future<void> _analyse(AiPickMode mode) async {
@@ -83,51 +76,102 @@ class _AiPicksScreenState extends State<AiPicksScreen>
           title: Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(6),
+                padding: const EdgeInsets.all(7),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withAlpha(30),
-                  borderRadius: BorderRadius.circular(8),
+                  color: AppColors.primary.withAlpha(24),
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                child:
-                    const Icon(Icons.auto_awesome, color: AppColors.primary, size: 18),
+                child: const Icon(Icons.auto_awesome_rounded,
+                    color: AppColors.primary, size: 18),
               ),
               const SizedBox(width: 10),
               const Text('AI Smart Picks'),
             ],
           ),
-          bottom: TabBar(
-            controller: _tabCtrl,
-            isScrollable: true,
-            tabAlignment: TabAlignment.start,
-            indicatorColor: AppColors.primary,
-            labelColor: AppColors.primary,
-            unselectedLabelColor: AppColors.textSecondary,
-            tabs: _tabs
-                .map((t) => Tab(
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(t.icon, size: 14),
-                          const SizedBox(width: 4),
-                          Text(t.label),
-                        ],
-                      ),
-                    ))
-                .toList(),
-          ),
         ),
-        body: provider.isLoading
-            ? const LoadingListWidget()
-            : TabBarView(
-                controller: _tabCtrl,
-                physics: const NeverScrollableScrollPhysics(),
-                children: _tabs
-                    .map((_) => _buildTabBody(context, provider))
-                    .toList(),
-              ),
+        body: Column(
+          children: [
+            // ── Mode selector ─────────────────────────────────────────────
+            _buildModeSelector(),
+            const SizedBox(height: 2),
+            // ── Content ───────────────────────────────────────────────────
+            Expanded(
+              child: provider.isLoading
+                  ? const LoadingListWidget()
+                  : _buildTabBody(context, provider),
+            ),
+          ],
+        ),
       );
     });
   }
+
+  Widget _buildModeSelector() {
+    return Container(
+      color: AppColors.secondary,
+      child: SizedBox(
+        height: 52,
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          separatorBuilder: (_, __) => const SizedBox(width: 8),
+          itemCount: _tabs.length,
+          itemBuilder: (_, i) {
+            final tab = _tabs[i];
+            final isSelected = _tabCtrl.index == i;
+            return GestureDetector(
+              onTap: () {
+                if (_tabCtrl.index == i) return;
+                _tabCtrl.animateTo(i);
+                setState(() {});
+                _analyse(tab.mode);
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? tab.color.withAlpha(28)
+                      : AppColors.cardMedium,
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(
+                    color: isSelected
+                        ? tab.color.withAlpha(160)
+                        : Colors.transparent,
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(tab.icon,
+                        color: isSelected
+                            ? tab.color
+                            : AppColors.textSecondary,
+                        size: 14),
+                    const SizedBox(width: 5),
+                    Text(
+                      tab.label,
+                      style: TextStyle(
+                        color: isSelected
+                            ? tab.color
+                            : AppColors.textSecondary,
+                        fontSize: 12,
+                        fontWeight: isSelected
+                            ? FontWeight.w700
+                            : FontWeight.w400,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
 
   Widget _buildTabBody(BuildContext context, FplProvider provider) {
     if (_isAnalysing) {
@@ -147,33 +191,44 @@ class _AiPicksScreenState extends State<AiPicksScreen>
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            width: 80,
-            height: 80,
+            width: 72,
+            height: 72,
             decoration: BoxDecoration(
-              color: AppColors.primary.withAlpha(20),
+              color: AppColors.primary.withAlpha(18),
               shape: BoxShape.circle,
+              border:
+                  Border.all(color: AppColors.primary.withAlpha(60), width: 1.5),
             ),
-            child: const Icon(Icons.auto_awesome,
-                color: AppColors.primary, size: 40),
+            child: const Icon(Icons.auto_awesome_rounded,
+                color: AppColors.primary, size: 36),
           ),
-          const SizedBox(height: 16),
-          const Text('Analysing players…',
-              style: TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600)),
-          const SizedBox(height: 8),
+          const SizedBox(height: 20),
           const Text(
-            'Using form, xG, ICT, fixtures & transfer\ntrends to pick the best team for you.',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+            'Analysing players…',
+            style: TextStyle(
+                color: AppColors.textPrimary,
+                fontSize: 17,
+                fontWeight: FontWeight.w700),
           ),
-          const SizedBox(height: 24),
-          const SizedBox(
-            width: 200,
-            child: LinearProgressIndicator(
-              color: AppColors.primary,
-              backgroundColor: AppColors.cardMedium,
+          const SizedBox(height: 8),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 40),
+            child: Text(
+              'Using form, xG, ICT, fixtures & transfer\ntrends to build the best team.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+            ),
+          ),
+          const SizedBox(height: 28),
+          SizedBox(
+            width: 180,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: const LinearProgressIndicator(
+                color: AppColors.primary,
+                backgroundColor: AppColors.cardMedium,
+                minHeight: 3,
+              ),
             ),
           ),
         ],

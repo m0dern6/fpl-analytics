@@ -40,7 +40,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: IndexedStack(index: _currentIndex, children: _screens),
-      bottomNavigationBar: _FloatingNavBar(
+      bottomNavigationBar: _BottomNav(
         currentIndex: _currentIndex,
         onTap: (i) => setState(() => _currentIndex = i),
       ),
@@ -48,21 +48,33 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   }
 }
 
-class _FloatingNavBar extends StatelessWidget {
+// ── Navigation bar ─────────────────────────────────────────────────────────────
+
+class _BottomNav extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
 
-  const _FloatingNavBar({required this.currentIndex, required this.onTap});
+  const _BottomNav({required this.currentIndex, required this.onTap});
+
+  static const _items = [
+    _NavDest(Icons.home_rounded, Icons.home_outlined, 'Home'),
+    _NavDest(Icons.people_rounded, Icons.people_outline_rounded, 'Players'),
+    _NavDest(Icons.shield_rounded, Icons.shield_outlined, 'My Teams'),
+    _NavDest(Icons.auto_awesome_rounded, Icons.auto_awesome_outlined, 'AI Picks'),
+    _NavDest(Icons.apps_rounded, Icons.apps_outlined, 'Explore'),
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.navBar,
-        border: const Border(top: BorderSide(color: AppColors.divider, width: 1)),
+        border: const Border(
+          top: BorderSide(color: AppColors.divider, width: 0.5),
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha(120),
+            color: Colors.black.withAlpha(100),
             blurRadius: 24,
             offset: const Offset(0, -4),
           ),
@@ -70,17 +82,17 @@ class _FloatingNavBar extends StatelessWidget {
       ),
       child: SafeArea(
         top: false,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        child: SizedBox(
+          height: 60,
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _NavItem(icon: Icons.home_rounded, activeIcon: Icons.home_rounded, label: 'Home', index: 0, currentIndex: currentIndex, onTap: onTap),
-              _NavItem(icon: Icons.people_outline_rounded, activeIcon: Icons.people_rounded, label: 'Players', index: 1, currentIndex: currentIndex, onTap: onTap),
-              _NavItem(icon: Icons.shield_outlined, activeIcon: Icons.shield_rounded, label: 'My Teams', index: 2, currentIndex: currentIndex, onTap: onTap),
-              _NavItem(icon: Icons.auto_awesome_outlined, activeIcon: Icons.auto_awesome_rounded, label: 'AI Picks', index: 3, currentIndex: currentIndex, onTap: onTap),
-              _NavItem(icon: Icons.grid_view_outlined, activeIcon: Icons.grid_view_rounded, label: 'Explore', index: 4, currentIndex: currentIndex, onTap: onTap),
-            ],
+            children: List.generate(_items.length, (i) {
+              return _NavItem(
+                dest: _items[i],
+                index: i,
+                currentIndex: currentIndex,
+                onTap: onTap,
+              );
+            }),
           ),
         ),
       ),
@@ -88,18 +100,21 @@ class _FloatingNavBar extends StatelessWidget {
   }
 }
 
-class _NavItem extends StatelessWidget {
-  final IconData icon;
-  final IconData activeIcon;
+class _NavDest {
+  final IconData filledIcon;
+  final IconData outlinedIcon;
   final String label;
+  const _NavDest(this.filledIcon, this.outlinedIcon, this.label);
+}
+
+class _NavItem extends StatelessWidget {
+  final _NavDest dest;
   final int index;
   final int currentIndex;
   final ValueChanged<int> onTap;
 
   const _NavItem({
-    required this.icon,
-    required this.activeIcon,
-    required this.label,
+    required this.dest,
     required this.index,
     required this.currentIndex,
     required this.onTap,
@@ -113,33 +128,35 @@ class _NavItem extends StatelessWidget {
         onTap: () => onTap(index),
         behavior: HitTestBehavior.opaque,
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              curve: Curves.easeOut,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              duration: const Duration(milliseconds: 220),
+              curve: Curves.easeOutCubic,
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
               decoration: BoxDecoration(
-                color: isSelected ? AppColors.primary.withAlpha(30) : Colors.transparent,
-                borderRadius: BorderRadius.circular(24),
+                color: isSelected
+                    ? AppColors.primary.withAlpha(28)
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(28),
               ),
               child: Icon(
-                isSelected ? activeIcon : icon,
+                isSelected ? dest.filledIcon : dest.outlinedIcon,
                 color: isSelected ? AppColors.primary : AppColors.textSecondary,
                 size: 22,
               ),
             ),
             const SizedBox(height: 2),
             AnimatedDefaultTextStyle(
-              duration: const Duration(milliseconds: 200),
+              duration: const Duration(milliseconds: 220),
               style: TextStyle(
                 color: isSelected ? AppColors.primary : AppColors.textSecondary,
                 fontSize: 10,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
+                letterSpacing: isSelected ? 0.1 : 0,
               ),
-              child: Text(label),
+              child: Text(dest.label),
             ),
-            const SizedBox(height: 2),
           ],
         ),
       ),
