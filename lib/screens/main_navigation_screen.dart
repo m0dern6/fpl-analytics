@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/fpl_provider.dart';
+import '../providers/user_teams_provider.dart';
 import '../utils/constants.dart';
 import 'dashboard_screen.dart';
 import 'players_screen.dart';
-import 'gameweeks_screen.dart';
-import 'best_team_screen.dart';
+import 'my_teams_screen.dart';
+import 'ai_picks_screen.dart';
 import 'more_screen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
@@ -21,8 +22,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   final List<Widget> _screens = const [
     DashboardScreen(),
     PlayersScreen(),
-    GameweeksScreen(),
-    BestTeamScreen(),
+    MyTeamsScreen(),
+    AiPicksScreen(),
     MoreScreen(),
   ];
 
@@ -31,6 +32,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<FplProvider>().loadAllData();
+      context.read<UserTeamsProvider>().loadTeams();
     });
   }
 
@@ -72,14 +74,14 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                 label: 'Players',
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.calendar_today_outlined),
-                activeIcon: Icon(Icons.calendar_today),
-                label: 'Gameweeks',
+                icon: Icon(Icons.group_outlined),
+                activeIcon: Icon(Icons.group),
+                label: 'My Teams',
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.emoji_events_outlined),
-                activeIcon: Icon(Icons.emoji_events),
-                label: 'Best Team',
+                icon: Icon(Icons.auto_awesome_outlined),
+                activeIcon: Icon(Icons.auto_awesome),
+                label: 'AI Picks',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.grid_view_outlined),

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../providers/fpl_provider.dart';
+import '../providers/user_teams_provider.dart';
 import '../models/player.dart';
 import '../models/fixture.dart';
 import '../utils/app_theme.dart';
@@ -12,6 +13,8 @@ import '../widgets/stat_card.dart';
 import '../widgets/loading_widget.dart';
 import '../widgets/difficulty_badge.dart';
 import 'player_detail_screen.dart';
+import 'my_teams_screen.dart';
+import 'ai_picks_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -153,34 +156,360 @@ class _DashboardContent extends StatelessWidget {
             .first
         : null;
 
-    return CustomScrollView(
-      slivers: [
-        SliverPadding(
-          padding: const EdgeInsets.all(16),
-          sliver: SliverList(
-            delegate: SliverChildListDelegate([
-              _buildCurrentGwBanner(context),
-              const SizedBox(height: 16),
-              _buildSectionTitle(context, 'Highlights'),
-              const SizedBox(height: 12),
-              _buildStatsGrid(context, topScorer, topAssist, topSelected, topValue),
-              const SizedBox(height: 20),
-              _buildSectionTitle(context, 'Top Performers'),
-              const SizedBox(height: 12),
-              _buildTopPerformers(context),
-              const SizedBox(height: 20),
-              _buildSectionTitle(context, 'Transfer Activity'),
-              const SizedBox(height: 12),
-              _buildTransferSection(context),
-              const SizedBox(height: 20),
-              _buildSectionTitle(context, 'Upcoming Fixtures'),
-              const SizedBox(height: 12),
-              _buildUpcomingFixtures(context),
-              const SizedBox(height: 24),
-            ]),
+    return Consumer<UserTeamsProvider>(
+      builder: (context, teamsProvider, _) {
+        return CustomScrollView(
+          slivers: [
+            SliverPadding(
+              padding: const EdgeInsets.all(16),
+              sliver: SliverList(
+                delegate: SliverChildListDelegate([
+                  _buildCurrentGwBanner(context),
+                  const SizedBox(height: 16),
+                  // Hero: show either user teams or best team pitch
+                  teamsProvider.hasTeams
+                      ? _buildMyTeamsHero(context, teamsProvider)
+                      : _buildBestTeamHero(context),
+                  const SizedBox(height: 16),
+                  _buildAiPicksBanner(context),
+                  const SizedBox(height: 16),
+                  _buildSectionTitle(context, 'Highlights'),
+                  const SizedBox(height: 12),
+                  _buildStatsGrid(context, topScorer, topAssist, topSelected, topValue),
+                  const SizedBox(height: 20),
+                  _buildSectionTitle(context, 'Top Performers'),
+                  const SizedBox(height: 12),
+                  _buildTopPerformers(context),
+                  const SizedBox(height: 20),
+                  _buildSectionTitle(context, 'Transfer Activity'),
+                  const SizedBox(height: 12),
+                  _buildTransferSection(context),
+                  const SizedBox(height: 20),
+                  _buildSectionTitle(context, 'Upcoming Fixtures'),
+                  const SizedBox(height: 12),
+                  _buildUpcomingFixtures(context),
+                  const SizedBox(height: 24),
+                ]),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildMyTeamsHero(BuildContext context, UserTeamsProvider teamsProvider) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionTitle(context, 'My Teams'),
+        const SizedBox(height: 10),
+        SizedBox(
+          height: 110,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: teamsProvider.teams.length + 1,
+            itemBuilder: (_, i) {
+              if (i == teamsProvider.teams.length) {
+                // "Add team" card
+                return GestureDetector(
+                  onTap: () => _navigateToMyTeams(context),
+                  child: Container(
+                    width: 110,
+                    margin: const EdgeInsets.only(right: 10),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withAlpha(15),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                          color: AppColors.primary.withAlpha(80),
+                          style: BorderStyle.solid,
+                          width: 1.5),
+                    ),
+                    child: const Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.add, color: AppColors.primary, size: 28),
+                        SizedBox(height: 4),
+                        Text('New Team',
+                            style: TextStyle(
+                                color: AppColors.primary,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600)),
+                      ],
+                    ),
+                  ),
+                );
+              }
+              final team = teamsProvider.teams[i];
+              final prices = <int, int>{};
+              for (final p in provider.players) {
+                prices[p.id] = p.nowCost;
+              }
+              final totalCost = team.totalCost(prices);
+              final captain = team.captainId != 0
+                  ? provider.getPlayerById(team.captainId)
+                  : null;
+              return GestureDetector(
+                onTap: () => _navigateToMyTeams(context),
+                child: Container(
+                  width: 130,
+                  margin: const EdgeInsets.only(right: 10),
+                  padding: const EdgeInsets.all(12),
+                  decoration: AppTheme.gradientCard(),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(team.name,
+                          style: const TextStyle(
+                              color: AppColors.textPrimary,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis),
+                      Text(team.formation,
+                          style: const TextStyle(
+                              color: AppColors.textSecondary, fontSize: 10)),
+                      if (captain != null)
+                        Row(
+                          children: [
+                            const CircleAvatar(
+                              radius: 8,
+                              backgroundColor: AppColors.warning,
+                              child: Text('C',
+                                  style: TextStyle(
+                                      fontSize: 8,
+                                      fontWeight: FontWeight.w900,
+                                      color: AppColors.secondary)),
+                            ),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(captain.webName,
+                                  style: const TextStyle(
+                                      color: AppColors.warning,
+                                      fontSize: 10),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis),
+                            ),
+                          ],
+                        ),
+                      Text(formatPrice(totalCost),
+                          style: const TextStyle(
+                              color: AppColors.primary,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600)),
+                    ],
+                  ),
+                ),
+              );
+            },
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildBestTeamHero(BuildContext context) {
+    if (provider.players.isEmpty) return const SizedBox.shrink();
+    final bestTeam = provider.getBestTeam();
+    final starting = bestTeam['starting'] ?? <Player>[];
+    final gks = starting.where((p) => p.elementType == 1).toList();
+    final defs = starting.where((p) => p.elementType == 2).toList();
+    final mids = starting.where((p) => p.elementType == 3).toList();
+    final fwds = starting.where((p) => p.elementType == 4).toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            _buildSectionTitle(context, "This Week's Best XI"),
+            const Spacer(),
+            GestureDetector(
+              onTap: () => _navigateToAiPicks(context),
+              child: const Text('AI Picks →',
+                  style: TextStyle(
+                      color: AppColors.primary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600)),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        Container(
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Color(0xFF1a4a1a), Color(0xFF0d2d0d)],
+            ),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.primary.withAlpha(51)),
+          ),
+          child: Column(
+            children: [
+              const SizedBox(height: 10),
+              _miniPitchRow(context, fwds, PositionConstants.positionColors[4]!),
+              const SizedBox(height: 6),
+              _miniPitchRow(context, mids, PositionConstants.positionColors[3]!),
+              const SizedBox(height: 6),
+              _miniPitchRow(context, defs, PositionConstants.positionColors[2]!),
+              const SizedBox(height: 6),
+              _miniPitchRow(context, gks, PositionConstants.positionColors[1]!),
+              const SizedBox(height: 10),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+        Center(
+          child: GestureDetector(
+            onTap: () => _navigateToMyTeams(context),
+            child: Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withAlpha(26),
+                borderRadius: BorderRadius.circular(20),
+                border:
+                    Border.all(color: AppColors.primary.withAlpha(102)),
+              ),
+              child: const Text('Create Your Own Team →',
+                  style: TextStyle(
+                      color: AppColors.primary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600)),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _miniPitchRow(
+      BuildContext context, List<Player> players, Color posColor) {
+    if (players.isEmpty) return const SizedBox.shrink();
+    return LayoutBuilder(builder: (context, constraints) {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: players.map((p) {
+          return SizedBox(
+            width: (constraints.maxWidth / players.length).clamp(44.0, 68.0),
+            child: GestureDetector(
+              onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => PlayerDetailScreen(player: p))),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppColors.cardDark,
+                      border: Border.all(color: posColor, width: 1.5),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: CachedNetworkImage(
+                      imageUrl: p.photoUrl,
+                      fit: BoxFit.cover,
+                      placeholder: (_, __) => const Icon(Icons.person,
+                          color: AppColors.textSecondary, size: 18),
+                      errorWidget: (_, __, ___) => const Icon(Icons.person,
+                          color: AppColors.textSecondary, size: 18),
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    p.webName.length > 7
+                        ? p.webName.substring(0, 6)
+                        : p.webName,
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 8,
+                        fontWeight: FontWeight.w600),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          );
+        }).toList(),
+      );
+    });
+  }
+
+  Widget _buildAiPicksBanner(BuildContext context) {
+    return GestureDetector(
+      onTap: () => _navigateToAiPicks(context),
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+            colors: [
+              AppColors.primary.withAlpha(30),
+              AppColors.accent.withAlpha(20),
+            ],
+          ),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: AppColors.primary.withAlpha(80)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withAlpha(40),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(Icons.auto_awesome,
+                  color: AppColors.primary, size: 20),
+            ),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('AI Smart Picks',
+                      style: TextStyle(
+                          color: AppColors.textPrimary,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700)),
+                  SizedBox(height: 2),
+                  Text(
+                      'Get AI-powered team picks for Best XI, Wildcard, '
+                      'Free Hit, Triple Captain & Bench Boost',
+                      style: TextStyle(
+                          color: AppColors.textSecondary, fontSize: 11)),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right,
+                color: AppColors.primary, size: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _navigateToMyTeams(BuildContext context) {
+    // Navigate to My Teams tab (index 2) via the parent scaffold
+    // We use a simple page navigation as fallback
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const _MyTeamsWrapper()),
+    );
+  }
+
+  void _navigateToAiPicks(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const _AiPicksWrapper()),
     );
   }
 
@@ -657,4 +986,20 @@ class _DashboardSkeleton extends StatelessWidget {
       ],
     );
   }
+}
+
+/// Thin wrapper so Dashboard can push to My Teams as a full-screen route.
+class _MyTeamsWrapper extends StatelessWidget {
+  const _MyTeamsWrapper();
+
+  @override
+  Widget build(BuildContext context) => const MyTeamsScreen();
+}
+
+/// Thin wrapper so Dashboard can push to AI Picks as a full-screen route.
+class _AiPicksWrapper extends StatelessWidget {
+  const _AiPicksWrapper();
+
+  @override
+  Widget build(BuildContext context) => const AiPicksScreen();
 }

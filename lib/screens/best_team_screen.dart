@@ -155,19 +155,26 @@ class _BestTeamScreenState extends State<BestTeamScreen> {
 
   Widget _buildPitchRow(BuildContext context, List<Player> players, FplProvider provider, Color posColor) {
     if (players.isEmpty) return const SizedBox.shrink();
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: players.map((p) {
-        final diff = provider.getNextFixtureDifficulty(p.teamId);
-        return _PitchPlayer(
-          player: p,
-          posColor: posColor,
-          nextFixtureDifficulty: diff,
-          onTap: () {
-            Navigator.push(context, MaterialPageRoute(builder: (_) => PlayerDetailScreen(player: p)));
-          },
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: players.map((p) {
+            final diff = provider.getNextFixtureDifficulty(p.teamId);
+            return SizedBox(
+              width: (constraints.maxWidth / players.length).clamp(60.0, 80.0),
+              child: _PitchPlayer(
+                player: p,
+                posColor: posColor,
+                nextFixtureDifficulty: diff,
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => PlayerDetailScreen(player: p)));
+                },
+              ),
+            );
+          }).toList(),
         );
-      }).toList(),
+      },
     );
   }
 
@@ -188,18 +195,25 @@ class _BestTeamScreenState extends State<BestTeamScreen> {
             ],
           ),
           const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: subs.take(4).map((p) {
-              final diff = provider.getNextFixtureDifficulty(p.teamId);
-              return _PitchPlayer(
-                player: p,
-                posColor: getPositionColor(p.elementType),
-                isSub: true,
-                nextFixtureDifficulty: diff,
-                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => PlayerDetailScreen(player: p))),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: subs.take(4).map((p) {
+                  final diff = provider.getNextFixtureDifficulty(p.teamId);
+                  return SizedBox(
+                    width: (constraints.maxWidth / 4).clamp(60.0, 80.0),
+                    child: _PitchPlayer(
+                      player: p,
+                      posColor: getPositionColor(p.elementType),
+                      isSub: true,
+                      nextFixtureDifficulty: diff,
+                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => PlayerDetailScreen(player: p))),
+                    ),
+                  );
+                }).toList(),
               );
-            }).toList(),
+            },
           ),
         ],
       ),

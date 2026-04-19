@@ -215,6 +215,11 @@ class FplProvider extends ChangeNotifier {
   /// Composite score combining form, ICT, PPG, value, fixture difficulty
   /// and availability to rank players for the upcoming gameweek.
   double computePlayerScore(Player p) {
+    return _computeScore(p, mode: AiPickMode.bestXi);
+  }
+
+  /// Mode-aware scoring used by the AI Picks feature.
+  double _computeScore(Player p, {required AiPickMode mode}) {
     double score = 0;
 
     // Season total points (baseline)
@@ -229,12 +234,48 @@ class FplProvider extends ChangeNotifier {
     // ICT index
     score += p.ictValue * 0.25;
 
-    // Value (pts per million)
-    score += p.valueSeasonValue * 1.5;
+    // Value (pts per million) – less important for Free Hit
+    if (mode != AiPickMode.freeHit) {
+      score += p.valueSeasonValue * 1.5;
+    }
 
-    // Fixture difficulty: easier opponent → higher bonus
-    final diff = getNextFixtureDifficulty(p.teamId);
-    score += (6 - diff) * 4.0;
+    // xG contribution (proxy: expectedGoalsStr)
+    final xg = double.tryParse(p.expectedGoalsStr) ?? 0;
+    final xa = double.tryParse(p.expectedAssistsStr) ?? 0;
+    score += xg * 8.0 + xa * 5.0;
+
+    // Fixture difficulty weighting
+    if (mode == AiPickMode.wildcard) {
+      // Wildcard: average difficulty over next 5 GWs
+      final gwId = _currentGameweek?.id ?? 1;
+      double totalDiff = 0;
+      int count = 0;
+      for (int gw = gwId; gw <= gwId + 4 && gw <= 38; gw++) {
+        final gwFixtures = getFixturesForGameweek(gw);
+        for (final f in gwFixtures) {
+          if (f.homeTeamId == p.teamId) {
+            totalDiff += f.teamHDifficulty;
+            count++;
+            break;
+          } else if (f.awayTeamId == p.teamId) {
+            totalDiff += f.teamADifficulty;
+            count++;
+            break;
+          }
+        }
+      }
+      final avgDiff = count > 0 ? totalDiff / count : 3.0;
+      score += (6 - avgDiff) * 4.0;
+    } else {
+      final diff = getNextFixtureDifficulty(p.teamId);
+      score += (6 - diff) * 4.0;
+    }
+
+    // Triple Captain: boost highest-scoring players further
+    if (mode == AiPickMode.tripleCaptain) {
+      score += p.totalPoints * 0.5;
+      score += p.formValue * 6.0;
+    }
 
     // Availability penalty
     if (p.chanceOfPlayingNextRound != null) {
@@ -250,16 +291,22 @@ class FplProvider extends ChangeNotifier {
   }
 
   Map<String, List<Player>> getBestTeam() {
-    const budget = 1000; // £100m in tenths
+    return computeAiTeam(AiPickMode.bestXi);
+  }
 
-    final gks = List<Player>.from(getPlayersByPosition(1))
-      ..sort((a, b) => computePlayerScore(b).compareTo(computePlayerScore(a)));
-    final defs = List<Player>.from(getPlayersByPosition(2))
-      ..sort((a, b) => computePlayerScore(b).compareTo(computePlayerScore(a)));
-    final mids = List<Player>.from(getPlayersByPosition(3))
-      ..sort((a, b) => computePlayerScore(b).compareTo(computePlayerScore(a)));
-    final fwds = List<Player>.from(getPlayersByPosition(4))
-      ..sort((a, b) => computePlayerScore(b).compareTo(computePlayerScore(a)));
+  /// Compute AI team for a given chip/mode.
+  /// Free Hit has no budget cap; others use £100m.
+  Map<String, List<Player>> computeAiTeam(AiPickMode mode) {
+    final budget = mode == AiPickMode.freeHit ? 9999 : 1000;
+
+    List<Player> ranked(int pos) => (List<Player>.from(getPlayersByPosition(pos))
+      ..sort((a, b) => _computeScore(b, mode: mode)
+          .compareTo(_computeScore(a, mode: mode))));
+
+    final gks = ranked(1);
+    final defs = ranked(2);
+    final mids = ranked(3);
+    final fwds = ranked(4);
 
     final List<Player> picked = [];
     int spent = 0;
@@ -273,35 +320,20 @@ class FplProvider extends ChangeNotifier {
       teamCount[p.teamId] = (teamCount[p.teamId] ?? 0) + 1;
     }
 
-    // Pick 2 GKs
-    int count = 0;
-    for (final p in gks) {
-      if (count >= 2) break;
-      if (canPickFromTeam(p.teamId)) { pickPlayer(p); count++; }
+    void pickN(List<Player> pool, int n) {
+      int count = 0;
+      for (final p in pool) {
+        if (count >= n) break;
+        if (canPickFromTeam(p.teamId)) { pickPlayer(p); count++; }
+      }
     }
 
-    // Pick 5 DEFs
-    count = 0;
-    for (final p in defs) {
-      if (count >= 5) break;
-      if (canPickFromTeam(p.teamId)) { pickPlayer(p); count++; }
-    }
+    pickN(gks, 2);
+    pickN(defs, 5);
+    pickN(mids, 5);
+    pickN(fwds, 3);
 
-    // Pick 5 MIDs
-    count = 0;
-    for (final p in mids) {
-      if (count >= 5) break;
-      if (canPickFromTeam(p.teamId)) { pickPlayer(p); count++; }
-    }
-
-    // Pick 3 FWDs
-    count = 0;
-    for (final p in fwds) {
-      if (count >= 3) break;
-      if (canPickFromTeam(p.teamId)) { pickPlayer(p); count++; }
-    }
-
-    // Handle budget overflow by swapping out expensive players with cheaper alternatives
+    // Handle budget overflow by swapping expensive players with cheaper ones
     while (spent > budget && picked.isNotEmpty) {
       picked.sort((a, b) => b.nowCost.compareTo(a.nowCost));
       final expensive = picked.first;
@@ -313,7 +345,6 @@ class FplProvider extends ChangeNotifier {
         _ => <Player>[]
       };
       final pickedIds = picked.map((p) => p.id).toSet();
-      // Temporarily free the team slot so the budget swap can consider same team
       teamCount[expensive.teamId] = (teamCount[expensive.teamId] ?? 1) - 1;
       final cheaper = posPlayers.lastWhere(
         (p) => !pickedIds.contains(p.id) && p.nowCost < expensive.nowCost,
@@ -338,12 +369,33 @@ class FplProvider extends ChangeNotifier {
     final starting = [...startingGks, ...startingDefs, ...startingMids, ...startingFwds];
     final subs = picked.where((p) => !starting.contains(p)).toList();
 
+    // Captain: highest score among starting 11
+    Player? captain;
+    Player? viceCaptain;
+    if (starting.isNotEmpty) {
+      final sorted = List<Player>.from(starting)
+        ..sort((a, b) => _computeScore(b, mode: mode)
+            .compareTo(_computeScore(a, mode: mode)));
+      captain = sorted.isNotEmpty ? sorted.first : null;
+      viceCaptain = sorted.length > 1 ? sorted[1] : null;
+    }
+
     return {
       'starting': starting,
       'subs': subs,
       'all': picked,
+      if (captain != null) 'captain': [captain],
+      if (viceCaptain != null) 'viceCaptain': [viceCaptain],
     };
   }
 
   Future<void> refresh() => loadAllData(forceRefresh: true);
+}
+
+enum AiPickMode {
+  bestXi,
+  wildcard,
+  freeHit,
+  tripleCaptain,
+  benchBoost,
 }

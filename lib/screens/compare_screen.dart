@@ -338,9 +338,11 @@ class _CompareScreenState extends State<CompareScreen> {
             padding: const EdgeInsets.all(12),
             child: Row(
               children: [
-                Expanded(child: Text(a.webName, style: const TextStyle(color: AppColors.primary, fontSize: 13, fontWeight: FontWeight.w600), textAlign: TextAlign.left)),
-                const SizedBox(width: 80, child: Text('Stat', style: TextStyle(color: AppColors.textSecondary, fontSize: 12), textAlign: TextAlign.center)),
-                Expanded(child: Text(b.webName, style: const TextStyle(color: AppColors.accent, fontSize: 13, fontWeight: FontWeight.w600), textAlign: TextAlign.right)),
+                Expanded(child: Text(a.webName, style: const TextStyle(color: AppColors.primary, fontSize: 13, fontWeight: FontWeight.w600), textAlign: TextAlign.left, maxLines: 1, overflow: TextOverflow.ellipsis)),
+                const SizedBox(width: 8),
+                Flexible(flex: 0, child: Text('Stat', style: const TextStyle(color: AppColors.textSecondary, fontSize: 12), textAlign: TextAlign.center)),
+                const SizedBox(width: 8),
+                Expanded(child: Text(b.webName, style: const TextStyle(color: AppColors.accent, fontSize: 13, fontWeight: FontWeight.w600), textAlign: TextAlign.right, maxLines: 1, overflow: TextOverflow.ellipsis)),
               ],
             ),
           ),
@@ -361,21 +363,23 @@ class _CompareScreenState extends State<CompareScreen> {
                       valA,
                       style: TextStyle(
                         color: aWins ? AppColors.primary : AppColors.textPrimary,
-                        fontSize: 14,
+                        fontSize: 13,
                         fontWeight: aWins ? FontWeight.w700 : FontWeight.w400,
                       ),
                     ),
                   ),
-                  SizedBox(
-                    width: 80,
-                    child: Text(label, style: const TextStyle(color: AppColors.textSecondary, fontSize: 11), textAlign: TextAlign.center),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    flex: 0,
+                    child: Text(label, style: const TextStyle(color: AppColors.textSecondary, fontSize: 10), textAlign: TextAlign.center),
                   ),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       valB,
                       style: TextStyle(
                         color: bWins ? AppColors.accent : AppColors.textPrimary,
-                        fontSize: 14,
+                        fontSize: 13,
                         fontWeight: bWins ? FontWeight.w700 : FontWeight.w400,
                       ),
                       textAlign: TextAlign.right,

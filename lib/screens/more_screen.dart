@@ -6,6 +6,8 @@ import 'stats_leaders_screen.dart';
 import 'compare_screen.dart';
 import 'teams_screen.dart';
 import 'fixtures_screen.dart';
+import 'gameweeks_screen.dart';
+import 'best_team_screen.dart';
 
 class MoreScreen extends StatelessWidget {
   const MoreScreen({super.key});
@@ -14,46 +16,53 @@ class MoreScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final items = [
       _MoreItem(
+        'Gameweeks',
+        'Gameweek history & live scores',
+        Icons.calendar_today,
+        [const Color(0xFF1a3a5c), const Color(0xFF0d2137)],
+        () => Navigator.push(context, MaterialPageRoute(builder: (_) => const GameweeksScreen())),
+      ),
+      _MoreItem(
+        'Best Team',
+        'Algorithm-picked best squad',
+        Icons.emoji_events,
+        [const Color(0xFF2a1a4c), const Color(0xFF1a0d37)],
+        () => Navigator.push(context, MaterialPageRoute(builder: (_) => const BestTeamScreen())),
+      ),
+      _MoreItem(
         'Fixture Difficulty',
         'FDR matrix for all teams',
         Icons.grid_on,
-        [const Color(0xFF1a3a5c), const Color(0xFF0d2137)],
+        [const Color(0xFF1a3a2a), const Color(0xFF0d2a1a)],
         () => Navigator.push(context, MaterialPageRoute(builder: (_) => const FixtureDifficultyScreen())),
       ),
       _MoreItem(
         'Stats Leaders',
         'Top scorers, assists & more',
         Icons.leaderboard,
-        [const Color(0xFF1a3a2a), const Color(0xFF0d2a1a)],
+        [const Color(0xFF3a1a1a), const Color(0xFF2a0d0d)],
         () => Navigator.push(context, MaterialPageRoute(builder: (_) => const StatsLeadersScreen())),
       ),
       _MoreItem(
         'Compare Players',
         'Side-by-side comparison',
         Icons.compare_arrows,
-        [const Color(0xFF2a1a4c), const Color(0xFF1a0d37)],
+        [const Color(0xFF1a2a3a), const Color(0xFF0d1a2a)],
         () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CompareScreen())),
       ),
       _MoreItem(
         'Teams',
         'All 20 Premier League teams',
         Icons.shield,
-        [const Color(0xFF3a1a1a), const Color(0xFF2a0d0d)],
+        [const Color(0xFF1a3a1a), const Color(0xFF0d2a0d)],
         () => Navigator.push(context, MaterialPageRoute(builder: (_) => const TeamsScreen())),
       ),
       _MoreItem(
         'All Fixtures',
         'Season fixture list',
         Icons.sports_soccer,
-        [const Color(0xFF1a2a3a), const Color(0xFF0d1a2a)],
+        [const Color(0xFF2a2a3a), const Color(0xFF1a1a2e)],
         () => Navigator.push(context, MaterialPageRoute(builder: (_) => const FixturesScreen())),
-      ),
-      _MoreItem(
-        'Team Strength',
-        'Attack & defence ratings',
-        Icons.bar_chart,
-        [const Color(0xFF1a3a1a), const Color(0xFF0d2a0d)],
-        () => Navigator.push(context, MaterialPageRoute(builder: (_) => const TeamsScreen())),
       ),
     ];
 
