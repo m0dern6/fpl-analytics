@@ -205,12 +205,60 @@ class _OverviewTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final statusColor = getStatusColor(player.status);
+    final statusLabel = formatStatusLabel(player.status);
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Availability status banner
+          if (player.status != 'a')
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              margin: const EdgeInsets.only(bottom: 12),
+              decoration: BoxDecoration(
+                color: statusColor.withAlpha(30),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: statusColor.withAlpha(120)),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.medical_services_outlined,
+                      color: statusColor, size: 16),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(statusLabel,
+                            style: TextStyle(
+                                color: statusColor,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700)),
+                        if (player.chanceOfPlayingNextRound != null)
+                          Text(
+                              'Chance of playing next GW: ${player.chanceOfPlayingNextRound}%',
+                              style: const TextStyle(
+                                  color: AppColors.textSecondary,
+                                  fontSize: 11)),
+                        if (player.news.isNotEmpty)
+                          Text(player.news,
+                              style: const TextStyle(
+                                  color: AppColors.textSecondary,
+                                  fontSize: 11),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
           _buildStatsGrid(),
+          const SizedBox(height: 20),
+          _buildExpectedStatsSection(),
           const SizedBox(height: 20),
           _buildIctSection(),
           const SizedBox(height: 20),
@@ -278,8 +326,29 @@ class _OverviewTab extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('ICT Index', style: TextStyle(color: AppColors.textPrimary, fontSize: 15, fontWeight: FontWeight.w700)),
-          const SizedBox(height: 16),
+          Row(
+            children: [
+              const Text('ICT Index',
+                  style: TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700)),
+              const SizedBox(width: 6),
+              Tooltip(
+                message:
+                    'ICT = Influence + Creativity + Threat\n'
+                    'A composite FPL score rating a player\'s\n'
+                    'impact on a match.',
+                child: const Icon(Icons.info_outline,
+                    color: AppColors.textSecondary, size: 14),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          const Text(
+              'Influence: ball involvement • Creativity: chance creation • Threat: goal threat',
+              style: TextStyle(color: AppColors.textSecondary, fontSize: 10)),
+          const SizedBox(height: 14),
           _ictBar('ICT Index', ict, 200, AppColors.primary),
           const SizedBox(height: 10),
           _ictBar('Influence', influence, 200, AppColors.accent),
@@ -288,6 +357,92 @@ class _OverviewTab extends StatelessWidget {
           const SizedBox(height: 10),
           _ictBar('Threat', threat, 200, AppColors.warning),
         ],
+      ),
+    );
+  }
+
+  Widget _buildExpectedStatsSection() {
+    final xg = double.tryParse(player.expectedGoalsStr) ?? 0;
+    final xa = double.tryParse(player.expectedAssistsStr) ?? 0;
+    final ppg = double.tryParse(player.pointsPerGame) ?? 0;
+    final vsn = double.tryParse(player.valueSeason) ?? 0;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: AppTheme.gradientCard(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('Expected Stats & Value',
+              style: TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700)),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(
+                  child: _expectedStatTile('Expected Goals\n(xG)', xg.toStringAsFixed(2),
+                      AppColors.primary,
+                      'How many goals a player\nwas statistically expected to score')),
+              const SizedBox(width: 10),
+              Expanded(
+                  child: _expectedStatTile(
+                      'Expected Assists\n(xA)',
+                      xa.toStringAsFixed(2),
+                      AppColors.accent,
+                      'How many assists a player\nwas expected to provide')),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                  child: _expectedStatTile(
+                      'Points Per Game\n(PPG)',
+                      ppg.toStringAsFixed(1),
+                      AppColors.warning,
+                      'Average points scored per\ngameweek this season')),
+              const SizedBox(width: 10),
+              Expanded(
+                  child: _expectedStatTile(
+                      'Value\n(pts per £m)',
+                      vsn.toStringAsFixed(1),
+                      const Color(0xFF69F0AE),
+                      'Total points divided by\ncurrent price — higher is better')),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _expectedStatTile(
+      String label, String value, Color color, String tooltip) {
+    return Tooltip(
+      message: tooltip,
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: color.withAlpha(20),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: color.withAlpha(60)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(value,
+                style: TextStyle(
+                    color: color,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800)),
+            const SizedBox(height: 2),
+            Text(label,
+                style: const TextStyle(
+                    color: AppColors.textSecondary, fontSize: 10),
+                maxLines: 2),
+          ],
+        ),
       ),
     );
   }
