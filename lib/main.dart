@@ -16,7 +16,7 @@ void main() {
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
     statusBarIconBrightness: Brightness.light,
-    systemNavigationBarColor: AppColors.secondary,
+    systemNavigationBarColor: AppColors.navBar,
     systemNavigationBarIconBrightness: Brightness.light,
   ));
   runApp(const FplAnalyticsApp());
