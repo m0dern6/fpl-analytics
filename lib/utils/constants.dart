@@ -59,15 +59,20 @@ class DifficultyConstants {
 }
 
 class AppColors {
-  static const Color primary = Color(0xFF00FF87);
-  static const Color secondary = Color(0xFF37003C);
-  static const Color background = Color(0xFF0f0f1a);
-  static const Color cardDark = Color(0xFF1a1a2e);
-  static const Color cardMedium = Color(0xFF16213e);
-  static const Color accent = Color(0xFF04F5FF);
-  static const Color warning = Color(0xFFFFEB04);
-  static const Color error = Color(0xFFFF6B6B);
-  static const Color textPrimary = Color(0xFFFFFFFF);
-  static const Color textSecondary = Color(0xFFB0B0C3);
-  static const Color divider = Color(0xFF2a2a3e);
+  static const Color primary = Color(0xFF00D68F);
+  static const Color secondary = Color(0xFF1B0A3F);
+  static const Color background = Color(0xFF080D1A);
+  static const Color cardDark = Color(0xFF0E1729);
+  static const Color cardMedium = Color(0xFF162035);
+  static const Color accent = Color(0xFF5B8DEF);
+  static const Color warning = Color(0xFFFFCC02);
+  static const Color error = Color(0xFFFF5C5C);
+  static const Color textPrimary = Color(0xFFF0F4FF);
+  static const Color textSecondary = Color(0xFF8896B3);
+  static const Color divider = Color(0xFF1E2D4A);
+  // Nav bar background – slightly lighter than background
+  static const Color navBar = Color(0xFF0D1526);
+  // Pitch green
+  static const Color pitchGreen = Color(0xFF0D3D1A);
+  static const Color pitchGreenDark = Color(0xFF072410);
 }
