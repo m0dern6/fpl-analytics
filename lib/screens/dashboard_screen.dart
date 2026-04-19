@@ -47,39 +47,41 @@ class DashboardScreen extends StatelessWidget {
       title: Row(
         children: [
           Container(
-            width: 32,
-            height: 32,
+            width: 34,
+            height: 34,
             decoration: BoxDecoration(
-              color: AppColors.primary,
-              borderRadius: BorderRadius.circular(8),
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFF00E5A0), Color(0xFF00A87A)],
+              ),
+              borderRadius: BorderRadius.circular(10),
             ),
             child: const Center(
               child: Text(
                 'FPL',
                 style: TextStyle(
-                  color: AppColors.secondary,
+                  color: Color(0xFF0C0720),
                   fontSize: 10,
                   fontWeight: FontWeight.w900,
+                  letterSpacing: 0.5,
                 ),
               ),
             ),
           ),
           const SizedBox(width: 10),
-          const Text(
-            'FPL Analytics',
-            style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700),
-          ),
+          const Text('FPL Analytics'),
         ],
       ),
       actions: [
         if (provider.currentGameweek != null)
           Container(
-            margin: const EdgeInsets.only(right: 8),
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            margin: const EdgeInsets.only(right: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             decoration: BoxDecoration(
-              color: AppColors.primary.withAlpha(26),
+              color: AppColors.primary.withAlpha(20),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: AppColors.primary.withAlpha(102)),
+              border: Border.all(color: AppColors.primary.withAlpha(80)),
             ),
             child: Text(
               'GW${provider.currentGameweek!.id}',
@@ -91,7 +93,7 @@ class DashboardScreen extends StatelessWidget {
             ),
           ),
         IconButton(
-          icon: const Icon(Icons.refresh, color: AppColors.textSecondary),
+          icon: const Icon(Icons.refresh_rounded, color: AppColors.textSecondary),
           onPressed: provider.refresh,
         ),
       ],
@@ -446,50 +448,51 @@ class _DashboardContent extends StatelessWidget {
     return GestureDetector(
       onTap: () => _navigateToAiPicks(context),
       child: Container(
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.centerLeft,
             end: Alignment.centerRight,
             colors: [
-              AppColors.primary.withAlpha(30),
-              AppColors.accent.withAlpha(20),
+              AppColors.primary.withAlpha(22),
+              AppColors.accent.withAlpha(16),
             ],
           ),
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppColors.primary.withAlpha(80)),
+          border: Border.all(color: AppColors.primary.withAlpha(70)),
         ),
         child: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: AppColors.primary.withAlpha(40),
-                borderRadius: BorderRadius.circular(10),
+                color: AppColors.primary.withAlpha(28),
+                borderRadius: BorderRadius.circular(12),
               ),
-              child: const Icon(Icons.auto_awesome,
+              child: const Icon(Icons.auto_awesome_rounded,
                   color: AppColors.primary, size: 20),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 14),
             const Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('AI Smart Picks',
-                      style: TextStyle(
-                          color: AppColors.textPrimary,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700)),
-                  SizedBox(height: 2),
                   Text(
-                      'Get AI-powered team picks for Best XI, Wildcard, '
-                      'Free Hit, Triple Captain & Bench Boost',
-                      style: TextStyle(
-                          color: AppColors.textSecondary, fontSize: 11)),
+                    'AI Smart Picks',
+                    style: TextStyle(
+                        color: AppColors.textPrimary,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700),
+                  ),
+                  SizedBox(height: 3),
+                  Text(
+                    'Best XI · Wildcard · Free Hit · Triple Cap · Bench Boost',
+                    style: TextStyle(color: AppColors.textSecondary, fontSize: 11),
+                  ),
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right,
+            const Icon(Icons.chevron_right_rounded,
                 color: AppColors.primary, size: 20),
           ],
         ),
@@ -517,81 +520,85 @@ class _DashboardContent extends StatelessWidget {
     final gw = provider.currentGameweek;
     if (gw == null) return const SizedBox.shrink();
     return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: AppTheme.purpleGradient(),
+      padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF160D36), Color(0xFF0D0622)],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.divider, width: 1),
+      ),
       child: Row(
         children: [
+          // GW label badge
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withAlpha(22),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: AppColors.primary.withAlpha(80)),
+            ),
+            child: Text(
+              gw.name,
+              style: const TextStyle(
+                color: AppColors.primary,
+                fontSize: 13,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0.2,
+              ),
+            ),
+          ),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  gw.name,
+                  gw.statusLabel,
                   style: const TextStyle(
-                    color: AppColors.primary,
-                    fontSize: 18,
+                    color: AppColors.textPrimary,
+                    fontSize: 15,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  'Status: ${gw.statusLabel}',
-                  style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
-                ),
                 if (gw.averageEntryScore != null)
                   Text(
-                    'Avg Score: ${gw.averageEntryScore} pts',
-                    style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                    'Avg ${gw.averageEntryScore} pts',
+                    style: const TextStyle(
+                        color: AppColors.textSecondary, fontSize: 12),
                   ),
               ],
             ),
           ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              if (gw.highestScore != null)
+          if (gw.highestScore != null)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
                 Text(
                   '${gw.highestScore}',
                   style: const TextStyle(
                     color: AppColors.primary,
-                    fontSize: 28,
+                    fontSize: 30,
                     fontWeight: FontWeight.w800,
+                    letterSpacing: -1,
                   ),
                 ),
-              if (gw.highestScore != null)
                 const Text(
-                  'Highest Score',
-                  style: TextStyle(color: AppColors.textSecondary, fontSize: 11),
+                  'High Score',
+                  style: TextStyle(
+                      color: AppColors.textSecondary, fontSize: 10),
                 ),
-            ],
-          ),
+              ],
+            ),
         ],
       ),
-    ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.1, end: 0);
+    ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.08, end: 0);
   }
 
   Widget _buildSectionTitle(BuildContext context, String title) {
-    return Row(
-      children: [
-        Container(
-          width: 4,
-          height: 18,
-          decoration: BoxDecoration(
-            color: AppColors.primary,
-            borderRadius: BorderRadius.circular(2),
-          ),
-        ),
-        const SizedBox(width: 8),
-        Text(
-          title,
-          style: const TextStyle(
-            color: AppColors.textPrimary,
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-      ],
-    );
+    return AppTheme.sectionTitle(context, title);
   }
 
   Widget _buildStatsGrid(
@@ -605,7 +612,7 @@ class _DashboardContent extends StatelessWidget {
       crossAxisCount: 2,
       crossAxisSpacing: 12,
       mainAxisSpacing: 12,
-      childAspectRatio: 1.6,
+      childAspectRatio: 1.5,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       children: [
@@ -613,33 +620,29 @@ class _DashboardContent extends StatelessWidget {
           title: 'Top Scorer',
           value: topScorer?.webName ?? '-',
           subtitle: '${topScorer?.totalPoints ?? 0} pts',
-          icon: Icons.star,
-          gradientColors: const [Color(0xFF1a3a5c), Color(0xFF0d2137)],
+          icon: Icons.star_rounded,
           valueColor: AppColors.primary,
         ).animate().fadeIn(delay: 100.ms),
         StatCard(
           title: 'Top Assists',
           value: topAssist?.webName ?? '-',
           subtitle: '${topAssist?.assists ?? 0} assists',
-          icon: Icons.sports_soccer,
-          gradientColors: const [Color(0xFF1a2a4c), Color(0xFF0d1a37)],
+          icon: Icons.sports_soccer_rounded,
           valueColor: AppColors.accent,
         ).animate().fadeIn(delay: 200.ms),
         StatCard(
           title: 'Most Owned',
           value: topSelected?.webName ?? '-',
           subtitle: formatPercent(topSelected?.selectedByPercent),
-          icon: Icons.people,
-          gradientColors: const [Color(0xFF2a1a4c), Color(0xFF1a0d37)],
-          valueColor: const Color(0xFFB388FF),
+          icon: Icons.people_rounded,
+          valueColor: const Color(0xFFA78BFA),
         ).animate().fadeIn(delay: 300.ms),
         StatCard(
           title: 'Best Value',
           value: topValue?.webName ?? '-',
           subtitle: formatPrice(topValue?.nowCost ?? 0),
-          icon: Icons.trending_up,
-          gradientColors: const [Color(0xFF1a3a2a), Color(0xFF0d2a1a)],
-          valueColor: const Color(0xFF69F0AE),
+          icon: Icons.trending_up_rounded,
+          valueColor: const Color(0xFF34D399),
         ).animate().fadeIn(delay: 400.ms),
       ],
     );

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../utils/app_theme.dart';
 import '../utils/constants.dart';
 import 'fixture_difficulty_screen.dart';
 import 'stats_leaders_screen.dart';
@@ -15,130 +14,146 @@ class MoreScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final items = [
-      _MoreItem(
-        'Gameweeks',
-        'Gameweek history & live scores',
-        Icons.calendar_today,
-        [const Color(0xFF1a3a5c), const Color(0xFF0d2137)],
-        () => Navigator.push(context, MaterialPageRoute(builder: (_) => const GameweeksScreen())),
+      _ExploreItem(
+        title: 'Gameweeks',
+        subtitle: 'History & live scores',
+        icon: Icons.calendar_month_rounded,
+        iconColor: AppColors.accent,
+        onTap: () => Navigator.push(
+            context, MaterialPageRoute(builder: (_) => const GameweeksScreen())),
       ),
-      _MoreItem(
-        'Best Team',
-        'Algorithm-picked best squad',
-        Icons.emoji_events,
-        [const Color(0xFF2a1a4c), const Color(0xFF1a0d37)],
-        () => Navigator.push(context, MaterialPageRoute(builder: (_) => const BestTeamScreen())),
+      _ExploreItem(
+        title: 'Best Team',
+        subtitle: 'Algorithm-picked best squad',
+        icon: Icons.emoji_events_rounded,
+        iconColor: AppColors.warning,
+        onTap: () => Navigator.push(
+            context, MaterialPageRoute(builder: (_) => const BestTeamScreen())),
       ),
-      _MoreItem(
-        'Fixture Difficulty',
-        'FDR matrix for all teams',
-        Icons.grid_on,
-        [const Color(0xFF1a3a2a), const Color(0xFF0d2a1a)],
-        () => Navigator.push(context, MaterialPageRoute(builder: (_) => const FixtureDifficultyScreen())),
+      _ExploreItem(
+        title: 'Fixture Difficulty',
+        subtitle: 'FDR matrix for all teams',
+        icon: Icons.grid_4x4_rounded,
+        iconColor: AppColors.primary,
+        onTap: () => Navigator.push(context,
+            MaterialPageRoute(builder: (_) => const FixtureDifficultyScreen())),
       ),
-      _MoreItem(
-        'Stats Leaders',
-        'Top scorers, assists & more',
-        Icons.leaderboard,
-        [const Color(0xFF3a1a1a), const Color(0xFF2a0d0d)],
-        () => Navigator.push(context, MaterialPageRoute(builder: (_) => const StatsLeadersScreen())),
+      _ExploreItem(
+        title: 'Stats Leaders',
+        subtitle: 'Top scorers, assists & more',
+        icon: Icons.leaderboard_rounded,
+        iconColor: const Color(0xFFF97316),
+        onTap: () => Navigator.push(context,
+            MaterialPageRoute(builder: (_) => const StatsLeadersScreen())),
       ),
-      _MoreItem(
-        'Compare Players',
-        'Side-by-side comparison',
-        Icons.compare_arrows,
-        [const Color(0xFF1a2a3a), const Color(0xFF0d1a2a)],
-        () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CompareScreen())),
+      _ExploreItem(
+        title: 'Compare Players',
+        subtitle: 'Side-by-side comparison',
+        icon: Icons.compare_arrows_rounded,
+        iconColor: const Color(0xFFA78BFA),
+        onTap: () => Navigator.push(
+            context, MaterialPageRoute(builder: (_) => const CompareScreen())),
       ),
-      _MoreItem(
-        'Teams',
-        'All 20 Premier League teams',
-        Icons.shield,
-        [const Color(0xFF1a3a1a), const Color(0xFF0d2a0d)],
-        () => Navigator.push(context, MaterialPageRoute(builder: (_) => const TeamsScreen())),
+      _ExploreItem(
+        title: 'Teams',
+        subtitle: 'All 20 Premier League clubs',
+        icon: Icons.shield_rounded,
+        iconColor: const Color(0xFF34D399),
+        onTap: () => Navigator.push(
+            context, MaterialPageRoute(builder: (_) => const TeamsScreen())),
       ),
-      _MoreItem(
-        'All Fixtures',
-        'Season fixture list',
-        Icons.sports_soccer,
-        [const Color(0xFF2a2a3a), const Color(0xFF1a1a2e)],
-        () => Navigator.push(context, MaterialPageRoute(builder: (_) => const FixturesScreen())),
+      _ExploreItem(
+        title: 'All Fixtures',
+        subtitle: 'Full season fixture list',
+        icon: Icons.sports_soccer_rounded,
+        iconColor: const Color(0xFF60A5FA),
+        onTap: () => Navigator.push(
+            context, MaterialPageRoute(builder: (_) => const FixturesScreen())),
       ),
     ];
 
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('More'),
+        title: const Text('Explore'),
         backgroundColor: AppColors.secondary,
       ),
       body: GridView.builder(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           crossAxisSpacing: 12,
           mainAxisSpacing: 12,
-          childAspectRatio: 1.3,
+          childAspectRatio: 1.25,
         ),
         itemCount: items.length,
-        itemBuilder: (_, i) => _buildCard(items[i]),
-      ),
-    );
-  }
-
-  Widget _buildCard(_MoreItem item) {
-    return GestureDetector(
-      onTap: item.onTap,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: item.colors,
-          ),
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withAlpha(77),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.white.withAlpha(26),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(item.icon, color: Colors.white, size: 24),
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(item.title, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700)),
-                const SizedBox(height: 2),
-                Text(item.subtitle, style: TextStyle(color: Colors.white.withAlpha(179), fontSize: 11), maxLines: 2, overflow: TextOverflow.ellipsis),
-              ],
-            ),
-          ],
-        ),
+        itemBuilder: (_, i) => _ExploreCard(item: items[i]),
       ),
     );
   }
 }
 
-class _MoreItem {
+class _ExploreItem {
   final String title;
   final String subtitle;
   final IconData icon;
-  final List<Color> colors;
+  final Color iconColor;
   final VoidCallback onTap;
 
-  const _MoreItem(this.title, this.subtitle, this.icon, this.colors, this.onTap);
+  const _ExploreItem({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.iconColor,
+    required this.onTap,
+  });
+}
+
+class _ExploreCard extends StatelessWidget {
+  final _ExploreItem item;
+  const _ExploreCard({required this.item});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: item.onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppColors.cardDark,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.divider, width: 1),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(9),
+              decoration: BoxDecoration(
+                color: item.iconColor.withAlpha(24),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(item.icon, color: item.iconColor, size: 22),
+            ),
+            const Spacer(),
+            Text(
+              item.title,
+              style: const TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 3),
+            Text(
+              item.subtitle,
+              style: const TextStyle(
+                  color: AppColors.textSecondary, fontSize: 11),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }

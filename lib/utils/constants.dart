@@ -34,20 +34,20 @@ class PositionConstants {
     4: 'Forward',
   };
   static const Map<int, Color> positionColors = {
-    1: Color(0xFF00FF87),
-    2: Color(0xFF04F5FF),
-    3: Color(0xFFFFEB04),
-    4: Color(0xFFFF6B35),
+    1: Color(0xFF34D399), // emerald – GK
+    2: Color(0xFF60A5FA), // sky blue – DEF
+    3: Color(0xFFFBBF24), // amber – MID
+    4: Color(0xFFF97316), // orange – FWD
   };
 }
 
 class DifficultyConstants {
   static const Map<int, Color> colors = {
-    1: Color(0xFF00C853),
-    2: Color(0xFF69F0AE),
-    3: Color(0xFFFFD740),
-    4: Color(0xFFFF6D00),
-    5: Color(0xFFD50000),
+    1: Color(0xFF34D399), // easy
+    2: Color(0xFF86EFAC), // fairly easy
+    3: Color(0xFFFBBF24), // medium
+    4: Color(0xFFFB923C), // hard
+    5: Color(0xFFF87171), // very hard
   };
   static const Map<int, String> labels = {
     1: 'Very Easy',
@@ -59,20 +59,30 @@ class DifficultyConstants {
 }
 
 class AppColors {
-  static const Color primary = Color(0xFF00D68F);
-  static const Color secondary = Color(0xFF1B0A3F);
-  static const Color background = Color(0xFF080D1A);
-  static const Color cardDark = Color(0xFF0E1729);
-  static const Color cardMedium = Color(0xFF162035);
-  static const Color accent = Color(0xFF5B8DEF);
-  static const Color warning = Color(0xFFFFCC02);
-  static const Color error = Color(0xFFFF5C5C);
-  static const Color textPrimary = Color(0xFFF0F4FF);
-  static const Color textSecondary = Color(0xFF8896B3);
-  static const Color divider = Color(0xFF1E2D4A);
-  // Nav bar background – slightly lighter than background
-  static const Color navBar = Color(0xFF0D1526);
-  // Pitch green
-  static const Color pitchGreen = Color(0xFF0D3D1A);
-  static const Color pitchGreenDark = Color(0xFF072410);
+  // Primary action – vibrant emerald
+  static const Color primary = Color(0xFF00E5A0);
+  // AppBar / deep surface
+  static const Color secondary = Color(0xFF0C0720);
+  // Page background
+  static const Color background = Color(0xFF070C1A);
+  // Card / surface level 1
+  static const Color cardDark = Color(0xFF0F1828);
+  // Card / surface level 2 (elevated)
+  static const Color cardMedium = Color(0xFF172238);
+  // Accent – soft indigo
+  static const Color accent = Color(0xFF7B87FA);
+  // Warning – warm amber
+  static const Color warning = Color(0xFFFBBF24);
+  // Error – soft coral
+  static const Color error = Color(0xFFF87171);
+  // Text
+  static const Color textPrimary = Color(0xFFEDF2FF);
+  static const Color textSecondary = Color(0xFF7A8BAA);
+  // Divider / border
+  static const Color divider = Color(0xFF182540);
+  // Nav bar background
+  static const Color navBar = Color(0xFF090F1F);
+  // Pitch
+  static const Color pitchGreen = Color(0xFF0A3318);
+  static const Color pitchGreenDark = Color(0xFF06200F);
 }

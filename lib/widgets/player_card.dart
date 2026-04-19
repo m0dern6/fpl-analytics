@@ -27,174 +27,235 @@ class PlayerCard extends StatelessWidget {
 
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        decoration: AppTheme.gradientCard(),
-        child: compact ? _buildCompact(posColor, posShort) : _buildFull(posColor, posShort),
-      ),
+      child: compact
+          ? _buildCompact(posColor, posShort)
+          : _buildFull(posColor, posShort),
     );
   }
+
+  // ── Compact (e.g. leaderboard rows) ──────────────────────────────────────
 
   Widget _buildCompact(Color posColor, String posShort) {
-    return Padding(
-      padding: const EdgeInsets.all(8),
-      child: Row(
-        children: [
-          _buildPhoto(size: 40),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  player.webName,
-                  style: const TextStyle(
-                    color: AppColors.textPrimary,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 13,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+    return IntrinsicHeight(
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.cardDark,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.divider, width: 1),
+        ),
+        child: Row(
+          children: [
+            // Position accent bar
+            Container(
+              width: 4,
+              decoration: BoxDecoration(
+                color: posColor,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(12),
+                  bottomLeft: Radius.circular(12),
                 ),
-                Row(
+              ),
+            ),
+            const SizedBox(width: 10),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: _buildPhoto(size: 38),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-                      decoration: BoxDecoration(
-                        color: posColor.withAlpha(51),
-                        borderRadius: BorderRadius.circular(4),
-                        border: Border.all(color: posColor, width: 0.5),
-                      ),
-                      child: Text(posShort, style: TextStyle(color: posColor, fontSize: 9, fontWeight: FontWeight.w700)),
-                    ),
-                    const SizedBox(width: 4),
                     Text(
-                      team?.shortName ?? '',
-                      style: const TextStyle(color: AppColors.textSecondary, fontSize: 11),
+                      player.webName,
+                      style: const TextStyle(
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 2),
+                    Row(
+                      children: [
+                        _posTag(posShort, posColor),
+                        const SizedBox(width: 5),
+                        Text(
+                          team?.shortName ?? '',
+                          style: const TextStyle(
+                              color: AppColors.textSecondary, fontSize: 11),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
+              ),
             ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                '${player.totalPoints}',
-                style: const TextStyle(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 16,
-                ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    '${player.totalPoints}',
+                    style: const TextStyle(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16,
+                    ),
+                  ),
+                  Text(
+                    formatPrice(player.nowCost),
+                    style: const TextStyle(
+                        color: AppColors.textSecondary, fontSize: 11),
+                  ),
+                ],
               ),
-              Text(
-                formatPrice(player.nowCost),
-                style: const TextStyle(color: AppColors.textSecondary, fontSize: 11),
-              ),
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
 
+  // ── Full card ─────────────────────────────────────────────────────────────
+
   Widget _buildFull(Color posColor, String posShort) {
-    return Padding(
-      padding: const EdgeInsets.all(12),
-      child: Row(
-        children: [
-          _buildPhoto(size: 56),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        player.webName,
-                        style: const TextStyle(
-                          color: AppColors.textPrimary,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 15,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    if (player.news.isNotEmpty)
-                      const Icon(Icons.info_outline, color: AppColors.warning, size: 16),
-                  ],
+    return IntrinsicHeight(
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.cardDark,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: AppColors.divider, width: 1),
+        ),
+        child: Row(
+          children: [
+            // Position colour bar
+            Container(
+              width: 4,
+              decoration: BoxDecoration(
+                color: posColor,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(14),
+                  bottomLeft: Radius.circular(14),
                 ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: posColor.withAlpha(51),
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(color: posColor, width: 0.8),
-                      ),
-                      child: Text(posShort, style: TextStyle(color: posColor, fontSize: 10, fontWeight: FontWeight.w700)),
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      team?.name ?? '',
-                      style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    _miniStat('Form', formatForm(player.form), AppColors.accent),
-                    const SizedBox(width: 12),
-                    _miniStat('ICT', formatDouble(player.ictIndex, decimals: 1), AppColors.warning),
-                    const SizedBox(width: 12),
-                    _miniStat('Sel%', formatPercent(player.selectedByPercent), AppColors.textSecondary),
-                  ],
-                ),
-              ],
+              ),
             ),
-          ),
-          const SizedBox(width: 8),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withAlpha(26),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: AppColors.primary.withAlpha(77)),
+            const SizedBox(width: 12),
+            _buildPhoto(size: 54),
+            const SizedBox(width: 12),
+            // Main content
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            player.webName,
+                            style: const TextStyle(
+                              color: AppColors.textPrimary,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 15,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (player.news.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(left: 4),
+                            child: Icon(Icons.warning_amber_rounded,
+                                color: AppColors.warning, size: 15),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 3),
+                    Row(
+                      children: [
+                        _posTag(posShort, posColor),
+                        const SizedBox(width: 6),
+                        Text(
+                          team?.name ?? '',
+                          style: const TextStyle(
+                              color: AppColors.textSecondary, fontSize: 12),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        _miniStat('Form', formatForm(player.form), AppColors.accent),
+                        const SizedBox(width: 14),
+                        _miniStat('ICT',
+                            formatDouble(player.ictIndex, decimals: 1),
+                            AppColors.warning),
+                        const SizedBox(width: 14),
+                        _miniStat('Sel',
+                            formatPercent(player.selectedByPercent),
+                            AppColors.textSecondary),
+                      ],
+                    ),
+                  ],
                 ),
-                child: Text(
-                  '${player.totalPoints}',
-                  style: const TextStyle(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 18,
+              ),
+            ),
+            // Right: Points + Price
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withAlpha(22),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                          color: AppColors.primary.withAlpha(70), width: 1),
+                    ),
+                    child: Text(
+                      '${player.totalPoints}',
+                      style: const TextStyle(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 18,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
                   ),
-                ),
+                  const SizedBox(height: 4),
+                  Text(
+                    formatPrice(player.nowCost),
+                    style: const TextStyle(
+                        color: AppColors.textSecondary, fontSize: 12),
+                  ),
+                  const SizedBox(height: 1),
+                  const Text(
+                    'pts',
+                    style:
+                        TextStyle(color: AppColors.textSecondary, fontSize: 10),
+                  ),
+                ],
               ),
-              const SizedBox(height: 4),
-              Text(
-                formatPrice(player.nowCost),
-                style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                'pts',
-                style: const TextStyle(color: AppColors.textSecondary, fontSize: 10),
-              ),
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
+
+  // ── Shared sub-widgets ────────────────────────────────────────────────────
 
   Widget _buildPhoto({required double size}) {
     return Stack(
@@ -204,26 +265,31 @@ class PlayerCard extends StatelessWidget {
           height: size,
           decoration: BoxDecoration(
             color: AppColors.cardMedium,
-            borderRadius: BorderRadius.circular(size / 2),
+            shape: BoxShape.circle,
             border: Border.all(color: AppColors.divider),
           ),
           clipBehavior: Clip.antiAlias,
           child: CachedNetworkImage(
             imageUrl: player.photoUrl,
             fit: BoxFit.cover,
-            placeholder: (_, __) => Icon(Icons.person, color: AppColors.textSecondary, size: size * 0.6),
-            errorWidget: (_, __, ___) => Icon(Icons.person, color: AppColors.textSecondary, size: size * 0.6),
+            placeholder: (_, __) => Icon(Icons.person,
+                color: AppColors.textSecondary, size: size * 0.55),
+            errorWidget: (_, __, ___) => Icon(Icons.person,
+                color: AppColors.textSecondary, size: size * 0.55),
           ),
         ),
-        if (player.chanceOfPlayingNextRound != null && player.chanceOfPlayingNextRound! < 100)
+        if (player.chanceOfPlayingNextRound != null &&
+            player.chanceOfPlayingNextRound! < 100)
           Positioned(
             bottom: 0,
             right: 0,
             child: Container(
-              width: size * 0.35,
-              height: size * 0.35,
+              width: size * 0.34,
+              height: size * 0.34,
               decoration: BoxDecoration(
-                color: player.chanceOfPlayingNextRound! < 50 ? AppColors.error : AppColors.warning,
+                color: player.chanceOfPlayingNextRound! < 50
+                    ? AppColors.error
+                    : AppColors.warning,
                 shape: BoxShape.circle,
                 border: Border.all(color: AppColors.cardDark, width: 1.5),
               ),
@@ -232,7 +298,7 @@ class PlayerCard extends StatelessWidget {
                   '${player.chanceOfPlayingNextRound}',
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: size * 0.12,
+                    fontSize: size * 0.11,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -243,12 +309,37 @@ class PlayerCard extends StatelessWidget {
     );
   }
 
+  Widget _posTag(String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withAlpha(28),
+        borderRadius: BorderRadius.circular(5),
+        border: Border.all(color: color.withAlpha(100), width: 0.8),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+            color: color, fontSize: 10, fontWeight: FontWeight.w700),
+      ),
+    );
+  }
+
   Widget _miniStat(String label, String value, Color valueColor) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(color: AppColors.textSecondary, fontSize: 9)),
-        Text(value, style: TextStyle(color: valueColor, fontSize: 12, fontWeight: FontWeight.w600)),
+        Text(label,
+            style: const TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 9,
+                fontWeight: FontWeight.w500)),
+        const SizedBox(height: 1),
+        Text(value,
+            style: TextStyle(
+                color: valueColor,
+                fontSize: 12,
+                fontWeight: FontWeight.w600)),
       ],
     );
   }

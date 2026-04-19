@@ -78,8 +78,10 @@ class _PlayersScreenState extends State<PlayersScreen> {
             backgroundColor: AppColors.secondary,
             actions: [
               PopupMenuButton<SortOption>(
-                icon: const Icon(Icons.sort, color: AppColors.textPrimary),
+                icon: const Icon(Icons.sort_rounded, color: AppColors.textPrimary),
                 color: AppColors.cardDark,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14)),
                 onSelected: (opt) => setState(() {
                   if (_sortOption == opt) {
                     _sortAscending = !_sortAscending;
@@ -89,12 +91,12 @@ class _PlayersScreenState extends State<PlayersScreen> {
                   }
                 }),
                 itemBuilder: (_) => [
-                  _sortItem(SortOption.points, 'Total Points', Icons.star),
-                  _sortItem(SortOption.form, 'Form', Icons.trending_up),
-                  _sortItem(SortOption.price, 'Price', Icons.attach_money),
-                  _sortItem(SortOption.ict, 'ICT Index', Icons.analytics),
-                  _sortItem(SortOption.selected, 'Selected %', Icons.people),
-                  _sortItem(SortOption.value, 'Value', Icons.savings),
+                  _sortItem(SortOption.points, 'Total Points', Icons.star_rounded),
+                  _sortItem(SortOption.form, 'Form', Icons.trending_up_rounded),
+                  _sortItem(SortOption.price, 'Price', Icons.attach_money_rounded),
+                  _sortItem(SortOption.ict, 'ICT Index', Icons.analytics_rounded),
+                  _sortItem(SortOption.selected, 'Selected %', Icons.people_rounded),
+                  _sortItem(SortOption.value, 'Value', Icons.savings_rounded),
                 ],
               ),
             ],
@@ -166,17 +168,18 @@ class _PlayersScreenState extends State<PlayersScreen> {
 
   Widget _buildSearchBar() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
       child: TextField(
         controller: _searchController,
         onChanged: (v) => setState(() => _searchQuery = v),
-        style: const TextStyle(color: AppColors.textPrimary),
+        style: const TextStyle(color: AppColors.textPrimary, fontSize: 14),
         decoration: InputDecoration(
-          hintText: 'Search players...',
-          prefixIcon: const Icon(Icons.search),
+          hintText: 'Search players…',
+          prefixIcon: const Icon(Icons.search_rounded, size: 20),
           suffixIcon: _searchQuery.isNotEmpty
               ? IconButton(
-                  icon: const Icon(Icons.clear, color: AppColors.textSecondary),
+                  icon: const Icon(Icons.close_rounded,
+                      color: AppColors.textSecondary, size: 18),
                   onPressed: () {
                     _searchController.clear();
                     setState(() => _searchQuery = '');
@@ -190,10 +193,10 @@ class _PlayersScreenState extends State<PlayersScreen> {
 
   Widget _buildFilterChips(FplProvider provider) {
     return SizedBox(
-      height: 52,
+      height: 50,
       child: ListView(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
         children: [
           _positionChip(0, 'All'),
           _positionChip(1, 'GK'),
@@ -204,13 +207,21 @@ class _PlayersScreenState extends State<PlayersScreen> {
           if (provider.teams.isNotEmpty)
             PopupMenuButton<int?>(
               color: AppColors.cardDark,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14)),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
                 decoration: BoxDecoration(
-                  color: _selectedTeam != null ? AppColors.primary.withAlpha(51) : AppColors.cardMedium,
-                  borderRadius: BorderRadius.circular(20),
+                  color: _selectedTeam != null
+                      ? AppColors.primary.withAlpha(28)
+                      : AppColors.cardMedium,
+                  borderRadius: BorderRadius.circular(24),
                   border: Border.all(
-                    color: _selectedTeam != null ? AppColors.primary : Colors.transparent,
+                    color: _selectedTeam != null
+                        ? AppColors.primary.withAlpha(160)
+                        : Colors.transparent,
                     width: 1,
                   ),
                 ),
@@ -219,13 +230,24 @@ class _PlayersScreenState extends State<PlayersScreen> {
                   children: [
                     Text(
                       _selectedTeam != null
-                          ? (provider.getTeamById(_selectedTeam!)?.shortName ?? 'Team')
-                          : 'Team ▾',
+                          ? (provider.getTeamById(_selectedTeam!)?.shortName ??
+                              'Team')
+                          : 'Team',
                       style: TextStyle(
-                        color: _selectedTeam != null ? AppColors.primary : AppColors.textSecondary,
-                        fontSize: 13,
+                        color: _selectedTeam != null
+                            ? AppColors.primary
+                            : AppColors.textSecondary,
+                        fontSize: 12,
                         fontWeight: FontWeight.w500,
                       ),
+                    ),
+                    const SizedBox(width: 4),
+                    Icon(
+                      Icons.keyboard_arrow_down_rounded,
+                      color: _selectedTeam != null
+                          ? AppColors.primary
+                          : AppColors.textSecondary,
+                      size: 14,
                     ),
                   ],
                 ),
@@ -234,12 +256,20 @@ class _PlayersScreenState extends State<PlayersScreen> {
               itemBuilder: (_) => [
                 PopupMenuItem(
                   value: null,
-                  child: Text('All Teams', style: TextStyle(color: _selectedTeam == null ? AppColors.primary : AppColors.textPrimary)),
+                  child: Text('All Teams',
+                      style: TextStyle(
+                          color: _selectedTeam == null
+                              ? AppColors.primary
+                              : AppColors.textPrimary)),
                 ),
                 ...provider.teams.map(
                   (t) => PopupMenuItem(
                     value: t.id,
-                    child: Text(t.name, style: TextStyle(color: _selectedTeam == t.id ? AppColors.primary : AppColors.textPrimary)),
+                    child: Text(t.name,
+                        style: TextStyle(
+                            color: _selectedTeam == t.id
+                                ? AppColors.primary
+                                : AppColors.textPrimary)),
                   ),
                 ),
               ],
@@ -253,27 +283,27 @@ class _PlayersScreenState extends State<PlayersScreen> {
     final isSelected = _selectedPosition == pos;
     Color? chipColor;
     if (pos > 0) chipColor = PositionConstants.positionColors[pos];
+    final color = chipColor ?? AppColors.primary;
     return GestureDetector(
       onTap: () => setState(() => _selectedPosition = pos),
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
         margin: const EdgeInsets.only(right: 8),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
         decoration: BoxDecoration(
-          color: isSelected
-              ? (chipColor ?? AppColors.primary).withAlpha(51)
-              : AppColors.cardMedium,
-          borderRadius: BorderRadius.circular(20),
+          color: isSelected ? color.withAlpha(28) : AppColors.cardMedium,
+          borderRadius: BorderRadius.circular(24),
           border: Border.all(
-            color: isSelected ? (chipColor ?? AppColors.primary) : Colors.transparent,
+            color: isSelected ? color.withAlpha(160) : Colors.transparent,
             width: 1,
           ),
         ),
         child: Text(
           label,
           style: TextStyle(
-            color: isSelected ? (chipColor ?? AppColors.primary) : AppColors.textSecondary,
-            fontSize: 13,
-            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+            color: isSelected ? color : AppColors.textSecondary,
+            fontSize: 12,
+            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
           ),
         ),
       ),
