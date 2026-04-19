@@ -20,13 +20,14 @@ class AppTheme {
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
         centerTitle: false,
-        titleTextStyle: GoogleFonts.poppins(
+        titleTextStyle: GoogleFonts.inter(
           color: AppColors.textPrimary,
-          fontSize: 20,
+          fontSize: 18,
           fontWeight: FontWeight.w700,
+          letterSpacing: -0.3,
         ),
       ),
-      textTheme: GoogleFonts.poppinsTextTheme(
+      textTheme: GoogleFonts.interTextTheme(
         const TextTheme(
           displayLarge: TextStyle(color: AppColors.textPrimary),
           displayMedium: TextStyle(color: AppColors.textPrimary),
@@ -45,15 +46,18 @@ class AppTheme {
       ),
       cardTheme: CardThemeData(
         color: AppColors.cardDark,
-        elevation: 4,
-        shadowColor: Colors.black54,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        elevation: 0,
+        shadowColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: const BorderSide(color: AppColors.divider, width: 1),
+        ),
       ),
       chipTheme: ChipThemeData(
         backgroundColor: AppColors.cardMedium,
         selectedColor: AppColors.primary,
-        labelStyle: GoogleFonts.poppins(color: AppColors.textPrimary, fontSize: 12),
-        secondaryLabelStyle: GoogleFonts.poppins(color: AppColors.secondary, fontSize: 12),
+        labelStyle: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 12),
+        secondaryLabelStyle: GoogleFonts.inter(color: AppColors.secondary, fontSize: 12),
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       ),
@@ -61,26 +65,47 @@ class AppTheme {
         filled: true,
         fillColor: AppColors.cardDark,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: AppColors.divider),
         ),
-        hintStyle: GoogleFonts.poppins(color: AppColors.textSecondary),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: AppColors.divider),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+        ),
+        hintStyle: GoogleFonts.inter(color: AppColors.textSecondary),
         prefixIconColor: AppColors.textSecondary,
       ),
-      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        backgroundColor: AppColors.secondary,
-        selectedItemColor: AppColors.primary,
-        unselectedItemColor: AppColors.textSecondary,
-        type: BottomNavigationBarType.fixed,
-        elevation: 8,
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: AppColors.navBar,
+        indicatorColor: AppColors.primary.withAlpha(40),
+        iconTheme: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return const IconThemeData(color: AppColors.primary, size: 22);
+          }
+          return const IconThemeData(color: AppColors.textSecondary, size: 22);
+        }),
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return GoogleFonts.inter(
+                color: AppColors.primary, fontSize: 11, fontWeight: FontWeight.w600);
+          }
+          return GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 11);
+        }),
+        elevation: 0,
+        height: 64,
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
       ),
       dividerTheme: const DividerThemeData(color: AppColors.divider, thickness: 1),
       tabBarTheme: TabBarThemeData(
         labelColor: AppColors.primary,
         unselectedLabelColor: AppColors.textSecondary,
         indicatorColor: AppColors.primary,
-        labelStyle: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 13),
-        unselectedLabelStyle: GoogleFonts.poppins(fontSize: 13),
+        labelStyle: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 13),
+        unselectedLabelStyle: GoogleFonts.inter(fontSize: 13),
       ),
     );
   }
@@ -95,14 +120,8 @@ class AppTheme {
         end: Alignment.bottomRight,
         colors: colors ?? [AppColors.cardDark, AppColors.cardMedium],
       ),
-      borderRadius: borderRadius ?? BorderRadius.circular(16),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withAlpha(77),
-          blurRadius: 8,
-          offset: const Offset(0, 4),
-        ),
-      ],
+      borderRadius: borderRadius ?? BorderRadius.circular(20),
+      border: Border.all(color: AppColors.divider, width: 1),
     );
   }
 
@@ -111,14 +130,14 @@ class AppTheme {
       gradient: const LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
-        colors: [Color(0xFF00FF87), Color(0xFF00C9A7)],
+        colors: [Color(0xFF00D68F), Color(0xFF00A87A)],
       ),
-      borderRadius: borderRadius ?? BorderRadius.circular(16),
+      borderRadius: borderRadius ?? BorderRadius.circular(20),
       boxShadow: [
         BoxShadow(
-          color: AppColors.primary.withAlpha(77),
-          blurRadius: 12,
-          offset: const Offset(0, 4),
+          color: AppColors.primary.withAlpha(60),
+          blurRadius: 16,
+          offset: const Offset(0, 6),
         ),
       ],
     );
@@ -129,16 +148,20 @@ class AppTheme {
       gradient: const LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
-        colors: [Color(0xFF37003C), Color(0xFF5a0060)],
+        colors: [Color(0xFF1B0A3F), Color(0xFF2A1260)],
       ),
-      borderRadius: borderRadius ?? BorderRadius.circular(16),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.purple.withAlpha(77),
-          blurRadius: 8,
-          offset: const Offset(0, 4),
-        ),
-      ],
+      borderRadius: borderRadius ?? BorderRadius.circular(20),
+    );
+  }
+
+  static BoxDecoration glassCard({BorderRadius? borderRadius, Color? borderColor}) {
+    return BoxDecoration(
+      color: AppColors.cardDark.withAlpha(200),
+      borderRadius: borderRadius ?? BorderRadius.circular(20),
+      border: Border.all(
+        color: borderColor ?? AppColors.divider,
+        width: 1,
+      ),
     );
   }
 }

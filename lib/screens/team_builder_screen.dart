@@ -22,26 +22,27 @@ class TeamBuilderScreen extends StatefulWidget {
 }
 
 class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
-  // Null means slot is empty; index 0–10 = starting, 11–14 = bench
+  // Slot layout:
+  //   0        = Starting GK
+  //   1-10     = Starting outfield (any position; grouped on pitch by player.elementType)
+  //   11       = Bench GK
+  //   12-14    = Bench outfield (any position)
   final List<Player?> _slots = List.filled(15, null);
-  // position requirement per slot index
-  // 0 = GK, 1-4 = DEF, 5-8 = MID, 9-10 = FWD  (for 4-4-2 base)
-  // We track by position counts dynamically instead.
 
-  String _formation = '4-3-3';
   int? _captainIdx;
   int? _viceCaptainIdx;
   final _nameController = TextEditingController();
   bool _isSaving = false;
 
-  // Formation configs: [def, mid, fwd]
-  static const Map<String, List<int>> _formations = {
-    '4-3-3': [4, 3, 3],
-    '4-4-2': [4, 4, 2],
-    '3-5-2': [3, 5, 2],
-    '5-3-2': [5, 3, 2],
-    '3-4-3': [3, 4, 3],
-  };
+  // Auto-compute formation from current starting outfield players
+  String get _autoFormation {
+    final starters = _slots.sublist(1, 11).whereType<Player>().toList();
+    final d = starters.where((p) => p.elementType == 2).length;
+    final m = starters.where((p) => p.elementType == 3).length;
+    final f = starters.where((p) => p.elementType == 4).length;
+    if (d == 0 && m == 0 && f == 0) return '?-?-?';
+    return '$d-$m-$f';
+  }
 
   @override
   void initState() {
@@ -56,7 +57,6 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
   void _loadExistingTeam() {
     final team = widget.existingTeam!;
     _nameController.text = team.name;
-    _formation = team.formation;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final fplProvider = context.read<FplProvider>();
@@ -99,31 +99,164 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
     return counts;
   }
 
+  // Slot 0 = starting GK, slot 11 = bench GK.
+  // Slots 1-10 = any starting outfield, slots 12-14 = any bench outfield.
   int _positionForSlot(int slotIndex) {
-    if (slotIndex == 0) return 1; // GK starting
-    if (slotIndex == 11) return 1; // GK bench
-    final parts = _formations[_formation] ?? [4, 3, 3];
-    final defCount = parts[0];
-    final midCount = parts[1];
-    final fwdCount = parts[2];
-    if (slotIndex >= 1 && slotIndex < 1 + defCount) return 2;
-    if (slotIndex >= 1 + defCount && slotIndex < 1 + defCount + midCount) {
-      return 3;
-    }
-    if (slotIndex >= 1 + defCount + midCount &&
-        slotIndex < 1 + defCount + midCount + fwdCount) return 4;
-    // bench slots 12-14: any outfield
+    if (slotIndex == 0 || slotIndex == 11) return 1; // GK
     return 0; // any outfield
   }
 
-  String _posLabelForSlot(int slotIndex) {
-    final pos = _positionForSlot(slotIndex);
-    return PositionConstants.positionNames[pos] ?? 'ANY';
+  // Next empty slot for a given position in the starting XI (slots 0-10)
+  int? _nextStartingSlot(int elementType) {
+    if (elementType == 1) {
+      return _slots[0] == null ? 0 : null;
+    }
+    for (int i = 1; i <= 10; i++) {
+      if (_slots[i] == null) return i;
+    }
+    return null;
+  }
+
+  // Next empty slot for a given position on the bench (slots 11-14)
+  int? _nextBenchSlot(int elementType) {
+    if (elementType == 1) {
+      return _slots[11] == null ? 11 : null;
+    }
+    for (int i = 12; i <= 14; i++) {
+      if (_slots[i] == null) return i;
+    }
+    return null;
   }
 
   void _onSlotTap(int slotIndex, FplProvider fplProvider) {
     final pos = _positionForSlot(slotIndex);
     _showPlayerPicker(slotIndex, pos, fplProvider);
+  }
+
+  // Sub Out: move a starting outfield player to bench
+  void _subOut(int startingSlotIndex) {
+    final player = _slots[startingSlotIndex];
+    if (player == null || startingSlotIndex < 1 || startingSlotIndex > 10) return;
+
+    // Find empty bench outfield slot
+    final emptyBenchSlot = _nextBenchSlot(player.elementType);
+    if (emptyBenchSlot != null) {
+      setState(() {
+        _slots[emptyBenchSlot] = player;
+        _slots[startingSlotIndex] = null;
+        if (_captainIdx == startingSlotIndex) _captainIdx = emptyBenchSlot;
+        if (_viceCaptainIdx == startingSlotIndex) _viceCaptainIdx = emptyBenchSlot;
+      });
+    } else {
+      // All bench outfield slots full – ask which bench player to swap with
+      _showSwapPicker(startingSlotIndex, benchToClear: true);
+    }
+  }
+
+  // Sub In: move a bench outfield player to starting
+  void _subIn(int benchSlotIndex) {
+    final player = _slots[benchSlotIndex];
+    if (player == null || benchSlotIndex < 12 || benchSlotIndex > 14) return;
+
+    // Find empty starting outfield slot
+    final emptyStartSlot = _nextStartingSlot(player.elementType);
+    if (emptyStartSlot != null) {
+      setState(() {
+        _slots[emptyStartSlot] = player;
+        _slots[benchSlotIndex] = null;
+        if (_captainIdx == benchSlotIndex) _captainIdx = emptyStartSlot;
+        if (_viceCaptainIdx == benchSlotIndex) _viceCaptainIdx = emptyStartSlot;
+      });
+    } else {
+      // Starting XI is full – ask which starting player to swap with
+      _showSwapPicker(benchSlotIndex, benchToClear: false);
+    }
+  }
+
+  // Sub GK: swap starting GK and bench GK
+  void _subGk() {
+    final startGk = _slots[0];
+    final benchGk = _slots[11];
+    if (startGk == null && benchGk == null) return;
+    setState(() {
+      _slots[0] = benchGk;
+      _slots[11] = startGk;
+      if (_captainIdx == 0) _captainIdx = 11;
+      else if (_captainIdx == 11) _captainIdx = 0;
+      if (_viceCaptainIdx == 0) _viceCaptainIdx = 11;
+      else if (_viceCaptainIdx == 11) _viceCaptainIdx = 0;
+    });
+  }
+
+  void _showSwapPicker(int fromSlot, {required bool benchToClear}) {
+    final fromPlayer = _slots[fromSlot]!;
+    // If benchToClear=true: from is starting, pick bench outfield slot to swap with
+    // If benchToClear=false: from is bench, pick starting outfield slot to swap with
+    final swapSlots = benchToClear
+        ? [12, 13, 14].where((i) => _slots[i] != null).toList()
+        : List.generate(10, (i) => i + 1).where((i) => _slots[i] != null).toList();
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.cardDark,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (_) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 36, height: 4,
+                  decoration: BoxDecoration(
+                    color: AppColors.divider,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                benchToClear ? 'Swap ${fromPlayer.webName} with bench player:' : 'Swap ${fromPlayer.webName} with starting player:',
+                style: const TextStyle(color: AppColors.textPrimary, fontSize: 15, fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 12),
+              ...swapSlots.map((toSlot) {
+                final toPlayer = _slots[toSlot]!;
+                final posColor = getPositionColor(toPlayer.elementType);
+                return ListTile(
+                  leading: CircleAvatar(
+                    radius: 18,
+                    backgroundColor: AppColors.cardMedium,
+                    backgroundImage: NetworkImage(toPlayer.photoUrl),
+                  ),
+                  title: Text(toPlayer.webName,
+                      style: const TextStyle(color: AppColors.textPrimary, fontSize: 14)),
+                  subtitle: Text(
+                    '${PositionConstants.positionNames[toPlayer.elementType] ?? ''} · ${formatPrice(toPlayer.nowCost)}',
+                    style: TextStyle(color: posColor, fontSize: 12),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    setState(() {
+                      _slots[toSlot] = fromPlayer;
+                      _slots[fromSlot] = toPlayer;
+                      if (_captainIdx == fromSlot) _captainIdx = toSlot;
+                      else if (_captainIdx == toSlot) _captainIdx = fromSlot;
+                      if (_viceCaptainIdx == fromSlot) _viceCaptainIdx = toSlot;
+                      else if (_viceCaptainIdx == toSlot) _viceCaptainIdx = fromSlot;
+                    });
+                  },
+                );
+              }),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   void _showPlayerPicker(
@@ -168,12 +301,15 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
       context: context,
       backgroundColor: AppColors.cardDark,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (_) => _SlotOptionsSheet(
         player: _slots[slotIndex]!,
+        slotIndex: slotIndex,
         isCaptain: _captainIdx == slotIndex,
         isViceCaptain: _viceCaptainIdx == slotIndex,
+        isStartingOutfield: slotIndex >= 1 && slotIndex <= 10,
+        isBenchOutfield: slotIndex >= 12 && slotIndex <= 14,
         onSetCaptain: () {
           setState(() {
             _captainIdx = slotIndex;
@@ -187,6 +323,14 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
             if (_captainIdx == slotIndex) _captainIdx = null;
           });
           Navigator.pop(context);
+        },
+        onSubOut: () {
+          Navigator.pop(context);
+          _subOut(slotIndex);
+        },
+        onSubIn: () {
+          Navigator.pop(context);
+          _subIn(slotIndex);
         },
         onRemove: () {
           setState(() {
@@ -242,7 +386,7 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
         slots: slots,
         captainId: captainId,
         viceCaptainId: vcId,
-        formation: _formation,
+        formation: _autoFormation,
         createdAt: widget.existingTeam?.createdAt ?? DateTime.now(),
       );
 
@@ -288,20 +432,22 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
             ),
           ),
           actions: [
-            PopupMenuButton<String>(
-              icon: const Icon(Icons.tune, color: AppColors.textPrimary),
-              color: AppColors.cardDark,
-              onSelected: (f) => setState(() => _formation = f),
-              itemBuilder: (_) => _formations.keys
-                  .map((f) => PopupMenuItem(
-                        value: f,
-                        child: Text(f,
-                            style: TextStyle(
-                                color: _formation == f
-                                    ? AppColors.primary
-                                    : AppColors.textPrimary)),
-                      ))
-                  .toList(),
+            // Formation badge (auto-computed, read-only)
+            Container(
+              margin: const EdgeInsets.only(right: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withAlpha(25),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: AppColors.primary.withAlpha(80)),
+              ),
+              child: Text(
+                _autoFormation,
+                style: const TextStyle(
+                    color: AppColors.primary,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700),
+              ),
             ),
             TextButton(
               onPressed: _isSaving ? null : _saveTeam,
@@ -309,8 +455,7 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
                   ? const SizedBox(
                       width: 20,
                       height: 20,
-                      child:
-                          CircularProgressIndicator(strokeWidth: 2))
+                      child: CircularProgressIndicator(strokeWidth: 2))
                   : const Text('Save',
                       style: TextStyle(
                           color: AppColors.primary,
@@ -342,7 +487,7 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
             ? AppColors.warning
             : AppColors.primary;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: AppTheme.purpleGradient(borderRadius: BorderRadius.zero),
       child: Row(
         children: [
@@ -353,8 +498,8 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Budget Remaining',
-                        style: const TextStyle(
+                    const Text('Budget Remaining',
+                        style: TextStyle(
                             color: AppColors.textSecondary, fontSize: 11)),
                     Text(formatPrice(_remaining),
                         style: TextStyle(
@@ -363,25 +508,25 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
                             fontWeight: FontWeight.w700)),
                   ],
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 6),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(4),
                   child: LinearProgressIndicator(
                     value: pct,
-                    backgroundColor: Colors.white.withAlpha(30),
+                    backgroundColor: Colors.white.withAlpha(25),
                     color: color,
-                    minHeight: 6,
+                    minHeight: 5,
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 20),
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text('Spent',
-                  style: const TextStyle(
+              const Text('Spent',
+                  style: TextStyle(
                       color: AppColors.textSecondary, fontSize: 11)),
               Text(formatPrice(_spent),
                   style: const TextStyle(
@@ -396,49 +541,86 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
   }
 
   Widget _buildPitch(FplProvider fplProvider) {
-    final parts = _formations[_formation] ?? [4, 3, 3];
-    final defCount = parts[0];
-    final midCount = parts[1];
-    final fwdCount = parts[2];
+    // Group starting slots (1-10) by player position
+    final fwdSlots = <int>[];
+    final midSlots = <int>[];
+    final defSlots = <int>[];
+    // Empty outfield slots – display in their own "empty" row
+    final emptyOutfieldSlots = <int>[];
 
-    // starting slots: 0=GK, 1..defCount=DEF, ..mid..=MID, ..fwd..=FWD
-    final gkSlots = [0];
-    final defSlots = List.generate(defCount, (i) => 1 + i);
-    final midSlots = List.generate(midCount, (i) => 1 + defCount + i);
-    final fwdSlots = List.generate(fwdCount, (i) => 1 + defCount + midCount + i);
+    for (int i = 1; i <= 10; i++) {
+      final p = _slots[i];
+      if (p == null) {
+        emptyOutfieldSlots.add(i);
+      } else {
+        switch (p.elementType) {
+          case 4:
+            fwdSlots.add(i);
+          case 3:
+            midSlots.add(i);
+          default:
+            defSlots.add(i);
+        }
+      }
+    }
 
     return Container(
-      margin: const EdgeInsets.all(12),
+      margin: const EdgeInsets.fromLTRB(12, 12, 12, 8),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [Color(0xFF1a4a1a), Color(0xFF0d2d0d)],
+          colors: [AppColors.pitchGreen, AppColors.pitchGreenDark],
         ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.primary.withAlpha(51)),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.primary.withAlpha(40)),
       ),
       child: Column(
         children: [
-          const SizedBox(height: 12),
-          _buildPitchRow(fwdSlots, fplProvider, PositionConstants.positionColors[4]!),
-          const SizedBox(height: 10),
-          _buildPitchRow(midSlots, fplProvider, PositionConstants.positionColors[3]!),
-          const SizedBox(height: 10),
-          _buildPitchRow(defSlots, fplProvider, PositionConstants.positionColors[2]!),
-          const SizedBox(height: 10),
-          _buildPitchRow(gkSlots, fplProvider, PositionConstants.positionColors[1]!),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
+          if (fwdSlots.isNotEmpty)
+            _buildPitchRow(fwdSlots, fplProvider, PositionConstants.positionColors[4]!),
+          if (fwdSlots.isNotEmpty && midSlots.isNotEmpty) const SizedBox(height: 10),
+          if (midSlots.isNotEmpty)
+            _buildPitchRow(midSlots, fplProvider, PositionConstants.positionColors[3]!),
+          if (midSlots.isNotEmpty && defSlots.isNotEmpty) const SizedBox(height: 10),
+          if (defSlots.isNotEmpty)
+            _buildPitchRow(defSlots, fplProvider, PositionConstants.positionColors[2]!),
+          if (defSlots.isNotEmpty) const SizedBox(height: 10),
+          _buildPitchRow([0], fplProvider, PositionConstants.positionColors[1]!),
+          const SizedBox(height: 14),
+          // Dividing line
           Container(
             width: double.infinity,
-            height: 3,
+            height: 2,
             margin: const EdgeInsets.symmetric(horizontal: 24),
             decoration: BoxDecoration(
-              color: Colors.white.withAlpha(51),
+              color: Colors.white.withAlpha(40),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
+          // Empty slots hint
+          if (emptyOutfieldSlots.isNotEmpty) ...[
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  const Icon(Icons.add_circle_outline,
+                      color: AppColors.textSecondary, size: 14),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Tap a slot to add a player  •  ${emptyOutfieldSlots.length} outfield slot${emptyOutfieldSlots.length == 1 ? '' : 's'} remaining',
+                    style: const TextStyle(
+                        color: AppColors.textSecondary, fontSize: 11),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 10),
+            _buildEmptyOutfieldRow(emptyOutfieldSlots, fplProvider),
+            const SizedBox(height: 14),
+          ],
         ],
       ),
     );
@@ -447,7 +629,8 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
   Widget _buildPitchRow(
       List<int> slotIndices, FplProvider fplProvider, Color posColor) {
     return LayoutBuilder(builder: (context, constraints) {
-      final itemWidth = (constraints.maxWidth / slotIndices.length).clamp(60.0, 80.0);
+      final itemWidth =
+          (constraints.maxWidth / slotIndices.length).clamp(60.0, 84.0);
       return Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: slotIndices.map((idx) {
@@ -457,11 +640,37 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
             child: _BuilderSlot(
               player: player,
               posColor: posColor,
-              posLabel: _posLabelForSlot(idx),
+              posLabel: player == null
+                  ? (idx == 0 ? 'GK' : 'ADD')
+                  : (PositionConstants.positionNames[player.elementType] ?? ''),
               isCaptain: _captainIdx == idx,
               isViceCaptain: _viceCaptainIdx == idx,
+              isStartingOutfield: idx >= 1 && idx <= 10,
               onTap: () => _onSlotTap(idx, fplProvider),
               onLongPress: () => _onSlotLongPress(idx),
+            ),
+          );
+        }).toList(),
+      );
+    });
+  }
+
+  Widget _buildEmptyOutfieldRow(
+      List<int> emptySlots, FplProvider fplProvider) {
+    return LayoutBuilder(builder: (context, constraints) {
+      final count = emptySlots.length.clamp(1, 5);
+      final itemWidth = (constraints.maxWidth / count).clamp(60.0, 84.0);
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: emptySlots.take(5).map((idx) {
+          return SizedBox(
+            width: itemWidth,
+            child: _BuilderSlot(
+              player: null,
+              posColor: AppColors.textSecondary,
+              posLabel: 'ADD',
+              onTap: () => _onSlotTap(idx, fplProvider),
+              onLongPress: () {},
             ),
           );
         }).toList(),
@@ -472,25 +681,55 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
   Widget _buildBench(FplProvider fplProvider) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 12),
-      padding: const EdgeInsets.all(12),
-      decoration: AppTheme.gradientCard(),
+      padding: const EdgeInsets.all(14),
+      decoration: AppTheme.glassCard(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(Icons.swap_horiz, color: AppColors.textSecondary, size: 16),
-              SizedBox(width: 6),
-              Text('Substitutes',
+              const Icon(Icons.swap_vert_rounded,
+                  color: AppColors.textSecondary, size: 16),
+              const SizedBox(width: 6),
+              const Text('Substitutes',
                   style: TextStyle(
                       color: AppColors.textSecondary,
                       fontSize: 13,
                       fontWeight: FontWeight.w600)),
+              const Spacer(),
+              // GK sub button
+              if (_slots[0] != null || _slots[11] != null)
+                GestureDetector(
+                  onTap: _subGk,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withAlpha(25),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                          color: AppColors.primary.withAlpha(80)),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.swap_vert_rounded,
+                            color: AppColors.primary, size: 12),
+                        SizedBox(width: 3),
+                        Text('GK Swap',
+                            style: TextStyle(
+                                color: AppColors.primary,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600)),
+                      ],
+                    ),
+                  ),
+                ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           LayoutBuilder(builder: (context, constraints) {
-            final itemWidth = (constraints.maxWidth / 4).clamp(60.0, 80.0);
+            final itemWidth = (constraints.maxWidth / 4).clamp(60.0, 84.0);
             return Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [11, 12, 13, 14].map((idx) {
@@ -502,8 +741,15 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
                     posColor: player != null
                         ? getPositionColor(player.elementType)
                         : AppColors.textSecondary,
-                    posLabel: idx == 11 ? 'GK' : 'OUT',
+                    posLabel: idx == 11
+                        ? 'GK'
+                        : (player != null
+                            ? (PositionConstants
+                                    .positionNames[player.elementType] ??
+                                'OUT')
+                            : 'OUT'),
                     isSub: true,
+                    isBenchOutfield: idx >= 12,
                     onTap: () => _onSlotTap(idx, fplProvider),
                     onLongPress: () => _onSlotLongPress(idx),
                   ),
@@ -526,6 +772,8 @@ class _BuilderSlot extends StatelessWidget {
   final bool isSub;
   final bool isCaptain;
   final bool isViceCaptain;
+  final bool isStartingOutfield;
+  final bool isBenchOutfield;
   final VoidCallback onTap;
   final VoidCallback onLongPress;
 
@@ -536,6 +784,8 @@ class _BuilderSlot extends StatelessWidget {
     this.isSub = false,
     this.isCaptain = false,
     this.isViceCaptain = false,
+    this.isStartingOutfield = false,
+    this.isBenchOutfield = false,
     required this.onTap,
     required this.onLongPress,
   });
@@ -614,15 +864,46 @@ class _BuilderSlot extends StatelessWidget {
                                 color: AppColors.secondary))),
                   ),
                 ),
+              // Sub-out badge on starting outfield players
+              if (player != null && isStartingOutfield)
+                Positioned(
+                  bottom: -2,
+                  left: -2,
+                  child: Container(
+                    width: 14,
+                    height: 14,
+                    decoration: BoxDecoration(
+                        color: AppColors.accent.withAlpha(220),
+                        shape: BoxShape.circle),
+                    child: const Center(
+                        child: Icon(Icons.arrow_downward_rounded,
+                            size: 9, color: Colors.white)),
+                  ),
+                ),
+              // Sub-in badge on bench outfield players
+              if (player != null && isBenchOutfield)
+                Positioned(
+                  bottom: -2,
+                  left: -2,
+                  child: Container(
+                    width: 14,
+                    height: 14,
+                    decoration: BoxDecoration(
+                        color: AppColors.primary.withAlpha(220),
+                        shape: BoxShape.circle),
+                    child: const Center(
+                        child: Icon(Icons.arrow_upward_rounded,
+                            size: 9, color: AppColors.secondary)),
+                  ),
+                ),
             ],
           ),
           const SizedBox(height: 3),
           if (player != null) ...[
             Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
               decoration: BoxDecoration(
-                color: Colors.black.withAlpha(153),
+                color: Colors.black.withAlpha(160),
                 borderRadius: BorderRadius.circular(4),
               ),
               constraints: const BoxConstraints(maxWidth: 72),
@@ -640,10 +921,9 @@ class _BuilderSlot extends StatelessWidget {
               ),
             ),
             Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
               decoration: BoxDecoration(
-                color: AppColors.primary.withAlpha(204),
+                color: AppColors.primary.withAlpha(200),
                 borderRadius: BorderRadius.circular(3),
               ),
               child: Text(
@@ -656,8 +936,7 @@ class _BuilderSlot extends StatelessWidget {
             ),
           ] else ...[
             Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
                 color: posColor.withAlpha(40),
                 borderRadius: BorderRadius.circular(4),
@@ -759,7 +1038,7 @@ class _PlayerPickerSheetState extends State<_PlayerPickerSheet> {
       builder: (_, scrollCtrl) => Container(
         decoration: const BoxDecoration(
           color: AppColors.cardDark,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: Column(
           children: [
@@ -987,39 +1266,124 @@ class _PickerPlayerRow extends StatelessWidget {
 
 class _SlotOptionsSheet extends StatelessWidget {
   final Player player;
+  final int slotIndex;
   final bool isCaptain;
   final bool isViceCaptain;
+  final bool isStartingOutfield;
+  final bool isBenchOutfield;
   final VoidCallback onSetCaptain;
   final VoidCallback onSetViceCaptain;
+  final VoidCallback onSubOut;
+  final VoidCallback onSubIn;
   final VoidCallback onRemove;
 
   const _SlotOptionsSheet({
     required this.player,
+    required this.slotIndex,
     required this.isCaptain,
     required this.isViceCaptain,
+    this.isStartingOutfield = false,
+    this.isBenchOutfield = false,
     required this.onSetCaptain,
     required this.onSetViceCaptain,
+    required this.onSubOut,
+    required this.onSubIn,
     required this.onRemove,
   });
 
   @override
   Widget build(BuildContext context) {
+    final posColor = getPositionColor(player.elementType);
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(player.webName,
-                style: const TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700)),
-            const SizedBox(height: 4),
-            Text(formatPrice(player.nowCost),
-                style: const TextStyle(
-                    color: AppColors.textSecondary, fontSize: 13)),
+            Center(
+              child: Container(
+                width: 36, height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.divider,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
             const SizedBox(height: 16),
+            Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppColors.cardMedium,
+                    border: Border.all(color: posColor, width: 1.5),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: CachedNetworkImage(
+                    imageUrl: player.photoUrl,
+                    fit: BoxFit.cover,
+                    placeholder: (_, __) =>
+                        const Icon(Icons.person, size: 22),
+                    errorWidget: (_, __, ___) =>
+                        const Icon(Icons.person, size: 22),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(player.webName,
+                          style: const TextStyle(
+                              color: AppColors.textPrimary,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700)),
+                      Text(
+                        '${PositionConstants.positionNames[player.elementType] ?? ''} · ${formatPrice(player.nowCost)}',
+                        style: TextStyle(color: posColor, fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            const Divider(height: 1, color: AppColors.divider),
+            const SizedBox(height: 4),
+            // Sub Out (starting outfield only)
+            if (isStartingOutfield)
+              ListTile(
+                leading: const CircleAvatar(
+                  backgroundColor: AppColors.accent,
+                  radius: 16,
+                  child: Icon(Icons.arrow_downward_rounded,
+                      color: Colors.white, size: 16),
+                ),
+                title: const Text('Sub Out  →  Move to Bench',
+                    style: TextStyle(color: AppColors.accent)),
+                subtitle: const Text('Send to substitutes',
+                    style: TextStyle(
+                        color: AppColors.textSecondary, fontSize: 11)),
+                onTap: onSubOut,
+              ),
+            // Sub In (bench outfield only)
+            if (isBenchOutfield)
+              ListTile(
+                leading: const CircleAvatar(
+                  backgroundColor: AppColors.primary,
+                  radius: 16,
+                  child: Icon(Icons.arrow_upward_rounded,
+                      color: AppColors.secondary, size: 16),
+                ),
+                title: const Text('Sub In  →  Move to Starting',
+                    style: TextStyle(color: AppColors.primary)),
+                subtitle: const Text('Bring into starting XI',
+                    style: TextStyle(
+                        color: AppColors.textSecondary, fontSize: 11)),
+                onTap: onSubIn,
+              ),
             ListTile(
               leading: const CircleAvatar(
                 backgroundColor: AppColors.warning,

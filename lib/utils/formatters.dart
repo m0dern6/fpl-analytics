@@ -89,16 +89,16 @@ String formatStatusLabel(String? status) {
 Color getStatusColor(String? status) {
   switch (status) {
     case 'a':
-      return const Color(0xFF00FF87);
+      return const Color(0xFF00D68F);
     case 'd':
-      return const Color(0xFFFFEB04);
+      return const Color(0xFFFFCC02);
     case 'i':
-      return const Color(0xFFFF6B6B);
+      return const Color(0xFFFF5C5C);
     case 's':
-      return const Color(0xFFFF6B6B);
+      return const Color(0xFFFF5C5C);
     case 'u':
-      return const Color(0xFFFF6B6B);
+      return const Color(0xFFFF5C5C);
     default:
-      return const Color(0xFF00FF87);
+      return const Color(0xFF00D68F);
   }
 }
