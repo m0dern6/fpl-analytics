@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../providers/fpl_provider.dart';
 import '../models/player.dart';
 import '../utils/app_theme.dart';
@@ -131,6 +132,28 @@ class _CompareScreenState extends State<CompareScreen> {
               decoration: AppTheme.gradientCard(),
               child: Column(
                 children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppColors.cardMedium,
+                      border: Border.all(
+                        color: getPositionColor(selected.elementType),
+                        width: 2,
+                      ),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: CachedNetworkImage(
+                      imageUrl: selected.photoUrl,
+                      fit: BoxFit.cover,
+                      placeholder: (_, __) => const Icon(Icons.person,
+                          color: AppColors.textSecondary, size: 24),
+                      errorWidget: (_, __, ___) => const Icon(Icons.person,
+                          color: AppColors.textSecondary, size: 24),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
                   Text(
                     selected.webName,
                     style: const TextStyle(color: AppColors.primary, fontSize: 13, fontWeight: FontWeight.w700),

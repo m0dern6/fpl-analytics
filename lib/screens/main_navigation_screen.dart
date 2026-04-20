@@ -5,8 +5,7 @@ import '../providers/user_teams_provider.dart';
 import '../utils/constants.dart';
 import 'dashboard_screen.dart';
 import 'players_screen.dart';
-import 'my_teams_screen.dart';
-import 'ai_picks_screen.dart';
+import 'analytics_screen.dart';
 import 'more_screen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
@@ -22,8 +21,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   final List<Widget> _screens = const [
     DashboardScreen(),
     PlayersScreen(),
-    MyTeamsScreen(),
-    AiPicksScreen(),
+    AnalyticsScreen(),
     MoreScreen(),
   ];
 
@@ -59,8 +57,7 @@ class _BottomNav extends StatelessWidget {
   static const _items = [
     _NavDest(Icons.home_rounded, Icons.home_outlined, 'Home'),
     _NavDest(Icons.people_rounded, Icons.people_outline_rounded, 'Players'),
-    _NavDest(Icons.shield_rounded, Icons.shield_outlined, 'My Teams'),
-    _NavDest(Icons.auto_awesome_rounded, Icons.auto_awesome_outlined, 'AI Picks'),
+    _NavDest(Icons.analytics_rounded, Icons.analytics_outlined, 'Analytics'),
     _NavDest(Icons.apps_rounded, Icons.apps_outlined, 'Explore'),
   ];
 

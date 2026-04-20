@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:fl_chart/fl_chart.dart';
 import '../providers/fpl_provider.dart';
 import '../providers/user_teams_provider.dart';
 import '../models/player.dart';
+import '../models/gameweek.dart';
 import '../models/fixture.dart';
 import '../utils/app_theme.dart';
 import '../utils/constants.dart';
@@ -168,12 +170,9 @@ class _DashboardContent extends StatelessWidget {
                 delegate: SliverChildListDelegate([
                   _buildCurrentGwBanner(context),
                   const SizedBox(height: 16),
-                  // Hero: show either user teams or best team pitch
-                  teamsProvider.hasTeams
-                      ? _buildMyTeamsHero(context, teamsProvider)
-                      : _buildBestTeamHero(context),
+                  _buildSparklines(context),
                   const SizedBox(height: 16),
-                  _buildAiPicksBanner(context),
+                  _buildQuickAccess(context, teamsProvider),
                   const SizedBox(height: 16),
                   _buildSectionTitle(context, 'Highlights'),
                   const SizedBox(height: 12),
@@ -200,309 +199,7 @@ class _DashboardContent extends StatelessWidget {
     );
   }
 
-  Widget _buildMyTeamsHero(BuildContext context, UserTeamsProvider teamsProvider) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionTitle(context, 'My Teams'),
-        const SizedBox(height: 10),
-        SizedBox(
-          height: 110,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: teamsProvider.teams.length + 1,
-            itemBuilder: (_, i) {
-              if (i == teamsProvider.teams.length) {
-                // "Add team" card
-                return GestureDetector(
-                  onTap: () => _navigateToMyTeams(context),
-                  child: Container(
-                    width: 110,
-                    margin: const EdgeInsets.only(right: 10),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withAlpha(15),
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(
-                          color: AppColors.primary.withAlpha(80),
-                          style: BorderStyle.solid,
-                          width: 1.5),
-                    ),
-                    child: const Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.add, color: AppColors.primary, size: 28),
-                        SizedBox(height: 4),
-                        Text('New Team',
-                            style: TextStyle(
-                                color: AppColors.primary,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600)),
-                      ],
-                    ),
-                  ),
-                );
-              }
-              final team = teamsProvider.teams[i];
-              final prices = <int, int>{};
-              for (final p in provider.players) {
-                prices[p.id] = p.nowCost;
-              }
-              final totalCost = team.totalCost(prices);
-              final captain = team.captainId != 0
-                  ? provider.getPlayerById(team.captainId)
-                  : null;
-              return GestureDetector(
-                onTap: () => _navigateToMyTeams(context),
-                child: Container(
-                  width: 130,
-                  margin: const EdgeInsets.only(right: 10),
-                  padding: const EdgeInsets.all(12),
-                  decoration: AppTheme.gradientCard(),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(team.name,
-                          style: const TextStyle(
-                              color: AppColors.textPrimary,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis),
-                      Text(team.formation,
-                          style: const TextStyle(
-                              color: AppColors.textSecondary, fontSize: 10)),
-                      if (captain != null)
-                        Row(
-                          children: [
-                            const CircleAvatar(
-                              radius: 8,
-                              backgroundColor: AppColors.warning,
-                              child: Text('C',
-                                  style: TextStyle(
-                                      fontSize: 8,
-                                      fontWeight: FontWeight.w900,
-                                      color: AppColors.secondary)),
-                            ),
-                            const SizedBox(width: 4),
-                            Expanded(
-                              child: Text(captain.webName,
-                                  style: const TextStyle(
-                                      color: AppColors.warning,
-                                      fontSize: 10),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis),
-                            ),
-                          ],
-                        ),
-                      Text(formatPrice(totalCost),
-                          style: const TextStyle(
-                              color: AppColors.primary,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600)),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildBestTeamHero(BuildContext context) {
-    if (provider.players.isEmpty) return const SizedBox.shrink();
-    final bestTeam = provider.getBestTeam();
-    final starting = bestTeam['starting'] ?? <Player>[];
-    final gks = starting.where((p) => p.elementType == 1).toList();
-    final defs = starting.where((p) => p.elementType == 2).toList();
-    final mids = starting.where((p) => p.elementType == 3).toList();
-    final fwds = starting.where((p) => p.elementType == 4).toList();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            _buildSectionTitle(context, "This Week's Best XI"),
-            const Spacer(),
-            GestureDetector(
-              onTap: () => _navigateToAiPicks(context),
-              child: const Text('AI Picks →',
-                  style: TextStyle(
-                      color: AppColors.primary,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600)),
-            ),
-          ],
-        ),
-        const SizedBox(height: 10),
-        Container(
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Color(0xFF1a4a1a), Color(0xFF0d2d0d)],
-            ),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.primary.withAlpha(51)),
-          ),
-          child: Column(
-            children: [
-              const SizedBox(height: 10),
-              _miniPitchRow(context, fwds, PositionConstants.positionColors[4]!),
-              const SizedBox(height: 6),
-              _miniPitchRow(context, mids, PositionConstants.positionColors[3]!),
-              const SizedBox(height: 6),
-              _miniPitchRow(context, defs, PositionConstants.positionColors[2]!),
-              const SizedBox(height: 6),
-              _miniPitchRow(context, gks, PositionConstants.positionColors[1]!),
-              const SizedBox(height: 10),
-            ],
-          ),
-        ),
-        const SizedBox(height: 8),
-        Center(
-          child: GestureDetector(
-            onTap: () => _navigateToMyTeams(context),
-            child: Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withAlpha(26),
-                borderRadius: BorderRadius.circular(20),
-                border:
-                    Border.all(color: AppColors.primary.withAlpha(102)),
-              ),
-              child: const Text('Create Your Own Team →',
-                  style: TextStyle(
-                      color: AppColors.primary,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600)),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _miniPitchRow(
-      BuildContext context, List<Player> players, Color posColor) {
-    if (players.isEmpty) return const SizedBox.shrink();
-    return LayoutBuilder(builder: (context, constraints) {
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: players.map((p) {
-          return SizedBox(
-            width: (constraints.maxWidth / players.length).clamp(44.0, 68.0),
-            child: GestureDetector(
-              onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => PlayerDetailScreen(player: p))),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 38,
-                    height: 38,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppColors.cardDark,
-                      border: Border.all(color: posColor, width: 1.5),
-                    ),
-                    clipBehavior: Clip.antiAlias,
-                    child: CachedNetworkImage(
-                      imageUrl: p.photoUrl,
-                      fit: BoxFit.cover,
-                      placeholder: (_, __) => const Icon(Icons.person,
-                          color: AppColors.textSecondary, size: 18),
-                      errorWidget: (_, __, ___) => const Icon(Icons.person,
-                          color: AppColors.textSecondary, size: 18),
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    p.webName.length > 7
-                        ? p.webName.substring(0, p.webName.length.clamp(0, 6))
-                        : p.webName,
-                    style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 8,
-                        fontWeight: FontWeight.w600),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            ),
-          );
-        }).toList(),
-      );
-    });
-  }
-
-  Widget _buildAiPicksBanner(BuildContext context) {
-    return GestureDetector(
-      onTap: () => _navigateToAiPicks(context),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
-            colors: [
-              AppColors.primary.withAlpha(22),
-              AppColors.accent.withAlpha(16),
-            ],
-          ),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppColors.primary.withAlpha(70)),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withAlpha(28),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(Icons.auto_awesome_rounded,
-                  color: AppColors.primary, size: 20),
-            ),
-            const SizedBox(width: 14),
-            const Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'AI Smart Picks',
-                    style: TextStyle(
-                        color: AppColors.textPrimary,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700),
-                  ),
-                  SizedBox(height: 3),
-                  Text(
-                    'Best XI · Wildcard · Free Hit · Triple Cap · Bench Boost',
-                    style: TextStyle(color: AppColors.textSecondary, fontSize: 11),
-                  ),
-                ],
-              ),
-            ),
-            const Icon(Icons.chevron_right_rounded,
-                color: AppColors.primary, size: 20),
-          ],
-        ),
-      ),
-    );
-  }
-
   void _navigateToMyTeams(BuildContext context) {
-    // Navigate to My Teams tab (index 2) via the parent scaffold
-    // We use a simple page navigation as fallback
     Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => const _MyTeamsWrapper()),
@@ -595,6 +292,280 @@ class _DashboardContent extends StatelessWidget {
         ],
       ),
     ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.08, end: 0);
+  }
+
+  // ── Sparklines ────────────────────────────────────────────────────────────
+
+  Widget _buildSparklines(BuildContext context) {
+    final finishedGws = provider.gameweeks
+        .where((gw) => gw.finished && gw.averageEntryScore != null)
+        .toList();
+
+    if (finishedGws.isEmpty) return const SizedBox.shrink();
+
+    final avgScores = finishedGws
+        .map((gw) => gw.averageEntryScore!.toDouble())
+        .toList();
+    final highScores = finishedGws
+        .where((gw) => gw.highestScore != null)
+        .map((gw) => gw.highestScore!.toDouble())
+        .toList();
+    final transfers = finishedGws
+        .map((gw) => gw.transfersMade.toDouble())
+        .toList();
+
+    // Top form players — current PPG trend (top 5 players' PPG as a mini bar)
+    final topByForm = provider.getTopScorersByForm(limit: 5);
+    final formValues = topByForm.map((p) => p.formValue).toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionTitle(context, 'Season Trends'),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: _buildSparkCard(
+                'GW Avg Score',
+                avgScores.isEmpty ? '–' : '${avgScores.last.toInt()} pts',
+                avgScores,
+                AppColors.primary,
+                Icons.show_chart_rounded,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _buildSparkCard(
+                'GW High Score',
+                highScores.isEmpty ? '–' : '${highScores.last.toInt()} pts',
+                highScores,
+                AppColors.warning,
+                Icons.emoji_events_rounded,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            Expanded(
+              child: _buildSparkCard(
+                'Transfers / GW',
+                transfers.isEmpty
+                    ? '–'
+                    : '${(transfers.last / 1000).toStringAsFixed(0)}k',
+                transfers,
+                AppColors.accent,
+                Icons.swap_horiz_rounded,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _buildSparkCard(
+                'Top Form (live)',
+                formValues.isEmpty
+                    ? '–'
+                    : formValues.first.toStringAsFixed(1),
+                formValues,
+                const Color(0xFF34D399),
+                Icons.trending_up_rounded,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSparkCard(
+    String title,
+    String value,
+    List<double> data,
+    Color color,
+    IconData icon,
+  ) {
+    final hasData = data.length >= 2;
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: AppTheme.gradientCard(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: color, size: 14),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                      color: AppColors.textSecondary, fontSize: 10),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            value,
+            style: TextStyle(
+              color: color,
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.5,
+            ),
+          ),
+          const SizedBox(height: 8),
+          if (hasData)
+            SizedBox(
+              height: 40,
+              child: _buildSparkline(data, color),
+            )
+          else
+            const SizedBox(height: 40),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSparkline(List<double> data, Color color) {
+    final maxVal = data.reduce((a, b) => a > b ? a : b);
+    final minVal = data.reduce((a, b) => a < b ? a : b);
+    final range = (maxVal - minVal).abs();
+    final effectiveRange = range < 0.001 ? 1.0 : range;
+
+    final spots = data.asMap().entries.map((e) {
+      final norm = (e.value - minVal) / effectiveRange;
+      return FlSpot(e.key.toDouble(), norm);
+    }).toList();
+
+    return LineChart(
+      LineChartData(
+        lineBarsData: [
+          LineChartBarData(
+            spots: spots,
+            isCurved: true,
+            color: color,
+            barWidth: 2,
+            dotData: const FlDotData(show: false),
+            belowBarData: BarAreaData(
+              show: true,
+              color: color.withAlpha(40),
+            ),
+          ),
+        ],
+        titlesData: const FlTitlesData(
+          leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          bottomTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        ),
+        gridData: const FlGridData(show: false),
+        borderData: FlBorderData(show: false),
+        lineTouchData: const LineTouchData(enabled: false),
+        minY: -0.05,
+        maxY: 1.05,
+      ),
+    );
+  }
+
+  // ── Quick Access: My Teams & AI Picks ─────────────────────────────────────
+
+  Widget _buildQuickAccess(BuildContext context, UserTeamsProvider teamsProvider) {
+    return Row(
+      children: [
+        Expanded(
+          child: _buildQuickAccessTile(
+            context,
+            icon: Icons.shield_rounded,
+            iconColor: AppColors.accent,
+            title: 'My Teams',
+            subtitle: teamsProvider.hasTeams
+                ? '${teamsProvider.teams.length} team${teamsProvider.teams.length == 1 ? '' : 's'}'
+                : 'Build your squad',
+            onTap: () => _navigateToMyTeams(context),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _buildQuickAccessTile(
+            context,
+            icon: Icons.auto_awesome_rounded,
+            iconColor: AppColors.primary,
+            title: 'AI Picks',
+            subtitle: 'Smart team selection',
+            onTap: () => _navigateToAiPicks(context),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildQuickAccessTile(
+    BuildContext context, {
+    required IconData icon,
+    required Color iconColor,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              iconColor.withAlpha(18),
+              AppColors.cardDark,
+            ],
+          ),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: iconColor.withAlpha(60)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: iconColor.withAlpha(30),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, color: iconColor, size: 18),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                        color: AppColors.textSecondary, fontSize: 10),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right_rounded,
+                color: iconColor.withAlpha(160), size: 16),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildSectionTitle(BuildContext context, String title) {

@@ -577,7 +577,7 @@ class _StatItem {
   const _StatItem(this.label, this.value, this.icon, this.color);
 }
 
-class _HistoryTab extends StatelessWidget {
+class _HistoryTab extends StatefulWidget {
   final Player player;
   final PlayerSummary? summary;
   final FplProvider provider;
@@ -585,22 +585,92 @@ class _HistoryTab extends StatelessWidget {
   const _HistoryTab({required this.player, this.summary, required this.provider});
 
   @override
+  State<_HistoryTab> createState() => _HistoryTabState();
+}
+
+class _HistoryTabState extends State<_HistoryTab>
+    with SingleTickerProviderStateMixin {
+  int _gwRange = 10; // 5, 10, 15, 20, 25, 30
+  int _metricIndex = 0; // 0=Points, 1=Minutes, 2=Goals+Assists, 3=BPS, 4=ICT
+  late TabController _metricTabController;
+
+  static const _ranges = [5, 10, 15, 20, 25, 30];
+  static const _metricLabels = [
+    'Points',
+    'Minutes',
+    'G+A',
+    'BPS',
+    'ICT',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _metricTabController =
+        TabController(length: _metricLabels.length, vsync: this)
+          ..addListener(() {
+            if (!_metricTabController.indexIsChanging) {
+              setState(() => _metricIndex = _metricTabController.index);
+            }
+          });
+  }
+
+  @override
+  void dispose() {
+    _metricTabController.dispose();
+    super.dispose();
+  }
+
+  List<double> _getValues(List<PlayerHistory> history) {
+    return history.map((h) {
+      switch (_metricIndex) {
+        case 0:
+          return h.totalPoints.toDouble();
+        case 1:
+          return h.minutes.toDouble();
+        case 2:
+          return (h.goalsScored + h.assists).toDouble();
+        case 3:
+          return h.bps.toDouble();
+        case 4:
+          return double.tryParse(h.ictIndex) ?? 0.0;
+        default:
+          return h.totalPoints.toDouble();
+      }
+    }).toList();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (summary == null) {
-      return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+    if (widget.summary == null) {
+      return const Center(
+          child: CircularProgressIndicator(color: AppColors.primary));
     }
-    if (summary!.history.isEmpty) {
-      return const Center(child: Text('No history available', style: TextStyle(color: AppColors.textSecondary)));
+    if (widget.summary!.history.isEmpty) {
+      return const Center(
+          child: Text('No history available',
+              style: TextStyle(color: AppColors.textSecondary)));
     }
 
-    final last10 = summary!.history.reversed.take(10).toList().reversed.toList();
+    final allHistory = widget.summary!.history;
+    final rangedHistory = allHistory.reversed
+        .take(_gwRange)
+        .toList()
+        .reversed
+        .toList();
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildPointsChart(last10),
+          _buildPlayerHeader(),
+          const SizedBox(height: 16),
+          _buildRangeSelector(),
+          const SizedBox(height: 12),
+          _buildMetricTabs(),
+          const SizedBox(height: 12),
+          _buildLineChart(rangedHistory),
           const SizedBox(height: 20),
           _buildHistoryTable(),
         ],
@@ -608,75 +678,304 @@ class _HistoryTab extends StatelessWidget {
     );
   }
 
-  Widget _buildPointsChart(List<PlayerHistory> history) {
+  Widget _buildPlayerHeader() {
+    final posColor = getPositionColor(widget.player.elementType);
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: AppTheme.gradientCard(),
+      child: Row(
+        children: [
+          Container(
+            width: 52,
+            height: 52,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppColors.cardMedium,
+              border: Border.all(color: posColor, width: 2),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: CachedNetworkImage(
+              imageUrl: widget.player.photoUrl,
+              fit: BoxFit.cover,
+              placeholder: (_, __) => const Icon(Icons.person,
+                  color: AppColors.textSecondary, size: 26),
+              errorWidget: (_, __, ___) => const Icon(Icons.person,
+                  color: AppColors.textSecondary, size: 26),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.player.webName,
+                  style: const TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                Text(
+                  '${widget.player.firstName} ${widget.player.secondName}',
+                  style: const TextStyle(
+                      color: AppColors.textSecondary, fontSize: 12),
+                ),
+              ],
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                '${widget.player.totalPoints}',
+                style: const TextStyle(
+                  color: AppColors.primary,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const Text(
+                'total pts',
+                style:
+                    TextStyle(color: AppColors.textSecondary, fontSize: 10),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRangeSelector() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Gameweek Range',
+          style: TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 11,
+              fontWeight: FontWeight.w600),
+        ),
+        const SizedBox(height: 8),
+        SizedBox(
+          height: 34,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            children: _ranges.map((r) {
+              final isSelected = _gwRange == r;
+              final maxAvail = widget.summary?.history.length ?? 0;
+              final isAvail = maxAvail >= r;
+              return GestureDetector(
+                onTap: isAvail
+                    ? () => setState(() => _gwRange = r)
+                    : null,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 180),
+                  margin: const EdgeInsets.only(right: 8),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 14, vertical: 7),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? AppColors.primary.withAlpha(30)
+                        : isAvail
+                            ? AppColors.cardMedium
+                            : AppColors.cardMedium.withAlpha(80),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: isSelected
+                          ? AppColors.primary
+                          : Colors.transparent,
+                    ),
+                  ),
+                  child: Text(
+                    'Last $r',
+                    style: TextStyle(
+                      color: isSelected
+                          ? AppColors.primary
+                          : isAvail
+                              ? AppColors.textSecondary
+                              : AppColors.textSecondary.withAlpha(100),
+                      fontSize: 11,
+                      fontWeight: isSelected
+                          ? FontWeight.w700
+                          : FontWeight.w400,
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMetricTabs() {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.cardMedium,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: TabBar(
+        controller: _metricTabController,
+        isScrollable: true,
+        padding: const EdgeInsets.all(4),
+        indicator: BoxDecoration(
+          color: AppColors.primary.withAlpha(30),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: AppColors.primary.withAlpha(80)),
+        ),
+        labelColor: AppColors.primary,
+        unselectedLabelColor: AppColors.textSecondary,
+        labelStyle:
+            const TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
+        unselectedLabelStyle: const TextStyle(fontSize: 11),
+        dividerColor: Colors.transparent,
+        tabs: _metricLabels
+            .map((l) => Tab(text: l, height: 30))
+            .toList(),
+      ),
+    );
+  }
+
+  Widget _buildLineChart(List<PlayerHistory> history) {
     if (history.isEmpty) return const SizedBox.shrink();
+
+    final values = _getValues(history);
+    final maxVal =
+        values.isEmpty ? 1.0 : values.reduce((a, b) => a > b ? a : b);
+    final metricColor = _metricColors[_metricIndex];
+    final metricLabel = _metricLabels[_metricIndex];
+
+    final spots = values.asMap().entries.map((e) {
+      return FlSpot(e.key.toDouble(), e.value);
+    }).toList();
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: AppTheme.gradientCard(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Points History (Last 10 GW)', style: TextStyle(color: AppColors.textPrimary, fontSize: 14, fontWeight: FontWeight.w600)),
+          Row(
+            children: [
+              Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: metricColor,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Text(
+                '$metricLabel (Last $_gwRange GW)',
+                style: const TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 16),
           SizedBox(
-            height: 160,
-            child: BarChart(
-              BarChartData(
-                alignment: BarChartAlignment.spaceAround,
-                maxY: (history.map((h) => h.totalPoints).reduce((a, b) => a > b ? a : b) + 4).toDouble(),
-                barGroups: history.asMap().entries.map((entry) {
-                  final pts = entry.value.totalPoints.toDouble();
-                  return BarChartGroupData(
-                    x: entry.key,
-                    barRods: [
-                      BarChartRodData(
-                        toY: pts,
-                        gradient: LinearGradient(
-                          begin: Alignment.bottomCenter,
-                          end: Alignment.topCenter,
-                          colors: [
-                            AppColors.primary.withAlpha(153),
-                            AppColors.primary,
-                          ],
-                        ),
-                        width: 18,
-                        borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+            height: 180,
+            child: LineChart(
+              LineChartData(
+                lineBarsData: [
+                  LineChartBarData(
+                    spots: spots,
+                    isCurved: true,
+                    curveSmoothness: 0.35,
+                    color: metricColor,
+                    barWidth: 2.5,
+                    dotData: FlDotData(
+                      show: true,
+                      getDotPainter: (spot, __, ___, ____) =>
+                          FlDotCirclePainter(
+                        radius: 3.5,
+                        color: metricColor,
+                        strokeWidth: 1.5,
+                        strokeColor: AppColors.cardDark,
                       ),
-                    ],
-                  );
-                }).toList(),
+                    ),
+                    belowBarData: BarAreaData(
+                      show: true,
+                      color: metricColor.withAlpha(40),
+                    ),
+                  ),
+                ],
                 titlesData: FlTitlesData(
                   leftTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
-                      reservedSize: 28,
+                      reservedSize: 32,
                       getTitlesWidget: (v, _) => Text(
-                        v.toInt().toString(),
-                        style: const TextStyle(color: AppColors.textSecondary, fontSize: 10),
+                        v.toStringAsFixed(
+                            _metricIndex == 4 ? 1 : 0),
+                        style: const TextStyle(
+                            color: AppColors.textSecondary,
+                            fontSize: 9),
                       ),
                     ),
                   ),
                   bottomTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
-                      getTitlesWidget: (v, _) => Padding(
-                        padding: const EdgeInsets.only(top: 4),
-                        child: Text(
-                          'GW${history[v.toInt()].round}',
-                          style: const TextStyle(color: AppColors.textSecondary, fontSize: 9),
-                        ),
-                      ),
+                      getTitlesWidget: (v, _) {
+                        final idx = v.toInt();
+                        if (idx < 0 || idx >= history.length) {
+                          return const SizedBox.shrink();
+                        }
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Text(
+                            'GW${history[idx].round}',
+                            style: const TextStyle(
+                                color: AppColors.textSecondary,
+                                fontSize: 8),
+                          ),
+                        );
+                      },
                     ),
                   ),
-                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  topTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false)),
+                  rightTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false)),
                 ),
                 gridData: FlGridData(
-                  show: true,
                   drawVerticalLine: false,
-                  getDrawingHorizontalLine: (_) => const FlLine(color: AppColors.divider, strokeWidth: 0.5),
+                  getDrawingHorizontalLine: (_) => const FlLine(
+                      color: AppColors.divider, strokeWidth: 0.5),
                 ),
                 borderData: FlBorderData(show: false),
+                minY: 0,
+                maxY: maxVal * 1.25 < 1 ? 2 : maxVal * 1.25,
+                lineTouchData: LineTouchData(
+                  touchTooltipData: LineTouchTooltipData(
+                    getTooltipColor: (_) => AppColors.cardDark,
+                    getTooltipItems: (spots) {
+                      return spots.map((s) {
+                        final idx = s.x.toInt();
+                        final gwNum = idx < history.length
+                            ? history[idx].round
+                            : '?';
+                        return LineTooltipItem(
+                          'GW$gwNum\n${s.y.toStringAsFixed(_metricIndex == 4 ? 1 : 0)} $metricLabel',
+                          TextStyle(
+                            color: metricColor,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        );
+                      }).toList();
+                    },
+                  ),
+                ),
               ),
             ),
           ),
@@ -684,6 +983,14 @@ class _HistoryTab extends StatelessWidget {
       ),
     );
   }
+
+  static const _metricColors = [
+    AppColors.primary,
+    AppColors.accent,
+    Color(0xFF34D399),
+    AppColors.warning,
+    Color(0xFFB388FF),
+  ];
 
   Widget _buildHistoryTable() {
     return Container(
@@ -706,7 +1013,7 @@ class _HistoryTab extends StatelessWidget {
               ],
             ),
           ),
-          ...summary!.history.reversed.take(20).map((h) => Container(
+          ...widget.summary!.history.reversed.take(20).map((h) => Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: const BoxDecoration(
                   border: Border(bottom: BorderSide(color: AppColors.divider, width: 0.5)),
@@ -753,7 +1060,7 @@ class _HistoryTab extends StatelessWidget {
   }
 
   Widget _buildOpponentCell(PlayerHistory h) {
-    final opp = provider.getTeamById(h.opponentTeam);
+    final opp = widget.provider.getTeamById(h.opponentTeam);
     return Row(
       children: [
         Text(
