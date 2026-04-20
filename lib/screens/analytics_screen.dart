@@ -234,21 +234,12 @@ class _FormChartTabState extends State<_FormChartTab> {
                         if (idx < 0 || idx >= players.length) {
                           return const SizedBox.shrink();
                         }
+                        final lastName =
+                            players[idx].webName.split(' ').last;
                         return Padding(
                           padding: const EdgeInsets.only(top: 4),
                           child: Text(
-                            players[idx]
-                                .webName
-                                .split(' ')
-                                .last
-                                .substring(
-                                    0,
-                                    players[idx]
-                                        .webName
-                                        .split(' ')
-                                        .last
-                                        .length
-                                        .clamp(0, 7)),
+                            lastName.substring(0, lastName.length.clamp(0, 7)),
                             style: const TextStyle(
                                 color: AppColors.textSecondary, fontSize: 8),
                           ),
@@ -679,9 +670,9 @@ class _HeatMapTab extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: const Text(
+                      const Padding(
+                        padding: EdgeInsets.only(bottom: 8),
+                        child: Text(
                           'Fixture Difficulty Heat Map (next 8 GWs)',
                           style: TextStyle(
                             color: AppColors.textPrimary,
