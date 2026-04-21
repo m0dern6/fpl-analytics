@@ -4,9 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../providers/fpl_provider.dart';
-import '../providers/user_teams_provider.dart';
 import '../models/player.dart';
-import '../models/gameweek.dart';
 import '../models/fixture.dart';
 import '../utils/app_theme.dart';
 import '../utils/constants.dart';
@@ -15,8 +13,9 @@ import '../widgets/stat_card.dart';
 import '../widgets/loading_widget.dart';
 import '../widgets/difficulty_badge.dart';
 import 'player_detail_screen.dart';
-import 'my_teams_screen.dart';
-import 'ai_picks_screen.dart';
+import 'gameweek_detail_screen.dart';
+import 'fixture_detail_screen.dart';
+import 'season_trend_detail_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -160,9 +159,7 @@ class _DashboardContent extends StatelessWidget {
             .first
         : null;
 
-    return Consumer<UserTeamsProvider>(
-      builder: (context, teamsProvider, _) {
-        return CustomScrollView(
+    return CustomScrollView(
           slivers: [
             SliverPadding(
               padding: const EdgeInsets.all(16),
@@ -171,8 +168,6 @@ class _DashboardContent extends StatelessWidget {
                   _buildCurrentGwBanner(context),
                   const SizedBox(height: 16),
                   _buildSparklines(context),
-                  const SizedBox(height: 16),
-                  _buildQuickAccess(context, teamsProvider),
                   const SizedBox(height: 16),
                   _buildSectionTitle(context, 'Highlights'),
                   const SizedBox(height: 12),
@@ -195,28 +190,19 @@ class _DashboardContent extends StatelessWidget {
             ),
           ],
         );
-      },
-    );
-  }
-
-  void _navigateToMyTeams(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const _MyTeamsWrapper()),
-    );
-  }
-
-  void _navigateToAiPicks(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const _AiPicksWrapper()),
-    );
   }
 
   Widget _buildCurrentGwBanner(BuildContext context) {
     final gw = provider.currentGameweek;
     if (gw == null) return const SizedBox.shrink();
-    return Container(
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => GameweekDetailScreen(gw: gw, provider: provider),
+        ),
+      ),
+      child: Container(
       padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
@@ -289,7 +275,10 @@ class _DashboardContent extends StatelessWidget {
                 ),
               ],
             ),
+          const SizedBox(width: 6),
+          const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary, size: 16),
         ],
+      ),
       ),
     ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.08, end: 0);
   }
@@ -327,21 +316,35 @@ class _DashboardContent extends StatelessWidget {
           children: [
             Expanded(
               child: _buildSparkCard(
+                context,
                 'GW Avg Score',
                 avgScores.isEmpty ? '–' : '${avgScores.last.toInt()} pts',
                 avgScores,
                 AppColors.primary,
                 Icons.show_chart_rounded,
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => SeasonTrendScreenFactory.avgScore(finishedGws),
+                  ),
+                ),
               ),
             ),
             const SizedBox(width: 10),
             Expanded(
               child: _buildSparkCard(
+                context,
                 'GW High Score',
                 highScores.isEmpty ? '–' : '${highScores.last.toInt()} pts',
                 highScores,
                 AppColors.warning,
                 Icons.emoji_events_rounded,
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => SeasonTrendScreenFactory.highScore(finishedGws),
+                  ),
+                ),
               ),
             ),
           ],
@@ -351,6 +354,7 @@ class _DashboardContent extends StatelessWidget {
           children: [
             Expanded(
               child: _buildSparkCard(
+                context,
                 'Transfers / GW',
                 transfers.isEmpty
                     ? '–'
@@ -358,11 +362,18 @@ class _DashboardContent extends StatelessWidget {
                 transfers,
                 AppColors.accent,
                 Icons.swap_horiz_rounded,
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => SeasonTrendScreenFactory.transfers(finishedGws),
+                  ),
+                ),
               ),
             ),
             const SizedBox(width: 10),
             Expanded(
               child: _buildSparkCard(
+                context,
                 'Top Form (live)',
                 formValues.isEmpty
                     ? '–'
@@ -379,14 +390,18 @@ class _DashboardContent extends StatelessWidget {
   }
 
   Widget _buildSparkCard(
+    BuildContext context,
     String title,
     String value,
     List<double> data,
     Color color,
-    IconData icon,
-  ) {
+    IconData icon, {
+    VoidCallback? onTap,
+  }) {
     final hasData = data.length >= 2;
-    return Container(
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
       padding: const EdgeInsets.all(12),
       decoration: AppTheme.gradientCard(),
       child: Column(
@@ -426,6 +441,7 @@ class _DashboardContent extends StatelessWidget {
           else
             const SizedBox(height: 40),
         ],
+      ),
       ),
     );
   }
@@ -471,102 +487,7 @@ class _DashboardContent extends StatelessWidget {
     );
   }
 
-  // ── Quick Access: My Teams & AI Picks ─────────────────────────────────────
 
-  Widget _buildQuickAccess(BuildContext context, UserTeamsProvider teamsProvider) {
-    return Row(
-      children: [
-        Expanded(
-          child: _buildQuickAccessTile(
-            context,
-            icon: Icons.shield_rounded,
-            iconColor: AppColors.accent,
-            title: 'My Teams',
-            subtitle: teamsProvider.hasTeams
-                ? '${teamsProvider.teams.length} team${teamsProvider.teams.length == 1 ? '' : 's'}'
-                : 'Build your squad',
-            onTap: () => _navigateToMyTeams(context),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _buildQuickAccessTile(
-            context,
-            icon: Icons.auto_awesome_rounded,
-            iconColor: AppColors.primary,
-            title: 'AI Picks',
-            subtitle: 'Smart team selection',
-            onTap: () => _navigateToAiPicks(context),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildQuickAccessTile(
-    BuildContext context, {
-    required IconData icon,
-    required Color iconColor,
-    required String title,
-    required String subtitle,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              iconColor.withAlpha(18),
-              AppColors.cardDark,
-            ],
-          ),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: iconColor.withAlpha(60)),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: iconColor.withAlpha(30),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(icon, color: iconColor, size: 18),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      color: AppColors.textPrimary,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  Text(
-                    subtitle,
-                    style: const TextStyle(
-                        color: AppColors.textSecondary, fontSize: 10),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
-            Icon(Icons.chevron_right_rounded,
-                color: iconColor.withAlpha(160), size: 16),
-          ],
-        ),
-      ),
-    );
-  }
 
   Widget _buildSectionTitle(BuildContext context, String title) {
     return AppTheme.sectionTitle(context, title);
@@ -593,6 +514,7 @@ class _DashboardContent extends StatelessWidget {
           subtitle: '${topScorer?.totalPoints ?? 0} pts',
           icon: Icons.star_rounded,
           valueColor: AppColors.primary,
+          imageUrl: topScorer?.photoUrl,
         ).animate().fadeIn(delay: 100.ms),
         StatCard(
           title: 'Top Assists',
@@ -600,6 +522,7 @@ class _DashboardContent extends StatelessWidget {
           subtitle: '${topAssist?.assists ?? 0} assists',
           icon: Icons.sports_soccer_rounded,
           valueColor: AppColors.accent,
+          imageUrl: topAssist?.photoUrl,
         ).animate().fadeIn(delay: 200.ms),
         StatCard(
           title: 'Most Owned',
@@ -607,6 +530,7 @@ class _DashboardContent extends StatelessWidget {
           subtitle: formatPercent(topSelected?.selectedByPercent),
           icon: Icons.people_rounded,
           valueColor: const Color(0xFFA78BFA),
+          imageUrl: topSelected?.photoUrl,
         ).animate().fadeIn(delay: 300.ms),
         StatCard(
           title: 'Best Value',
@@ -614,6 +538,7 @@ class _DashboardContent extends StatelessWidget {
           subtitle: formatPrice(topValue?.nowCost ?? 0),
           icon: Icons.trending_up_rounded,
           valueColor: const Color(0xFF34D399),
+          imageUrl: topValue?.photoUrl,
         ).animate().fadeIn(delay: 400.ms),
       ],
     );
@@ -849,7 +774,18 @@ class _DashboardContent extends StatelessWidget {
     final home = provider.getTeamById(fixture.homeTeamId);
     final away = provider.getTeamById(fixture.awayTeamId);
 
-    return Container(
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => FixtureDetailScreen(
+            fixture: fixture,
+            homeTeam: home,
+            awayTeam: away,
+          ),
+        ),
+      ),
+      child: Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
       decoration: AppTheme.gradientCard(),
@@ -930,6 +866,7 @@ class _DashboardContent extends StatelessWidget {
           ),
         ],
       ),
+      ),
     );
   }
 }
@@ -960,20 +897,4 @@ class _DashboardSkeleton extends StatelessWidget {
       ],
     );
   }
-}
-
-/// Thin wrapper so Dashboard can push to My Teams as a full-screen route.
-class _MyTeamsWrapper extends StatelessWidget {
-  const _MyTeamsWrapper();
-
-  @override
-  Widget build(BuildContext context) => const MyTeamsScreen();
-}
-
-/// Thin wrapper so Dashboard can push to AI Picks as a full-screen route.
-class _AiPicksWrapper extends StatelessWidget {
-  const _AiPicksWrapper();
-
-  @override
-  Widget build(BuildContext context) => const AiPicksScreen();
 }

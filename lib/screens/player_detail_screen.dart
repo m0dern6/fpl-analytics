@@ -24,11 +24,26 @@ class PlayerDetailScreen extends StatefulWidget {
 class _PlayerDetailScreenState extends State<PlayerDetailScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  final _scrollControllers = [
+    ScrollController(),
+    ScrollController(),
+    ScrollController(),
+  ];
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _tabController.addListener(() {
+      if (!_tabController.indexIsChanging) {
+        final idx = _tabController.index;
+        for (int i = 0; i < _scrollControllers.length; i++) {
+          if (i == idx && _scrollControllers[i].hasClients) {
+            _scrollControllers[i].jumpTo(0);
+          }
+        }
+      }
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<FplProvider>().loadPlayerSummary(widget.player.id);
     });
@@ -37,6 +52,9 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen>
   @override
   void dispose() {
     _tabController.dispose();
+    for (final c in _scrollControllers) {
+      c.dispose();
+    }
     super.dispose();
   }
 
@@ -70,9 +88,24 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen>
             return TabBarView(
               controller: _tabController,
               children: [
-                _OverviewTab(player: widget.player, team: team, summary: summary),
-                _HistoryTab(player: widget.player, summary: summary, provider: provider),
-                _FixturesTab(player: widget.player, summary: summary, provider: provider),
+                _OverviewTab(
+                  player: widget.player,
+                  team: team,
+                  summary: summary,
+                  scrollController: _scrollControllers[0],
+                ),
+                _HistoryTab(
+                  player: widget.player,
+                  summary: summary,
+                  provider: provider,
+                  scrollController: _scrollControllers[1],
+                ),
+                _FixturesTab(
+                  player: widget.player,
+                  summary: summary,
+                  provider: provider,
+                  scrollController: _scrollControllers[2],
+                ),
               ],
             );
           },
@@ -200,8 +233,14 @@ class _OverviewTab extends StatelessWidget {
   final Player player;
   final Team? team;
   final PlayerSummary? summary;
+  final ScrollController? scrollController;
 
-  const _OverviewTab({required this.player, this.team, this.summary});
+  const _OverviewTab({
+    required this.player,
+    this.team,
+    this.summary,
+    this.scrollController,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -209,7 +248,8 @@ class _OverviewTab extends StatelessWidget {
     final statusLabel = formatStatusLabel(player.status);
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      controller: scrollController,
+      padding: const EdgeInsets.fromLTRB(16, 26, 16, 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

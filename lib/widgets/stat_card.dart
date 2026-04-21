@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../utils/constants.dart';
 
 class StatCard extends StatelessWidget {
@@ -9,6 +10,7 @@ class StatCard extends StatelessWidget {
   final List<Color>? gradientColors;
   final VoidCallback? onTap;
   final Color? valueColor;
+  final String? imageUrl;
 
   const StatCard({
     super.key,
@@ -19,6 +21,7 @@ class StatCard extends StatelessWidget {
     this.gradientColors,
     this.onTap,
     this.valueColor,
+    this.imageUrl,
   });
 
   @override
@@ -48,7 +51,26 @@ class StatCard extends StatelessWidget {
                   ),
                   child: Icon(icon, color: accentColor, size: 16),
                 ),
-                if (onTap != null)
+                if (imageUrl != null)
+                  Container(
+                    width: 28,
+                    height: 28,
+                    clipBehavior: Clip.antiAlias,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppColors.cardMedium,
+                      border: Border.all(color: accentColor.withAlpha(80), width: 1.5),
+                    ),
+                    child: CachedNetworkImage(
+                      imageUrl: imageUrl!,
+                      fit: BoxFit.cover,
+                      placeholder: (_, __) => const Icon(Icons.person,
+                          color: AppColors.textSecondary, size: 14),
+                      errorWidget: (_, __, ___) => const Icon(Icons.person,
+                          color: AppColors.textSecondary, size: 14),
+                    ),
+                  )
+                else if (onTap != null)
                   Icon(Icons.chevron_right,
                       color: AppColors.textSecondary, size: 16),
               ],
