@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../providers/fpl_provider.dart';
 import '../models/player.dart';
 import '../utils/app_theme.dart';
@@ -205,7 +206,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
           _positionChip(4, 'FWD'),
           const SizedBox(width: 8),
           if (provider.teams.isNotEmpty)
-            PopupMenuButton<int?>(
+            PopupMenuButton<int>(
               color: AppColors.cardDark,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14)),
@@ -228,6 +229,17 @@ class _PlayersScreenState extends State<PlayersScreen> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                    if (_selectedTeam != null) ...[
+                      CachedNetworkImage(
+                        imageUrl: provider.getTeamById(_selectedTeam!)?.badgeUrl ?? '',
+                        width: 16,
+                        height: 16,
+                        fit: BoxFit.contain,
+                        placeholder: (_, __) => const SizedBox(width: 16, height: 16),
+                        errorWidget: (_, __, ___) => const SizedBox(width: 16, height: 16),
+                      ),
+                      const SizedBox(width: 4),
+                    ],
                     Text(
                       _selectedTeam != null
                           ? (provider.getTeamById(_selectedTeam!)?.shortName ??
@@ -252,10 +264,10 @@ class _PlayersScreenState extends State<PlayersScreen> {
                   ],
                 ),
               ),
-              onSelected: (id) => setState(() => _selectedTeam = id),
+              onSelected: (id) => setState(() => _selectedTeam = id == 0 ? null : id),
               itemBuilder: (_) => [
                 PopupMenuItem(
-                  value: null,
+                  value: 0,
                   child: Text('All Teams',
                       style: TextStyle(
                           color: _selectedTeam == null
@@ -265,11 +277,24 @@ class _PlayersScreenState extends State<PlayersScreen> {
                 ...provider.teams.map(
                   (t) => PopupMenuItem(
                     value: t.id,
-                    child: Text(t.name,
-                        style: TextStyle(
-                            color: _selectedTeam == t.id
-                                ? AppColors.primary
-                                : AppColors.textPrimary)),
+                    child: Row(
+                      children: [
+                        CachedNetworkImage(
+                          imageUrl: t.badgeUrl,
+                          width: 20,
+                          height: 20,
+                          fit: BoxFit.contain,
+                          placeholder: (_, __) => const SizedBox(width: 20, height: 20),
+                          errorWidget: (_, __, ___) => const SizedBox(width: 20, height: 20),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(t.name,
+                            style: TextStyle(
+                                color: _selectedTeam == t.id
+                                    ? AppColors.primary
+                                    : AppColors.textPrimary)),
+                      ],
+                    ),
                   ),
                 ),
               ],
