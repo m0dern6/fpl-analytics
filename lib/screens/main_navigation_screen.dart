@@ -6,6 +6,7 @@ import '../utils/constants.dart';
 import 'dashboard_screen.dart';
 import 'players_screen.dart';
 import 'analytics_screen.dart';
+import 'stats_leaders_screen.dart';
 import 'more_screen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
@@ -22,6 +23,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     DashboardScreen(),
     PlayersScreen(),
     AnalyticsScreen(),
+    StatsLeadersScreen(),
     MoreScreen(),
   ];
 
@@ -58,6 +60,7 @@ class _BottomNav extends StatelessWidget {
     _NavDest(Icons.home_rounded, Icons.home_outlined, 'Home'),
     _NavDest(Icons.people_rounded, Icons.people_outline_rounded, 'Players'),
     _NavDest(Icons.analytics_rounded, Icons.analytics_outlined, 'Analytics'),
+    _NavDest(Icons.leaderboard_rounded, Icons.leaderboard_outlined, 'Leaders'),
     _NavDest(Icons.apps_rounded, Icons.apps_outlined, 'Explore'),
   ];
 

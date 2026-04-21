@@ -3,9 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../providers/fpl_provider.dart';
 import '../models/player.dart';
-import '../utils/app_theme.dart';
 import '../utils/constants.dart';
-import '../utils/formatters.dart';
 import '../widgets/player_card.dart';
 import '../widgets/loading_widget.dart';
 import 'player_detail_screen.dart';
@@ -22,7 +20,7 @@ class PlayersScreen extends StatefulWidget {
 class _PlayersScreenState extends State<PlayersScreen> {
   final _searchController = TextEditingController();
   int _selectedPosition = 0; // 0 = all
-  int? _selectedTeam;
+  int _selectedTeam = 0; // 0 = all teams
   SortOption _sortOption = SortOption.points;
   bool _sortAscending = false;
   String _searchQuery = '';
@@ -35,9 +33,11 @@ class _PlayersScreenState extends State<PlayersScreen> {
 
   List<Player> _filteredAndSorted(List<Player> players) {
     var list = players.where((p) {
-      final matchesPos = _selectedPosition == 0 || p.elementType == _selectedPosition;
-      final matchesTeam = _selectedTeam == null || p.teamId == _selectedTeam;
-      final matchesSearch = _searchQuery.isEmpty ||
+      final matchesPos =
+          _selectedPosition == 0 || p.elementType == _selectedPosition;
+      final matchesTeam = _selectedTeam == 0 || p.teamId == _selectedTeam;
+      final matchesSearch =
+          _searchQuery.isEmpty ||
           p.webName.toLowerCase().contains(_searchQuery.toLowerCase()) ||
           p.firstName.toLowerCase().contains(_searchQuery.toLowerCase()) ||
           p.secondName.toLowerCase().contains(_searchQuery.toLowerCase());
@@ -49,18 +49,22 @@ class _PlayersScreenState extends State<PlayersScreen> {
       switch (_sortOption) {
         case SortOption.points:
           cmp = a.totalPoints.compareTo(b.totalPoints);
+          break;
         case SortOption.form:
           cmp = a.formValue.compareTo(b.formValue);
+          break;
         case SortOption.price:
           cmp = a.nowCost.compareTo(b.nowCost);
+          break;
         case SortOption.ict:
           cmp = a.ictValue.compareTo(b.ictValue);
+          break;
         case SortOption.selected:
           cmp = a.selectedPercent.compareTo(b.selectedPercent);
+          break;
         case SortOption.value:
           cmp = a.valueSeasonValue.compareTo(b.valueSeasonValue);
-        default:
-          cmp = 0;
+          break;
       }
       return _sortAscending ? cmp : -cmp;
     });
@@ -79,10 +83,14 @@ class _PlayersScreenState extends State<PlayersScreen> {
             backgroundColor: AppColors.secondary,
             actions: [
               PopupMenuButton<SortOption>(
-                icon: const Icon(Icons.sort_rounded, color: AppColors.textPrimary),
+                icon: const Icon(
+                  Icons.sort_rounded,
+                  color: AppColors.textPrimary,
+                ),
                 color: AppColors.cardDark,
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14)),
+                  borderRadius: BorderRadius.circular(14),
+                ),
                 onSelected: (opt) => setState(() {
                   if (_sortOption == opt) {
                     _sortAscending = !_sortAscending;
@@ -92,11 +100,27 @@ class _PlayersScreenState extends State<PlayersScreen> {
                   }
                 }),
                 itemBuilder: (_) => [
-                  _sortItem(SortOption.points, 'Total Points', Icons.star_rounded),
+                  _sortItem(
+                    SortOption.points,
+                    'Total Points',
+                    Icons.star_rounded,
+                  ),
                   _sortItem(SortOption.form, 'Form', Icons.trending_up_rounded),
-                  _sortItem(SortOption.price, 'Price', Icons.attach_money_rounded),
-                  _sortItem(SortOption.ict, 'ICT Index', Icons.analytics_rounded),
-                  _sortItem(SortOption.selected, 'Selected %', Icons.people_rounded),
+                  _sortItem(
+                    SortOption.price,
+                    'Price',
+                    Icons.attach_money_rounded,
+                  ),
+                  _sortItem(
+                    SortOption.ict,
+                    'ICT Index',
+                    Icons.analytics_rounded,
+                  ),
+                  _sortItem(
+                    SortOption.selected,
+                    'Selected %',
+                    Icons.people_rounded,
+                  ),
                   _sortItem(SortOption.value, 'Value', Icons.savings_rounded),
                 ],
               ),
@@ -116,11 +140,18 @@ class _PlayersScreenState extends State<PlayersScreen> {
                         child: filtered.isEmpty
                             ? _buildEmpty()
                             : ListView.builder(
-                                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                                padding: const EdgeInsets.fromLTRB(
+                                  16,
+                                  8,
+                                  16,
+                                  16,
+                                ),
                                 itemCount: filtered.length,
                                 itemBuilder: (ctx, i) {
                                   final player = filtered[i];
-                                  final team = provider.getTeamById(player.teamId);
+                                  final team = provider.getTeamById(
+                                    player.teamId,
+                                  );
                                   return Padding(
                                     padding: const EdgeInsets.only(bottom: 8),
                                     child: PlayerCard(
@@ -129,7 +160,9 @@ class _PlayersScreenState extends State<PlayersScreen> {
                                       onTap: () => Navigator.push(
                                         ctx,
                                         MaterialPageRoute(
-                                          builder: (_) => PlayerDetailScreen(player: player),
+                                          builder: (_) => PlayerDetailScreen(
+                                            player: player,
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -145,15 +178,28 @@ class _PlayersScreenState extends State<PlayersScreen> {
     );
   }
 
-  PopupMenuItem<SortOption> _sortItem(SortOption opt, String label, IconData icon) {
+  PopupMenuItem<SortOption> _sortItem(
+    SortOption opt,
+    String label,
+    IconData icon,
+  ) {
     final isSelected = _sortOption == opt;
     return PopupMenuItem(
       value: opt,
       child: Row(
         children: [
-          Icon(icon, color: isSelected ? AppColors.primary : AppColors.textSecondary, size: 18),
+          Icon(
+            icon,
+            color: isSelected ? AppColors.primary : AppColors.textSecondary,
+            size: 18,
+          ),
           const SizedBox(width: 8),
-          Text(label, style: TextStyle(color: isSelected ? AppColors.primary : AppColors.textPrimary)),
+          Text(
+            label,
+            style: TextStyle(
+              color: isSelected ? AppColors.primary : AppColors.textPrimary,
+            ),
+          ),
           if (isSelected) ...[
             const Spacer(),
             Icon(
@@ -179,8 +225,11 @@ class _PlayersScreenState extends State<PlayersScreen> {
           prefixIcon: const Icon(Icons.search_rounded, size: 20),
           suffixIcon: _searchQuery.isNotEmpty
               ? IconButton(
-                  icon: const Icon(Icons.close_rounded,
-                      color: AppColors.textSecondary, size: 18),
+                  icon: const Icon(
+                    Icons.close_rounded,
+                    color: AppColors.textSecondary,
+                    size: 18,
+                  ),
                   onPressed: () {
                     _searchController.clear();
                     setState(() => _searchQuery = '');
@@ -209,18 +258,21 @@ class _PlayersScreenState extends State<PlayersScreen> {
             PopupMenuButton<int>(
               color: AppColors.cardDark,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14)),
+                borderRadius: BorderRadius.circular(14),
+              ),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 180),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 7,
+                ),
                 decoration: BoxDecoration(
-                  color: _selectedTeam != null
+                  color: _selectedTeam != 0
                       ? AppColors.primary.withAlpha(28)
                       : AppColors.cardMedium,
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(
-                    color: _selectedTeam != null
+                    color: _selectedTeam != 0
                         ? AppColors.primary.withAlpha(160)
                         : Colors.transparent,
                     width: 1,
@@ -229,24 +281,27 @@ class _PlayersScreenState extends State<PlayersScreen> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    if (_selectedTeam != null) ...[
+                    if (_selectedTeam != 0) ...[
                       CachedNetworkImage(
-                        imageUrl: provider.getTeamById(_selectedTeam!)?.badgeUrl ?? '',
+                        imageUrl:
+                            provider.getTeamById(_selectedTeam)?.badgeUrl ?? '',
                         width: 16,
                         height: 16,
                         fit: BoxFit.contain,
-                        placeholder: (_, __) => const SizedBox(width: 16, height: 16),
-                        errorWidget: (_, __, ___) => const SizedBox(width: 16, height: 16),
+                        placeholder: (_, __) =>
+                            const SizedBox(width: 16, height: 16),
+                        errorWidget: (_, __, ___) =>
+                            const SizedBox(width: 16, height: 16),
                       ),
                       const SizedBox(width: 4),
                     ],
                     Text(
-                      _selectedTeam != null
-                          ? (provider.getTeamById(_selectedTeam!)?.shortName ??
-                              'Team')
+                      _selectedTeam != 0
+                          ? (provider.getTeamById(_selectedTeam)?.shortName ??
+                                'Team')
                           : 'Team',
                       style: TextStyle(
-                        color: _selectedTeam != null
+                        color: _selectedTeam != 0
                             ? AppColors.primary
                             : AppColors.textSecondary,
                         fontSize: 12,
@@ -256,7 +311,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
                     const SizedBox(width: 4),
                     Icon(
                       Icons.keyboard_arrow_down_rounded,
-                      color: _selectedTeam != null
+                      color: _selectedTeam != 0
                           ? AppColors.primary
                           : AppColors.textSecondary,
                       size: 14,
@@ -264,15 +319,18 @@ class _PlayersScreenState extends State<PlayersScreen> {
                   ],
                 ),
               ),
-              onSelected: (id) => setState(() => _selectedTeam = id == 0 ? null : id),
+              onSelected: (id) => setState(() => _selectedTeam = id),
               itemBuilder: (_) => [
                 PopupMenuItem(
                   value: 0,
-                  child: Text('All Teams',
-                      style: TextStyle(
-                          color: _selectedTeam == null
-                              ? AppColors.primary
-                              : AppColors.textPrimary)),
+                  child: Text(
+                    'All Teams',
+                    style: TextStyle(
+                      color: _selectedTeam == 0
+                          ? AppColors.primary
+                          : AppColors.textPrimary,
+                    ),
+                  ),
                 ),
                 ...provider.teams.map(
                   (t) => PopupMenuItem(
@@ -284,15 +342,20 @@ class _PlayersScreenState extends State<PlayersScreen> {
                           width: 20,
                           height: 20,
                           fit: BoxFit.contain,
-                          placeholder: (_, __) => const SizedBox(width: 20, height: 20),
-                          errorWidget: (_, __, ___) => const SizedBox(width: 20, height: 20),
+                          placeholder: (_, __) =>
+                              const SizedBox(width: 20, height: 20),
+                          errorWidget: (_, __, ___) =>
+                              const SizedBox(width: 20, height: 20),
                         ),
                         const SizedBox(width: 8),
-                        Text(t.name,
-                            style: TextStyle(
-                                color: _selectedTeam == t.id
-                                    ? AppColors.primary
-                                    : AppColors.textPrimary)),
+                        Text(
+                          t.name,
+                          style: TextStyle(
+                            color: _selectedTeam == t.id
+                                ? AppColors.primary
+                                : AppColors.textPrimary,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -342,7 +405,10 @@ class _PlayersScreenState extends State<PlayersScreen> {
         children: [
           Icon(Icons.search_off, color: AppColors.textSecondary, size: 48),
           SizedBox(height: 12),
-          Text('No players found', style: TextStyle(color: AppColors.textSecondary)),
+          Text(
+            'No players found',
+            style: TextStyle(color: AppColors.textSecondary),
+          ),
         ],
       ),
     );

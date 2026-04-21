@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import '../models/gameweek.dart';
 import '../utils/app_theme.dart';
 import '../utils/constants.dart';
 
@@ -27,9 +28,15 @@ class SeasonTrendDetailScreen extends StatelessWidget {
     if (dataPoints.isEmpty) {
       return Scaffold(
         backgroundColor: AppColors.background,
-        appBar: AppBar(title: Text(title), backgroundColor: AppColors.secondary),
+        appBar: AppBar(
+          title: Text(title),
+          backgroundColor: AppColors.secondary,
+        ),
         body: const Center(
-          child: Text('No data available', style: TextStyle(color: AppColors.textSecondary)),
+          child: Text(
+            'No data available',
+            style: TextStyle(color: AppColors.textSecondary),
+          ),
         ),
       );
     }
@@ -40,7 +47,7 @@ class SeasonTrendDetailScreen extends StatelessWidget {
     final avgVal = values.reduce((a, b) => a + b) / values.length;
 
     final spots = dataPoints.asMap().entries.map((e) {
-      return FlSpot(e.key.toDouble(), e.value);
+      return FlSpot(e.key.toDouble(), e.value.value);
     }).toList();
 
     return Scaffold(
@@ -66,15 +73,21 @@ class SeasonTrendDetailScreen extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          child: _summaryTile('Highest', valueFormatter(maxVal), AppColors.primary),
+          child: _summaryTile(
+            'Highest',
+            valueFormatter(maxVal),
+            AppColors.primary,
+          ),
         ),
         const SizedBox(width: 10),
-        Expanded(
-          child: _summaryTile('Average', valueFormatter(avgVal), color),
-        ),
+        Expanded(child: _summaryTile('Average', valueFormatter(avgVal), color)),
         const SizedBox(width: 10),
         Expanded(
-          child: _summaryTile('Lowest', valueFormatter(minVal), AppColors.textSecondary),
+          child: _summaryTile(
+            'Lowest',
+            valueFormatter(minVal),
+            AppColors.textSecondary,
+          ),
         ),
       ],
     ).animate().fadeIn(duration: 400.ms);
@@ -98,7 +111,10 @@ class SeasonTrendDetailScreen extends StatelessWidget {
           const SizedBox(height: 2),
           Text(
             label,
-            style: const TextStyle(color: AppColors.textSecondary, fontSize: 11),
+            style: const TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 11,
+            ),
           ),
         ],
       ),
@@ -147,12 +163,13 @@ class SeasonTrendDetailScreen extends StatelessWidget {
                     barWidth: 2.5,
                     dotData: FlDotData(
                       show: true,
-                      getDotPainter: (spot, __, ___, ____) => FlDotCirclePainter(
-                        radius: 3.5,
-                        color: color,
-                        strokeWidth: 1.5,
-                        strokeColor: AppColors.cardDark,
-                      ),
+                      getDotPainter: (spot, __, ___, ____) =>
+                          FlDotCirclePainter(
+                            radius: 3.5,
+                            color: color,
+                            strokeWidth: 1.5,
+                            strokeColor: AppColors.cardDark,
+                          ),
                     ),
                     belowBarData: BarAreaData(
                       show: true,
@@ -168,14 +185,19 @@ class SeasonTrendDetailScreen extends StatelessWidget {
                       getTitlesWidget: (v, _) => Text(
                         valueFormatter(v),
                         style: const TextStyle(
-                            color: AppColors.textSecondary, fontSize: 9),
+                          color: AppColors.textSecondary,
+                          fontSize: 9,
+                        ),
                       ),
                     ),
                   ),
                   bottomTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
-                      interval: (dataPoints.length / 6).ceilToDouble().clamp(1, 38),
+                      interval: (dataPoints.length / 6).ceilToDouble().clamp(
+                        1,
+                        38,
+                      ),
                       getTitlesWidget: (v, _) {
                         final idx = v.toInt();
                         if (idx < 0 || idx >= dataPoints.length) {
@@ -186,14 +208,20 @@ class SeasonTrendDetailScreen extends StatelessWidget {
                           child: Text(
                             'GW${dataPoints[idx].gwId}',
                             style: const TextStyle(
-                                color: AppColors.textSecondary, fontSize: 8),
+                              color: AppColors.textSecondary,
+                              fontSize: 8,
+                            ),
                           ),
                         );
                       },
                     ),
                   ),
-                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  topTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
+                  rightTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
                 ),
                 gridData: FlGridData(
                   drawVerticalLine: true,
@@ -271,38 +299,41 @@ class SeasonTrendDetailScreen extends StatelessWidget {
               ],
             ),
           ),
-          ...dataPoints.reversed.map((dp) => Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                decoration: const BoxDecoration(
-                  border:
-                      Border(bottom: BorderSide(color: AppColors.divider, width: 0.5)),
+          ...dataPoints.reversed.map(
+            (dp) => Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              decoration: const BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(color: AppColors.divider, width: 0.5),
                 ),
-                child: Row(
-                  children: [
-                    SizedBox(
-                      width: 60,
-                      child: Text(
-                        'GW${dp.gwId}',
-                        style: const TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 13,
-                        ),
+              ),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 60,
+                    child: Text(
+                      'GW${dp.gwId}',
+                      style: const TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 13,
                       ),
                     ),
-                    Expanded(
-                      child: Text(
-                        valueFormatter(dp.value),
-                        style: TextStyle(
-                          color: color,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        textAlign: TextAlign.right,
+                  ),
+                  Expanded(
+                    child: Text(
+                      valueFormatter(dp.value),
+                      style: TextStyle(
+                        color: color,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
                       ),
+                      textAlign: TextAlign.right,
                     ),
-                  ],
-                ),
-              )),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     ).animate().fadeIn(delay: 200.ms);
@@ -318,10 +349,10 @@ class _GwDataPoint {
 
 /// Helper factory for season trend screens
 class SeasonTrendScreenFactory {
-  static SeasonTrendDetailScreen avgScore(List<dynamic> finishedGws) {
+  static SeasonTrendDetailScreen avgScore(List<Gameweek> finishedGws) {
     final points = finishedGws
         .where((gw) => gw.averageEntryScore != null)
-        .map((gw) => _GwDataPoint(gw.id as int, (gw.averageEntryScore as int).toDouble()))
+        .map((gw) => _GwDataPoint(gw.id, gw.averageEntryScore!.toDouble()))
         .toList();
     return SeasonTrendDetailScreen(
       title: 'GW Avg Score',
@@ -333,10 +364,10 @@ class SeasonTrendScreenFactory {
     );
   }
 
-  static SeasonTrendDetailScreen highScore(List<dynamic> finishedGws) {
+  static SeasonTrendDetailScreen highScore(List<Gameweek> finishedGws) {
     final points = finishedGws
         .where((gw) => gw.highestScore != null)
-        .map((gw) => _GwDataPoint(gw.id as int, (gw.highestScore as int).toDouble()))
+        .map((gw) => _GwDataPoint(gw.id, gw.highestScore!.toDouble()))
         .toList();
     return SeasonTrendDetailScreen(
       title: 'GW High Score',
@@ -348,9 +379,9 @@ class SeasonTrendScreenFactory {
     );
   }
 
-  static SeasonTrendDetailScreen transfers(List<dynamic> finishedGws) {
+  static SeasonTrendDetailScreen transfers(List<Gameweek> finishedGws) {
     final points = finishedGws
-        .map((gw) => _GwDataPoint(gw.id as int, (gw.transfersMade as int).toDouble()))
+        .map((gw) => _GwDataPoint(gw.id, gw.transfersMade.toDouble()))
         .toList();
     return SeasonTrendDetailScreen(
       title: 'Transfers / GW',
@@ -358,7 +389,9 @@ class SeasonTrendScreenFactory {
       dataPoints: points,
       color: AppColors.accent,
       icon: Icons.swap_horiz_rounded,
-      valueFormatter: (v) => v >= 1000 ? '${(v / 1000).toStringAsFixed(0)}k' : v.toInt().toString(),
+      valueFormatter: (v) => v >= 1000
+          ? '${(v / 1000).toStringAsFixed(0)}k'
+          : v.toInt().toString(),
     );
   }
 }

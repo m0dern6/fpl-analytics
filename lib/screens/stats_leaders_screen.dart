@@ -51,7 +51,7 @@ class _StatsLeadersScreenState extends State<StatsLeadersScreen>
                 Tab(text: 'Clean Sheets'),
                 Tab(text: 'Bonus'),
                 Tab(text: 'ICT'),
-                Tab(text: 'Bubble'),
+                Tab(text: 'By Position'),
               ],
             ),
           ),
@@ -109,7 +109,7 @@ class _StatsLeadersScreenState extends State<StatsLeadersScreen>
   }
 }
 
-// ── Bubble Chart Tab ──────────────────────────────────────────────────────────
+// ── Position Chart Tab ────────────────────────────────────────────────────────
 
 class _BubbleTab extends StatefulWidget {
   final FplProvider provider;
@@ -125,39 +125,15 @@ class _BubbleTabState extends State<_BubbleTab> {
   @override
   Widget build(BuildContext context) {
     final players = widget.provider.players.where((p) {
-      return (_posFilter == 0 || p.elementType == _posFilter) &&
-          p.totalPoints > 0;
-    }).toList();
+      return _posFilter == 0 || p.elementType == _posFilter;
+    }).toList()..sort((a, b) => b.totalPoints.compareTo(a.totalPoints));
 
-    final maxSelected = players.isEmpty
+    final topPlayers = players.take(8).toList();
+    final maxPoints = topPlayers.isEmpty
         ? 1.0
-        : players
-            .map((p) => p.selectedPercent)
-            .reduce((a, b) => a > b ? a : b);
-
-    final spots = players.map((p) {
-      final x = p.nowCost / 10.0;
-      final y = p.totalPoints.toDouble();
-      final size = maxSelected > 0
-          ? ((p.selectedPercent / maxSelected) * 14).clamp(4.0, 14.0)
-          : 6.0;
-      final color =
-          PositionConstants.positionColors[p.elementType] ?? AppColors.primary;
-      return ScatterSpot(x, y,
-          dotPainter: FlDotCirclePainter(
-            radius: size,
-            color: color.withAlpha(180),
-            strokeWidth: 1,
-            strokeColor: color,
-          ));
-    }).toList();
-
-    final maxX = players.isEmpty
-        ? 14.0
-        : players.map((p) => p.nowCost / 10.0).reduce((a, b) => a > b ? a : b);
-    final maxY = players.isEmpty
-        ? 300.0
-        : players.map((p) => p.totalPoints.toDouble()).reduce((a, b) => a > b ? a : b);
+        : topPlayers
+              .map((p) => p.totalPoints.toDouble())
+              .reduce((a, b) => a > b ? a : b);
 
     final labels = {0: 'All', 1: 'GK', 2: 'DEF', 3: 'MID', 4: 'FWD'};
 
@@ -166,7 +142,7 @@ class _BubbleTabState extends State<_BubbleTab> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AppTheme.sectionTitle(context, 'Price vs Points'),
+          AppTheme.sectionTitle(context, 'Top Scorers by Position'),
           const SizedBox(height: 10),
           SizedBox(
             height: 36,
@@ -183,24 +159,24 @@ class _BubbleTabState extends State<_BubbleTab> {
                     duration: const Duration(milliseconds: 180),
                     margin: const EdgeInsets.only(right: 8),
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 7),
+                      horizontal: 16,
+                      vertical: 7,
+                    ),
                     decoration: BoxDecoration(
-                      color: isSel
-                          ? col.withAlpha(30)
-                          : AppColors.cardMedium,
+                      color: isSel ? col.withAlpha(30) : AppColors.cardMedium,
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
                         color: isSel ? col : Colors.transparent,
                       ),
                     ),
-                    child: Text(e.value,
-                        style: TextStyle(
-                          color: isSel ? col : AppColors.textSecondary,
-                          fontSize: 12,
-                          fontWeight: isSel
-                              ? FontWeight.w700
-                              : FontWeight.w400,
-                        )),
+                    child: Text(
+                      e.value,
+                      style: TextStyle(
+                        color: isSel ? col : AppColors.textSecondary,
+                        fontSize: 12,
+                        fontWeight: isSel ? FontWeight.w700 : FontWeight.w400,
+                      ),
+                    ),
                   ),
                 );
               }).toList(),
@@ -214,89 +190,109 @@ class _BubbleTabState extends State<_BubbleTab> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'Bubble size = Ownership %  ·  Colour = Position',
+                  'Bar height = total points  ·  Colour = position',
                   style: TextStyle(
-                      color: AppColors.textSecondary, fontSize: 11),
+                    color: AppColors.textSecondary,
+                    fontSize: 11,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 SizedBox(
-                  height: 280,
-                  child: ScatterChart(
-                    ScatterChartData(
-                      scatterSpots: spots,
-                      minX: 3.5,
-                      maxX: maxX + 1,
-                      minY: 0,
-                      maxY: maxY + 20,
-                      borderData: FlBorderData(show: false),
-                      gridData: FlGridData(
-                        drawVerticalLine: true,
-                        getDrawingHorizontalLine: (_) => const FlLine(
-                            color: AppColors.divider, strokeWidth: 0.5),
-                        getDrawingVerticalLine: (_) => const FlLine(
-                            color: AppColors.divider, strokeWidth: 0.5),
-                      ),
+                  height: 240,
+                  child: BarChart(
+                    BarChartData(
+                      alignment: BarChartAlignment.spaceAround,
+                      maxY: maxPoints * 1.2,
+                      barGroups: topPlayers.asMap().entries.map((entry) {
+                        final player = entry.value;
+                        final color =
+                            PositionConstants.positionColors[player
+                                .elementType] ??
+                            AppColors.primary;
+                        return BarChartGroupData(
+                          x: entry.key,
+                          barRods: [
+                            BarChartRodData(
+                              toY: player.totalPoints.toDouble(),
+                              width: 18,
+                              borderRadius: const BorderRadius.vertical(
+                                top: Radius.circular(4),
+                              ),
+                              gradient: LinearGradient(
+                                begin: Alignment.bottomCenter,
+                                end: Alignment.topCenter,
+                                colors: [color.withAlpha(153), color],
+                              ),
+                            ),
+                          ],
+                        );
+                      }).toList(),
                       titlesData: FlTitlesData(
                         leftTitles: AxisTitles(
-                          axisNameWidget: const Text('Points',
-                              style: TextStyle(
-                                  color: AppColors.textSecondary,
-                                  fontSize: 10)),
                           sideTitles: SideTitles(
                             showTitles: true,
-                            reservedSize: 32,
+                            reservedSize: 30,
                             getTitlesWidget: (v, _) => Text(
                               v.toInt().toString(),
                               style: const TextStyle(
-                                  color: AppColors.textSecondary,
-                                  fontSize: 9),
+                                color: AppColors.textSecondary,
+                                fontSize: 9,
+                              ),
                             ),
                           ),
                         ),
                         bottomTitles: AxisTitles(
-                          axisNameWidget: const Text('Price (£m)',
-                              style: TextStyle(
-                                  color: AppColors.textSecondary,
-                                  fontSize: 10)),
                           sideTitles: SideTitles(
                             showTitles: true,
-                            getTitlesWidget: (v, _) => Text(
-                              '£${v.toStringAsFixed(1)}',
-                              style: const TextStyle(
-                                  color: AppColors.textSecondary,
-                                  fontSize: 9),
-                            ),
+                            getTitlesWidget: (v, _) {
+                              final idx = v.toInt();
+                              if (idx < 0 || idx >= topPlayers.length) {
+                                return const SizedBox.shrink();
+                              }
+                              final shortName = topPlayers[idx].webName
+                                  .split(' ')
+                                  .last;
+                              return Padding(
+                                padding: const EdgeInsets.only(top: 4),
+                                child: Text(
+                                  shortName.length > 6
+                                      ? shortName.substring(0, 6)
+                                      : shortName,
+                                  style: const TextStyle(
+                                    color: AppColors.textSecondary,
+                                    fontSize: 8,
+                                  ),
+                                ),
+                              );
+                            },
                           ),
                         ),
                         topTitles: const AxisTitles(
-                            sideTitles: SideTitles(showTitles: false)),
+                          sideTitles: SideTitles(showTitles: false),
+                        ),
                         rightTitles: const AxisTitles(
-                            sideTitles: SideTitles(showTitles: false)),
-                      ),
-                      scatterTouchData: ScatterTouchData(
-                        enabled: true,
-                        touchTooltipData: ScatterTouchTooltipData(
-                          getTooltipColor: (_) => AppColors.cardDark,
-                          getTooltipItems: (spot) {
-                            final idx = spots.indexOf(spot);
-                            if (idx < 0 || idx >= players.length) return null;
-                            final p = players[idx];
-                            return ScatterTooltipItem(
-                              '${p.webName}\n${formatPrice(p.nowCost)}  ${p.totalPoints}pts',
-                              textStyle: const TextStyle(
-                                  color: AppColors.textPrimary,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600),
-                            );
-                          },
+                          sideTitles: SideTitles(showTitles: false),
                         ),
                       ),
+                      gridData: FlGridData(
+                        drawVerticalLine: true,
+                        getDrawingHorizontalLine: (_) => const FlLine(
+                          color: AppColors.divider,
+                          strokeWidth: 0.5,
+                        ),
+                        getDrawingVerticalLine: (_) => const FlLine(
+                          color: AppColors.divider,
+                          strokeWidth: 0.5,
+                        ),
+                      ),
+                      borderData: FlBorderData(show: false),
                     ),
                   ),
                 ),
                 const SizedBox(height: 12),
                 Wrap(
                   spacing: 14,
+                  runSpacing: 8,
                   children: PositionConstants.positionColors.entries.map((e) {
                     return Row(
                       mainAxisSize: MainAxisSize.min,
@@ -305,13 +301,17 @@ class _BubbleTabState extends State<_BubbleTab> {
                           width: 10,
                           height: 10,
                           decoration: BoxDecoration(
-                              color: e.value, shape: BoxShape.circle),
+                            color: e.value,
+                            shape: BoxShape.circle,
+                          ),
                         ),
                         const SizedBox(width: 4),
                         Text(
                           PositionConstants.positionFullNames[e.key] ?? '',
                           style: const TextStyle(
-                              color: AppColors.textSecondary, fontSize: 11),
+                            color: AppColors.textSecondary,
+                            fontSize: 11,
+                          ),
                         ),
                       ],
                     );
@@ -348,7 +348,12 @@ class _LeadersList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (players.isEmpty) {
-      return const Center(child: Text('No data', style: TextStyle(color: AppColors.textSecondary)));
+      return const Center(
+        child: Text(
+          'No data',
+          style: TextStyle(color: AppColors.textSecondary),
+        ),
+      );
     }
 
     final maxVal = players.map(valueGetter).reduce((a, b) => a > b ? a : b);
@@ -388,7 +393,9 @@ class _LeadersList extends StatelessWidget {
                       colors: [color.withAlpha(153), color],
                     ),
                     width: 20,
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(4),
+                    ),
                   ),
                 ],
               );
@@ -400,7 +407,10 @@ class _LeadersList extends StatelessWidget {
                   reservedSize: 28,
                   getTitlesWidget: (v, _) => Text(
                     valueFormatter(v),
-                    style: const TextStyle(color: AppColors.textSecondary, fontSize: 9),
+                    style: const TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 9,
+                    ),
                   ),
                 ),
               ),
@@ -409,23 +419,42 @@ class _LeadersList extends StatelessWidget {
                   showTitles: true,
                   getTitlesWidget: (v, _) {
                     final idx = v.toInt();
-                    if (idx < 0 || idx >= players.length) return const SizedBox.shrink();
+                    if (idx < 0 || idx >= players.length)
+                      return const SizedBox.shrink();
                     return Padding(
                       padding: const EdgeInsets.only(top: 4),
                       child: Text(
-                        players[idx].webName.split(' ').last.substring(0, players[idx].webName.split(' ').last.length.clamp(0, 6)),
-                        style: const TextStyle(color: AppColors.textSecondary, fontSize: 8),
+                        players[idx].webName
+                            .split(' ')
+                            .last
+                            .substring(
+                              0,
+                              players[idx].webName
+                                  .split(' ')
+                                  .last
+                                  .length
+                                  .clamp(0, 6),
+                            ),
+                        style: const TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 8,
+                        ),
                       ),
                     );
                   },
                 ),
               ),
-              topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-              rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+              topTitles: const AxisTitles(
+                sideTitles: SideTitles(showTitles: false),
+              ),
+              rightTitles: const AxisTitles(
+                sideTitles: SideTitles(showTitles: false),
+              ),
             ),
             gridData: FlGridData(
               drawVerticalLine: false,
-              getDrawingHorizontalLine: (_) => const FlLine(color: AppColors.divider, strokeWidth: 0.5),
+              getDrawingHorizontalLine: (_) =>
+                  const FlLine(color: AppColors.divider, strokeWidth: 0.5),
             ),
             borderData: FlBorderData(show: false),
           ),
@@ -446,11 +475,21 @@ class _LeadersList extends StatelessWidget {
           final posColor = getPositionColor(player.elementType);
 
           return InkWell(
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => PlayerDetailScreen(player: player))),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => PlayerDetailScreen(player: player),
+              ),
+            ),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                border: Border(bottom: BorderSide(color: AppColors.divider, width: i < players.length - 1 ? 1 : 0)),
+                border: Border(
+                  bottom: BorderSide(
+                    color: AppColors.divider,
+                    width: i < players.length - 1 ? 1 : 0,
+                  ),
+                ),
               ),
               child: Row(
                 children: [
@@ -479,10 +518,16 @@ class _LeadersList extends StatelessWidget {
                     child: CachedNetworkImage(
                       imageUrl: player.photoUrl,
                       fit: BoxFit.cover,
-                      placeholder: (_, __) => const Icon(Icons.person,
-                          color: AppColors.textSecondary, size: 18),
-                      errorWidget: (_, __, ___) => const Icon(Icons.person,
-                          color: AppColors.textSecondary, size: 18),
+                      placeholder: (_, __) => const Icon(
+                        Icons.person,
+                        color: AppColors.textSecondary,
+                        size: 18,
+                      ),
+                      errorWidget: (_, __, ___) => const Icon(
+                        Icons.person,
+                        color: AppColors.textSecondary,
+                        size: 18,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -490,10 +535,20 @@ class _LeadersList extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(player.webName, style: const TextStyle(color: AppColors.textPrimary, fontSize: 14, fontWeight: FontWeight.w600)),
+                        Text(
+                          player.webName,
+                          style: const TextStyle(
+                            color: AppColors.textPrimary,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                         Text(
                           '${team?.shortName ?? ''} · ${getPositionShort(player.elementType)} · ${formatPrice(player.nowCost)}',
-                          style: const TextStyle(color: AppColors.textSecondary, fontSize: 11),
+                          style: const TextStyle(
+                            color: AppColors.textSecondary,
+                            fontSize: 11,
+                          ),
                         ),
                       ],
                     ),
@@ -503,9 +558,19 @@ class _LeadersList extends StatelessWidget {
                     children: [
                       Text(
                         valueFormatter(val),
-                        style: TextStyle(color: color, fontSize: 18, fontWeight: FontWeight.w800),
+                        style: TextStyle(
+                          color: color,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
-                      Text(label, style: const TextStyle(color: AppColors.textSecondary, fontSize: 10)),
+                      Text(
+                        label,
+                        style: const TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 10,
+                        ),
+                      ),
                     ],
                   ),
                 ],

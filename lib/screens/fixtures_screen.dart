@@ -9,6 +9,7 @@ import '../utils/constants.dart';
 import '../utils/formatters.dart';
 import '../widgets/loading_widget.dart';
 import '../widgets/difficulty_badge.dart';
+import 'fixture_detail_screen.dart';
 
 class FixturesScreen extends StatefulWidget {
   final int? initialGameweek;
@@ -19,17 +20,27 @@ class FixturesScreen extends StatefulWidget {
   State<FixturesScreen> createState() => _FixturesScreenState();
 }
 
-class _FixturesScreenState extends State<FixturesScreen> with SingleTickerProviderStateMixin {
+class _FixturesScreenState extends State<FixturesScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   int _selectedGw = 1;
+  bool _didAutoScroll = false;
   static const int _totalGws = 38;
+  late final List<GlobalKey> _tabKeys = List.generate(
+    _totalGws,
+    (_) => GlobalKey(),
+  );
 
   @override
   void initState() {
     super.initState();
     final provider = context.read<FplProvider>();
     _selectedGw = widget.initialGameweek ?? (provider.currentGameweek?.id ?? 1);
-    _tabController = TabController(length: _totalGws, vsync: this, initialIndex: _selectedGw - 1);
+    _tabController = TabController(
+      length: _totalGws,
+      vsync: this,
+      initialIndex: _selectedGw - 1,
+    );
     _tabController.addListener(() {
       if (!_tabController.indexIsChanging) {
         setState(() => _selectedGw = _tabController.index + 1);
@@ -47,6 +58,20 @@ class _FixturesScreenState extends State<FixturesScreen> with SingleTickerProvid
   Widget build(BuildContext context) {
     return Consumer<FplProvider>(
       builder: (context, provider, _) {
+        if (!_didAutoScroll && provider.gameweeks.isNotEmpty) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+            final target = _tabKeys[_selectedGw - 1].currentContext;
+            if (target != null) {
+              Scrollable.ensureVisible(
+                target,
+                alignment: 0.5,
+                duration: Duration.zero,
+              );
+            }
+            _didAutoScroll = true;
+          });
+        }
         return Scaffold(
           backgroundColor: AppColors.background,
           appBar: AppBar(
@@ -57,11 +82,14 @@ class _FixturesScreenState extends State<FixturesScreen> with SingleTickerProvid
               isScrollable: true,
               tabs: List.generate(_totalGws, (i) {
                 final gwId = i + 1;
-                final gw = provider.gameweeks.length > i ? provider.gameweeks[i] : null;
+                final gw = provider.gameweeks.length > i
+                    ? provider.gameweeks[i]
+                    : null;
                 final isCurrent = gw?.isCurrent ?? false;
                 final isNext = gw?.isNext ?? false;
                 return Tab(
                   child: Container(
+                    key: _tabKeys[i],
                     padding: const EdgeInsets.symmetric(horizontal: 2),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -72,14 +100,20 @@ class _FixturesScreenState extends State<FixturesScreen> with SingleTickerProvid
                           Container(
                             width: 6,
                             height: 6,
-                            decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
+                            decoration: const BoxDecoration(
+                              color: AppColors.primary,
+                              shape: BoxShape.circle,
+                            ),
                           ),
                         ] else if (isNext) ...[
                           const SizedBox(width: 4),
                           Container(
                             width: 6,
                             height: 6,
-                            decoration: const BoxDecoration(color: AppColors.accent, shape: BoxShape.circle),
+                            decoration: const BoxDecoration(
+                              color: AppColors.accent,
+                              shape: BoxShape.circle,
+                            ),
                           ),
                         ],
                       ],
@@ -119,9 +153,16 @@ class _GwFixturesList extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.sports_soccer, color: AppColors.textSecondary, size: 48),
+            const Icon(
+              Icons.sports_soccer,
+              color: AppColors.textSecondary,
+              size: 48,
+            ),
             const SizedBox(height: 12),
-            Text('GW$gwId fixtures not available yet', style: const TextStyle(color: AppColors.textSecondary)),
+            Text(
+              'GW$gwId fixtures not available yet',
+              style: const TextStyle(color: AppColors.textSecondary),
+            ),
           ],
         ),
       );
@@ -131,7 +172,8 @@ class _GwFixturesList extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       itemCount: fixtures.length,
       separatorBuilder: (_, __) => const SizedBox(height: 8),
-      itemBuilder: (_, i) => _FixtureCard(fixture: fixtures[i], provider: provider),
+      itemBuilder: (_, i) =>
+          _FixtureCard(fixture: fixtures[i], provider: provider),
     );
   }
 }
@@ -147,65 +189,98 @@ class _FixtureCard extends StatelessWidget {
     final home = provider.getTeamById(fixture.homeTeamId);
     final away = provider.getTeamById(fixture.awayTeamId);
 
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: AppTheme.gradientCard(),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: _teamDisplay(home, fixture.teamHDifficulty, true),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                decoration: BoxDecoration(
-                  color: AppColors.cardMedium,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: AppColors.divider),
-                ),
-                child: fixture.hasResult
-                    ? Text(
-                        '${fixture.homeTeamScore} - ${fixture.awayTeamScore}',
-                        style: const TextStyle(
-                          color: AppColors.textPrimary,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 16,
-                        ),
-                      )
-                    : Column(
-                        children: [
-                          Text(
-                            fixture.kickoffTime != null ? formatDateShort(fixture.kickoffTime) : 'TBC',
-                            style: const TextStyle(color: AppColors.textPrimary, fontSize: 12, fontWeight: FontWeight.w600),
-                          ),
-                          Text(
-                            fixture.kickoffTime != null ? _extractTime(fixture.kickoffTime!) : '',
-                            style: const TextStyle(color: AppColors.textSecondary, fontSize: 11),
-                          ),
-                        ],
-                      ),
-              ),
-              Expanded(
-                child: _teamDisplay(away, fixture.teamADifficulty, false),
-              ),
-            ],
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => FixtureDetailScreen(
+            fixture: fixture,
+            homeTeam: home,
+            awayTeam: away,
           ),
-          if (!fixture.finished && fixture.kickoffTime != null) ...[
-            const SizedBox(height: 8),
+        ),
+      ),
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: AppTheme.gradientCard(),
+        child: Column(
+          children: [
             Row(
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.access_time, color: AppColors.textSecondary, size: 12),
-                const SizedBox(width: 4),
-                Text(
-                  formatDateTime(fixture.kickoffTime),
-                  style: const TextStyle(color: AppColors.textSecondary, fontSize: 11),
+                Expanded(
+                  child: _teamDisplay(home, fixture.teamHDifficulty, true),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.cardMedium,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: AppColors.divider),
+                  ),
+                  child: fixture.hasResult
+                      ? Text(
+                          '${fixture.homeTeamScore} - ${fixture.awayTeamScore}',
+                          style: const TextStyle(
+                            color: AppColors.textPrimary,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 16,
+                          ),
+                        )
+                      : Column(
+                          children: [
+                            Text(
+                              fixture.kickoffTime != null
+                                  ? formatDateShort(fixture.kickoffTime)
+                                  : 'TBC',
+                              style: const TextStyle(
+                                color: AppColors.textPrimary,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            Text(
+                              fixture.kickoffTime != null
+                                  ? _extractTime(fixture.kickoffTime!)
+                                  : '',
+                              style: const TextStyle(
+                                color: AppColors.textSecondary,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ],
+                        ),
+                ),
+                Expanded(
+                  child: _teamDisplay(away, fixture.teamADifficulty, false),
                 ),
               ],
             ),
+            if (!fixture.finished && fixture.kickoffTime != null) ...[
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.access_time,
+                    color: AppColors.textSecondary,
+                    size: 12,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    formatDateTime(fixture.kickoffTime),
+                    style: const TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
@@ -223,7 +298,9 @@ class _FixtureCard extends StatelessWidget {
     return Column(
       children: [
         Row(
-          mainAxisAlignment: isHome ? MainAxisAlignment.end : MainAxisAlignment.start,
+          mainAxisAlignment: isHome
+              ? MainAxisAlignment.end
+              : MainAxisAlignment.start,
           children: isHome
               ? [
                   Text(
@@ -252,13 +329,18 @@ class _FixtureCard extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Row(
-          mainAxisAlignment: isHome ? MainAxisAlignment.end : MainAxisAlignment.start,
+          mainAxisAlignment: isHome
+              ? MainAxisAlignment.end
+              : MainAxisAlignment.start,
           children: [
             DifficultyBadge(difficulty: difficulty, size: 24),
             const SizedBox(width: 4),
             Text(
               isHome ? 'H' : 'A',
-              style: const TextStyle(color: AppColors.textSecondary, fontSize: 10),
+              style: const TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 10,
+              ),
             ),
           ],
         ),
