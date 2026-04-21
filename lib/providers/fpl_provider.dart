@@ -17,6 +17,7 @@ class FplProvider extends ChangeNotifier {
   List<ElementType> _elementTypes = [];
   Map<int, PlayerSummary> _playerSummaries = {};
   Map<int, Map<String, dynamic>> _liveData = {};
+  Map<int, List<Player>> _dreamTeams = {};
 
   bool _isLoading = false;
   bool _isLoadingFixtures = false;
@@ -101,6 +102,21 @@ class FplProvider extends ChangeNotifier {
   }
 
   PlayerSummary? getPlayerSummary(int playerId) => _playerSummaries[playerId];
+
+  Future<void> loadDreamTeam(int gw) async {
+    if (_dreamTeams.containsKey(gw)) return;
+    try {
+      final ids = await _service.fetchDreamTeam(gw);
+      final dreamTeamPlayers = ids
+          .map((id) => getPlayerById(id))
+          .whereType<Player>()
+          .toList();
+      _dreamTeams[gw] = dreamTeamPlayers;
+      notifyListeners();
+    } catch (_) {}
+  }
+
+  List<Player> getDreamTeam(int gw) => _dreamTeams[gw] ?? [];
 
   Team? getTeamById(int teamId) {
     try {

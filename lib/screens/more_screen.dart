@@ -6,7 +6,6 @@ import 'compare_screen.dart';
 import 'teams_screen.dart';
 import 'fixtures_screen.dart';
 import 'gameweeks_screen.dart';
-import 'best_team_screen.dart';
 
 class MoreScreen extends StatelessWidget {
   const MoreScreen({super.key});
@@ -20,31 +19,29 @@ class MoreScreen extends StatelessWidget {
         icon: Icons.calendar_month_rounded,
         iconColor: AppColors.accent,
         onTap: () => Navigator.push(
-            context, MaterialPageRoute(builder: (_) => const GameweeksScreen())),
-      ),
-      _ExploreItem(
-        title: 'Best Team',
-        subtitle: 'Algorithm-picked best squad',
-        icon: Icons.emoji_events_rounded,
-        iconColor: AppColors.warning,
-        onTap: () => Navigator.push(
-            context, MaterialPageRoute(builder: (_) => const BestTeamScreen())),
+          context,
+          MaterialPageRoute(builder: (_) => const GameweeksScreen()),
+        ),
       ),
       _ExploreItem(
         title: 'Fixture Difficulty',
         subtitle: 'FDR matrix for all teams',
         icon: Icons.grid_4x4_rounded,
         iconColor: AppColors.primary,
-        onTap: () => Navigator.push(context,
-            MaterialPageRoute(builder: (_) => const FixtureDifficultyScreen())),
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const FixtureDifficultyScreen()),
+        ),
       ),
       _ExploreItem(
         title: 'Stats Leaders',
         subtitle: 'Top scorers, assists & more',
         icon: Icons.leaderboard_rounded,
         iconColor: const Color(0xFFF97316),
-        onTap: () => Navigator.push(context,
-            MaterialPageRoute(builder: (_) => const StatsLeadersScreen())),
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const StatsLeadersScreen()),
+        ),
       ),
       _ExploreItem(
         title: 'Compare Players',
@@ -52,7 +49,9 @@ class MoreScreen extends StatelessWidget {
         icon: Icons.compare_arrows_rounded,
         iconColor: const Color(0xFFA78BFA),
         onTap: () => Navigator.push(
-            context, MaterialPageRoute(builder: (_) => const CompareScreen())),
+          context,
+          MaterialPageRoute(builder: (_) => const CompareScreen()),
+        ),
       ),
       _ExploreItem(
         title: 'Teams',
@@ -60,7 +59,9 @@ class MoreScreen extends StatelessWidget {
         icon: Icons.shield_rounded,
         iconColor: const Color(0xFF34D399),
         onTap: () => Navigator.push(
-            context, MaterialPageRoute(builder: (_) => const TeamsScreen())),
+          context,
+          MaterialPageRoute(builder: (_) => const TeamsScreen()),
+        ),
       ),
       _ExploreItem(
         title: 'All Fixtures',
@@ -68,7 +69,9 @@ class MoreScreen extends StatelessWidget {
         icon: Icons.sports_soccer_rounded,
         iconColor: const Color(0xFF60A5FA),
         onTap: () => Navigator.push(
-            context, MaterialPageRoute(builder: (_) => const FixturesScreen())),
+          context,
+          MaterialPageRoute(builder: (_) => const FixturesScreen()),
+        ),
       ),
     ];
 
@@ -139,15 +142,18 @@ class _ExploreCard extends StatelessWidget {
             Text(
               item.title,
               style: const TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700),
+                color: AppColors.textPrimary,
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+              ),
             ),
             const SizedBox(height: 3),
             Text(
               item.subtitle,
               style: const TextStyle(
-                  color: AppColors.textSecondary, fontSize: 11),
+                color: AppColors.textSecondary,
+                fontSize: 11,
+              ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),

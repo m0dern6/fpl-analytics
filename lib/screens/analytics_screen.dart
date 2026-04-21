@@ -53,7 +53,11 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Center(
-                    child: Icon(Icons.analytics, color: Color(0xFF0C0720), size: 16),
+                    child: Icon(
+                      Icons.analytics,
+                      color: Color(0xFF0C0720),
+                      size: 16,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -65,7 +69,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
               isScrollable: true,
               tabs: const [
                 Tab(text: 'Form Chart'),
-                Tab(text: 'Bubble Chart'),
+                Tab(text: 'Value Chart'),
                 Tab(text: 'Heat Map'),
                 Tab(text: 'Radar'),
               ],
@@ -77,7 +81,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
                   controller: _tabController,
                   children: [
                     _FormChartTab(provider: provider),
-                    _BubbleChartTab(provider: provider),
+                    _ValueChartTab(provider: provider),
                     const _HeatMapTab(),
                     _RadarTab(provider: provider),
                   ],
@@ -105,8 +109,7 @@ class _FormChartTabState extends State<_FormChartTab> {
   Widget build(BuildContext context) {
     final players = widget.provider.players.where((p) {
       return _posFilter == 0 || p.elementType == _posFilter;
-    }).toList()
-      ..sort((a, b) => b.formValue.compareTo(a.formValue));
+    }).toList()..sort((a, b) => b.formValue.compareTo(a.formValue));
 
     final top = players.take(10).toList();
 
@@ -121,7 +124,10 @@ class _FormChartTabState extends State<_FormChartTab> {
           const SizedBox(height: 16),
           if (top.isEmpty)
             const Center(
-              child: Text('No data', style: TextStyle(color: AppColors.textSecondary)),
+              child: Text(
+                'No data',
+                style: TextStyle(color: AppColors.textSecondary),
+              ),
             )
           else ...[
             _buildFormBarChart(top),
@@ -173,7 +179,9 @@ class _FormChartTabState extends State<_FormChartTab> {
   }
 
   Widget _buildFormBarChart(List<Player> players) {
-    final maxForm = players.map((p) => p.formValue).fold(0.0, (a, b) => a > b ? a : b);
+    final maxForm = players
+        .map((p) => p.formValue)
+        .fold(0.0, (a, b) => a > b ? a : b);
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: AppTheme.gradientCard(),
@@ -208,8 +216,9 @@ class _FormChartTabState extends State<_FormChartTab> {
                           colors: [posColor.withAlpha(150), posColor],
                         ),
                         width: 22,
-                        borderRadius:
-                            const BorderRadius.vertical(top: Radius.circular(4)),
+                        borderRadius: const BorderRadius.vertical(
+                          top: Radius.circular(4),
+                        ),
                       ),
                     ],
                   );
@@ -222,7 +231,9 @@ class _FormChartTabState extends State<_FormChartTab> {
                       getTitlesWidget: (v, _) => Text(
                         v.toStringAsFixed(1),
                         style: const TextStyle(
-                            color: AppColors.textSecondary, fontSize: 9),
+                          color: AppColors.textSecondary,
+                          fontSize: 9,
+                        ),
                       ),
                     ),
                   ),
@@ -234,23 +245,26 @@ class _FormChartTabState extends State<_FormChartTab> {
                         if (idx < 0 || idx >= players.length) {
                           return const SizedBox.shrink();
                         }
-                        final lastName =
-                            players[idx].webName.split(' ').last;
+                        final lastName = players[idx].webName.split(' ').last;
                         return Padding(
                           padding: const EdgeInsets.only(top: 4),
                           child: Text(
                             lastName.substring(0, lastName.length.clamp(0, 7)),
                             style: const TextStyle(
-                                color: AppColors.textSecondary, fontSize: 8),
+                              color: AppColors.textSecondary,
+                              fontSize: 8,
+                            ),
                           ),
                         );
                       },
                     ),
                   ),
                   topTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false)),
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
                   rightTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false)),
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
                 ),
                 gridData: FlGridData(
                   drawVerticalLine: false,
@@ -281,7 +295,9 @@ class _FormChartTabState extends State<_FormChartTab> {
                   Text(
                     PositionConstants.positionNames[e.key] ?? '',
                     style: const TextStyle(
-                        color: AppColors.textSecondary, fontSize: 10),
+                      color: AppColors.textSecondary,
+                      fontSize: 10,
+                    ),
                   ),
                 ],
               );
@@ -305,7 +321,8 @@ class _FormChartTabState extends State<_FormChartTab> {
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (_) => PlayerDetailScreen(player: player)),
+                builder: (_) => PlayerDetailScreen(player: player),
+              ),
             ),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -324,10 +341,11 @@ class _FormChartTabState extends State<_FormChartTab> {
                     child: Text(
                       '${i + 1}',
                       style: TextStyle(
-                        color: i == 0 ? AppColors.primary : AppColors.textSecondary,
+                        color: i == 0
+                            ? AppColors.primary
+                            : AppColors.textSecondary,
                         fontSize: 13,
-                        fontWeight:
-                            i == 0 ? FontWeight.w700 : FontWeight.w400,
+                        fontWeight: i == 0 ? FontWeight.w700 : FontWeight.w400,
                       ),
                     ),
                   ),
@@ -340,16 +358,19 @@ class _FormChartTabState extends State<_FormChartTab> {
                         Text(
                           player.webName,
                           style: const TextStyle(
-                              color: AppColors.textPrimary,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600),
+                            color: AppColors.textPrimary,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                         Text(
                           '${team?.shortName ?? ''} · ${getPositionShort(player.elementType)}',
                           style: const TextStyle(
-                              color: AppColors.textSecondary, fontSize: 11),
+                            color: AppColors.textSecondary,
+                            fontSize: 11,
+                          ),
                         ),
                       ],
                     ),
@@ -360,14 +381,17 @@ class _FormChartTabState extends State<_FormChartTab> {
                       Text(
                         formatForm(player.form),
                         style: const TextStyle(
-                            color: AppColors.accent,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w800),
+                          color: AppColors.accent,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
                       const Text(
                         'form',
                         style: TextStyle(
-                            color: AppColors.textSecondary, fontSize: 10),
+                          color: AppColors.textSecondary,
+                          fontSize: 10,
+                        ),
                       ),
                     ],
                   ),
@@ -393,28 +417,27 @@ class _FormChartTabState extends State<_FormChartTab> {
       child: CachedNetworkImage(
         imageUrl: player.photoUrl,
         fit: BoxFit.cover,
-        placeholder: (_, __) => const Icon(Icons.person,
-            color: AppColors.textSecondary, size: 18),
-        errorWidget: (_, __, ___) => const Icon(Icons.person,
-            color: AppColors.textSecondary, size: 18),
+        placeholder: (_, __) =>
+            const Icon(Icons.person, color: AppColors.textSecondary, size: 18),
+        errorWidget: (_, __, ___) =>
+            const Icon(Icons.person, color: AppColors.textSecondary, size: 18),
       ),
     );
   }
 }
 
-// ── Tab 2: Bubble Chart ───────────────────────────────────────────────────────
+// ── Tab 2: Value Chart ────────────────────────────────────────────────────────
 
-class _BubbleChartTab extends StatefulWidget {
+class _ValueChartTab extends StatefulWidget {
   final FplProvider provider;
-  const _BubbleChartTab({required this.provider});
+  const _ValueChartTab({required this.provider});
 
   @override
-  State<_BubbleChartTab> createState() => _BubbleChartTabState();
+  State<_ValueChartTab> createState() => _ValueChartTabState();
 }
 
-class _BubbleChartTabState extends State<_BubbleChartTab> {
+class _ValueChartTabState extends State<_ValueChartTab> {
   int _posFilter = 0;
-  int? _touchedIndex;
 
   @override
   Widget build(BuildContext context) {
@@ -428,7 +451,7 @@ class _BubbleChartTabState extends State<_BubbleChartTab> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AppTheme.sectionTitle(context, 'Price vs Points (Bubble = Selected %)'),
+          AppTheme.sectionTitle(context, 'Price vs Points'),
           const SizedBox(height: 10),
           _buildPositionFilter(),
           const SizedBox(height: 16),
@@ -454,13 +477,11 @@ class _BubbleChartTabState extends State<_BubbleChartTab> {
           return GestureDetector(
             onTap: () => setState(() {
               _posFilter = e.key;
-              _touchedIndex = null;
             }),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 180),
               margin: const EdgeInsets.only(right: 8),
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
               decoration: BoxDecoration(
                 color: isSelected ? color.withAlpha(30) : AppColors.cardMedium,
                 borderRadius: BorderRadius.circular(20),
@@ -489,13 +510,17 @@ class _BubbleChartTabState extends State<_BubbleChartTab> {
         height: 300,
         decoration: AppTheme.gradientCard(),
         child: const Center(
-          child: Text('No data', style: TextStyle(color: AppColors.textSecondary)),
+          child: Text(
+            'No data',
+            style: TextStyle(color: AppColors.textSecondary),
+          ),
         ),
       );
     }
 
-    final maxSelected =
-        players.map((p) => p.selectedPercent).fold(0.0, (a, b) => a > b ? a : b);
+    final maxSelected = players
+        .map((p) => p.selectedPercent)
+        .fold(0.0, (a, b) => a > b ? a : b);
 
     final spots = players.asMap().entries.map((e) {
       final p = e.value;
@@ -504,19 +529,23 @@ class _BubbleChartTabState extends State<_BubbleChartTab> {
       final size = maxSelected > 0
           ? ((p.selectedPercent / maxSelected) * 14).clamp(4.0, 14.0)
           : 6.0;
-      final color = PositionConstants.positionColors[p.elementType] ??
-          AppColors.primary;
-      return ScatterSpot(x, y,
-          dotPainter: FlDotCirclePainter(
-            radius: size,
-            color: color.withAlpha(180),
-            strokeWidth: 1,
-            strokeColor: color,
-          ));
+      final color =
+          PositionConstants.positionColors[p.elementType] ?? AppColors.primary;
+      return ScatterSpot(
+        x,
+        y,
+        dotPainter: FlDotCirclePainter(
+          radius: size,
+          color: color.withAlpha(180),
+          strokeWidth: 1,
+          strokeColor: color,
+        ),
+      );
     }).toList();
 
-    final maxX =
-        players.map((p) => p.nowCost / 10.0).fold(0.0, (a, b) => a > b ? a : b);
+    final maxX = players
+        .map((p) => p.nowCost / 10.0)
+        .fold(0.0, (a, b) => a > b ? a : b);
     final maxY = players
         .map((p) => p.totalPoints.toDouble())
         .fold(0.0, (a, b) => a > b ? a : b);
@@ -528,9 +557,8 @@ class _BubbleChartTabState extends State<_BubbleChartTab> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Each dot = 1 player  ·  Size = Ownership %',
-            style:
-                TextStyle(color: AppColors.textSecondary, fontSize: 11),
+            'Each dot = 1 player  ·  Size = Ownership %  ·  Grid = value map',
+            style: TextStyle(color: AppColors.textSecondary, fontSize: 11),
           ),
           const SizedBox(height: 16),
           SizedBox(
@@ -554,7 +582,10 @@ class _BubbleChartTabState extends State<_BubbleChartTab> {
                   leftTitles: AxisTitles(
                     axisNameWidget: const Text(
                       'Points',
-                      style: TextStyle(color: AppColors.textSecondary, fontSize: 10),
+                      style: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 10,
+                      ),
                     ),
                     sideTitles: SideTitles(
                       showTitles: true,
@@ -562,28 +593,37 @@ class _BubbleChartTabState extends State<_BubbleChartTab> {
                       getTitlesWidget: (v, _) => Text(
                         v.toInt().toString(),
                         style: const TextStyle(
-                            color: AppColors.textSecondary, fontSize: 9),
+                          color: AppColors.textSecondary,
+                          fontSize: 9,
+                        ),
                       ),
                     ),
                   ),
                   bottomTitles: AxisTitles(
                     axisNameWidget: const Text(
                       'Price (£m)',
-                      style: TextStyle(color: AppColors.textSecondary, fontSize: 10),
+                      style: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 10,
+                      ),
                     ),
                     sideTitles: SideTitles(
                       showTitles: true,
                       getTitlesWidget: (v, _) => Text(
                         '£${v.toStringAsFixed(1)}',
                         style: const TextStyle(
-                            color: AppColors.textSecondary, fontSize: 9),
+                          color: AppColors.textSecondary,
+                          fontSize: 9,
+                        ),
                       ),
                     ),
                   ),
                   topTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false)),
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
                   rightTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false)),
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
                 ),
                 scatterTouchData: ScatterTouchData(
                   enabled: true,
@@ -596,9 +636,10 @@ class _BubbleChartTabState extends State<_BubbleChartTab> {
                       return ScatterTooltipItem(
                         '${p.webName}\n${formatPrice(p.nowCost)}  ${p.totalPoints}pts',
                         textStyle: const TextStyle(
-                            color: AppColors.textPrimary,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600),
+                          color: AppColors.textPrimary,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
                       );
                     },
                   ),
@@ -634,7 +675,9 @@ class _BubbleChartTabState extends State<_BubbleChartTab> {
               Text(
                 PositionConstants.positionFullNames[e.key] ?? '',
                 style: const TextStyle(
-                    color: AppColors.textSecondary, fontSize: 12),
+                  color: AppColors.textSecondary,
+                  fontSize: 12,
+                ),
               ),
             ],
           );
@@ -654,8 +697,10 @@ class _HeatMapTab extends StatelessWidget {
     return Consumer<FplProvider>(
       builder: (context, provider, _) {
         final currentGwId = provider.currentGameweek?.id ?? 1;
-        final nextGws =
-            List.generate(8, (i) => currentGwId + i).where((gw) => gw <= 38).toList();
+        final nextGws = List.generate(
+          8,
+          (i) => currentGwId + i,
+        ).where((gw) => gw <= 38).toList();
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -705,8 +750,10 @@ class _HeatMapTab extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         child: Row(
           children: [
-            const Text('Difficulty: ',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+            const Text(
+              'Difficulty: ',
+              style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+            ),
             ...DifficultyConstants.colors.entries.map(
               (e) => Padding(
                 padding: const EdgeInsets.only(right: 8),
@@ -717,14 +764,17 @@ class _HeatMapTab extends StatelessWidget {
                       width: 12,
                       height: 12,
                       decoration: BoxDecoration(
-                          color: e.value,
-                          borderRadius: BorderRadius.circular(3)),
+                        color: e.value,
+                        borderRadius: BorderRadius.circular(3),
+                      ),
                     ),
                     const SizedBox(width: 3),
                     Text(
                       '${e.key} - ${DifficultyConstants.labels[e.key]}',
                       style: const TextStyle(
-                          color: AppColors.textSecondary, fontSize: 11),
+                        color: AppColors.textSecondary,
+                        fontSize: 11,
+                      ),
                     ),
                   ],
                 ),
@@ -741,23 +791,29 @@ class _HeatMapTab extends StatelessWidget {
       children: [
         const SizedBox(
           width: 72,
-          child: Text('Team',
-              style: TextStyle(
-                  color: AppColors.textSecondary,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600)),
+          child: Text(
+            'Team',
+            style: TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ),
-        ...gws.map((gw) => SizedBox(
-              width: 80,
-              child: Text(
-                'GW$gw',
-                style: const TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600),
-                textAlign: TextAlign.center,
+        ...gws.map(
+          (gw) => SizedBox(
+            width: 80,
+            child: Text(
+              'GW$gw',
+              style: const TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
               ),
-            )),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -772,17 +828,20 @@ class _HeatMapTab extends StatelessWidget {
             child: Text(
               team.shortName as String,
               style: const TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600),
+                color: AppColors.textPrimary,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
               overflow: TextOverflow.ellipsis,
             ),
           ),
           ...gws.map((gw) {
             final gwFixtures = provider.fixtures
-                .where((f) =>
-                    f.event == gw &&
-                    (f.homeTeamId == team.id || f.awayTeamId == team.id))
+                .where(
+                  (f) =>
+                      f.event == gw &&
+                      (f.homeTeamId == team.id || f.awayTeamId == team.id),
+                )
                 .toList();
 
             if (gwFixtures.isEmpty) {
@@ -796,9 +855,13 @@ class _HeatMapTab extends StatelessWidget {
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: const Center(
-                    child: Text('-',
-                        style: TextStyle(
-                            color: AppColors.textSecondary, fontSize: 12)),
+                    child: Text(
+                      '-',
+                      style: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 12,
+                      ),
+                    ),
                   ),
                 ),
               );
@@ -809,8 +872,9 @@ class _HeatMapTab extends StatelessWidget {
               child: Column(
                 children: gwFixtures.map((f) {
                   final isHome = f.homeTeamId == team.id;
-                  final difficulty =
-                      isHome ? f.teamHDifficulty : f.teamADifficulty;
+                  final difficulty = isHome
+                      ? f.teamHDifficulty
+                      : f.teamADifficulty;
                   final opponentId = isHome ? f.awayTeamId : f.homeTeamId;
                   final opponent = provider.getTeamById(opponentId);
                   final diffColor =
@@ -818,12 +882,13 @@ class _HeatMapTab extends StatelessWidget {
                   return Container(
                     margin: const EdgeInsets.all(2),
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 3, vertical: 5),
+                      horizontal: 3,
+                      vertical: 5,
+                    ),
                     decoration: BoxDecoration(
                       color: diffColor.withAlpha(51),
                       borderRadius: BorderRadius.circular(4),
-                      border:
-                          Border.all(color: diffColor.withAlpha(153)),
+                      border: Border.all(color: diffColor.withAlpha(153)),
                     ),
                     child: Center(
                       child: Text(
@@ -893,10 +958,25 @@ class _RadarTabState extends State<_RadarTab> {
           const SizedBox(height: 12),
           Row(
             children: [
-              Expanded(child: _buildSelector('Player A', _playerA, _searchACtrl, _queryA,
+              Expanded(
+                child: _buildSelector(
+                  'Player A',
+                  _playerA,
+                  _searchACtrl,
+                  _queryA,
                   (q) => setState(() => _queryA = q),
-                  (p) => setState(() { _playerA = p; _queryA = ''; _searchACtrl.clear(); }),
-                  () => setState(() { _playerA = null; _queryA = ''; _searchACtrl.clear(); }))),
+                  (p) => setState(() {
+                    _playerA = p;
+                    _queryA = '';
+                    _searchACtrl.clear();
+                  }),
+                  () => setState(() {
+                    _playerA = null;
+                    _queryA = '';
+                    _searchACtrl.clear();
+                  }),
+                ),
+              ),
               const SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -904,25 +984,41 @@ class _RadarTabState extends State<_RadarTab> {
                   color: AppColors.cardMedium,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Text('VS',
-                    style: TextStyle(
-                        color: AppColors.primary,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700)),
+                child: const Text(
+                  'VS',
+                  style: TextStyle(
+                    color: AppColors.primary,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ),
               const SizedBox(width: 8),
-              Expanded(child: _buildSelector('Player B', _playerB, _searchBCtrl, _queryB,
+              Expanded(
+                child: _buildSelector(
+                  'Player B',
+                  _playerB,
+                  _searchBCtrl,
+                  _queryB,
                   (q) => setState(() => _queryB = q),
-                  (p) => setState(() { _playerB = p; _queryB = ''; _searchBCtrl.clear(); }),
-                  () => setState(() { _playerB = null; _queryB = ''; _searchBCtrl.clear(); }))),
+                  (p) => setState(() {
+                    _playerB = p;
+                    _queryB = '';
+                    _searchBCtrl.clear();
+                  }),
+                  () => setState(() {
+                    _playerB = null;
+                    _queryB = '';
+                    _searchBCtrl.clear();
+                  }),
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 20),
-          if (_playerA != null)
-            _buildRadarCard(context, _playerA!, _playerB),
+          if (_playerA != null) _buildRadarCard(context, _playerA!, _playerB),
           const SizedBox(height: 16),
-          if (_playerA != null)
-            _buildStatsCompareTable(_playerA!, _playerB),
+          if (_playerA != null) _buildStatsCompareTable(_playerA!, _playerB),
         ],
       ),
     );
@@ -955,8 +1051,10 @@ class _RadarTabState extends State<_RadarTab> {
               hintText: label,
               hintStyle: const TextStyle(fontSize: 12),
               prefixIcon: const Icon(Icons.search, size: 18),
-              contentPadding:
-                  const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+              contentPadding: const EdgeInsets.symmetric(
+                vertical: 10,
+                horizontal: 12,
+              ),
             ),
           ),
         if (results.isNotEmpty)
@@ -968,26 +1066,41 @@ class _RadarTabState extends State<_RadarTab> {
               border: Border.all(color: AppColors.divider),
             ),
             child: Column(
-              children: results.map((p) => InkWell(
-                onTap: () => onSelect(p),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(p.webName,
-                            style: const TextStyle(
-                                color: AppColors.textPrimary, fontSize: 12),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis),
+              children: results
+                  .map(
+                    (p) => InkWell(
+                      onTap: () => onSelect(p),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 8,
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                p.webName,
+                                style: const TextStyle(
+                                  color: AppColors.textPrimary,
+                                  fontSize: 12,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            Text(
+                              formatPrice(p.nowCost),
+                              style: const TextStyle(
+                                color: AppColors.textSecondary,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      Text(formatPrice(p.nowCost),
-                          style: const TextStyle(
-                              color: AppColors.textSecondary, fontSize: 11)),
-                    ],
-                  ),
-                ),
-              )).toList(),
+                    ),
+                  )
+                  .toList(),
             ),
           ),
       ],
@@ -1013,10 +1126,16 @@ class _RadarTabState extends State<_RadarTab> {
             child: CachedNetworkImage(
               imageUrl: player.photoUrl,
               fit: BoxFit.cover,
-              placeholder: (_, __) => const Icon(Icons.person,
-                  color: AppColors.textSecondary, size: 18),
-              errorWidget: (_, __, ___) => const Icon(Icons.person,
-                  color: AppColors.textSecondary, size: 18),
+              placeholder: (_, __) => const Icon(
+                Icons.person,
+                color: AppColors.textSecondary,
+                size: 18,
+              ),
+              errorWidget: (_, __, ___) => const Icon(
+                Icons.person,
+                color: AppColors.textSecondary,
+                size: 18,
+              ),
             ),
           ),
           const SizedBox(width: 6),
@@ -1024,17 +1143,17 @@ class _RadarTabState extends State<_RadarTab> {
             child: Text(
               player.webName,
               style: const TextStyle(
-                  color: AppColors.primary,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700),
+                color: AppColors.primary,
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+              ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
           ),
           GestureDetector(
             onTap: onClear,
-            child: const Icon(Icons.close,
-                color: AppColors.error, size: 16),
+            child: const Icon(Icons.close, color: AppColors.error, size: 16),
           ),
         ],
       ),
@@ -1043,7 +1162,12 @@ class _RadarTabState extends State<_RadarTab> {
 
   Widget _buildRadarCard(BuildContext context, Player a, Player? b) {
     // Normalize stats to 0-1: ICT, Influence, Creativity, Threat, PPG, Form
-    double maxIct = 200, maxInf = 200, maxCre = 200, maxThr = 200, maxPpg = 12, maxForm = 10;
+    double maxIct = 200,
+        maxInf = 200,
+        maxCre = 200,
+        maxThr = 200,
+        maxPpg = 12,
+        maxForm = 10;
 
     List<double> normalise(Player p) => [
       (p.ictValue / maxIct).clamp(0.0, 1.0),
@@ -1054,7 +1178,14 @@ class _RadarTabState extends State<_RadarTab> {
       (p.formValue / maxForm).clamp(0.0, 1.0),
     ];
 
-    final labelsText = ['ICT', 'Influence', 'Creativity', 'Threat', 'PPG', 'Form'];
+    final labelsText = [
+      'ICT',
+      'Influence',
+      'Creativity',
+      'Threat',
+      'PPG',
+      'Form',
+    ];
     final valuesA = normalise(a);
     final valuesB = b != null ? normalise(b) : <double>[];
 
@@ -1067,9 +1198,10 @@ class _RadarTabState extends State<_RadarTab> {
           const Text(
             'Attribute Radar',
             style: TextStyle(
-                color: AppColors.textPrimary,
-                fontSize: 14,
-                fontWeight: FontWeight.w700),
+              color: AppColors.textPrimary,
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+            ),
           ),
           const SizedBox(height: 8),
           Row(
@@ -1112,20 +1244,25 @@ class _RadarTabState extends State<_RadarTab> {
                 radarBorderData: const BorderSide(color: AppColors.divider),
                 titlePositionPercentageOffset: 0.2,
                 titleTextStyle: const TextStyle(
-                    color: AppColors.textSecondary, fontSize: 10),
+                  color: AppColors.textSecondary,
+                  fontSize: 10,
+                ),
                 getTitle: (index, angle) {
-                  return RadarChartTitle(
-                    text: labelsText[index],
-                    angle: angle,
-                  );
+                  return RadarChartTitle(text: labelsText[index], angle: angle);
                 },
                 tickCount: 4,
                 ticksTextStyle: const TextStyle(
-                    color: Colors.transparent, fontSize: 0),
-                tickBorderData:
-                    const BorderSide(color: AppColors.divider, width: 0.5),
-                gridBorderData:
-                    const BorderSide(color: AppColors.divider, width: 0.5),
+                  color: Colors.transparent,
+                  fontSize: 0,
+                ),
+                tickBorderData: const BorderSide(
+                  color: AppColors.divider,
+                  width: 0.5,
+                ),
+                gridBorderData: const BorderSide(
+                  color: AppColors.divider,
+                  width: 0.5,
+                ),
               ),
             ),
           ),
@@ -1139,28 +1276,61 @@ class _RadarTabState extends State<_RadarTab> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-            width: 10,
-            height: 10,
-            decoration:
-                BoxDecoration(color: color, shape: BoxShape.circle)),
+          width: 10,
+          height: 10,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
         const SizedBox(width: 4),
-        Text(label,
-            style: TextStyle(
-                color: color, fontSize: 11, fontWeight: FontWeight.w600)),
+        Text(
+          label,
+          style: TextStyle(
+            color: color,
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
       ],
     );
   }
 
   Widget _buildStatsCompareTable(Player a, Player? b) {
     final rows = [
-      ('Total Points', '${a.totalPoints}', b != null ? '${b.totalPoints}' : '–'),
+      (
+        'Total Points',
+        '${a.totalPoints}',
+        b != null ? '${b.totalPoints}' : '–',
+      ),
       ('Form', formatForm(a.form), b != null ? formatForm(b.form) : '–'),
-      ('ICT Index', a.ictValue.toStringAsFixed(1), b != null ? b.ictValue.toStringAsFixed(1) : '–'),
-      ('Influence', a.influenceValue.toStringAsFixed(1), b != null ? b.influenceValue.toStringAsFixed(1) : '–'),
-      ('Creativity', a.creativityValue.toStringAsFixed(1), b != null ? b.creativityValue.toStringAsFixed(1) : '–'),
-      ('Threat', a.threatValue.toStringAsFixed(1), b != null ? b.threatValue.toStringAsFixed(1) : '–'),
-      ('PPG', formatDouble(a.pointsPerGame), b != null ? formatDouble(b.pointsPerGame) : '–'),
-      ('Price', formatPrice(a.nowCost), b != null ? formatPrice(b.nowCost) : '–'),
+      (
+        'ICT Index',
+        a.ictValue.toStringAsFixed(1),
+        b != null ? b.ictValue.toStringAsFixed(1) : '–',
+      ),
+      (
+        'Influence',
+        a.influenceValue.toStringAsFixed(1),
+        b != null ? b.influenceValue.toStringAsFixed(1) : '–',
+      ),
+      (
+        'Creativity',
+        a.creativityValue.toStringAsFixed(1),
+        b != null ? b.creativityValue.toStringAsFixed(1) : '–',
+      ),
+      (
+        'Threat',
+        a.threatValue.toStringAsFixed(1),
+        b != null ? b.threatValue.toStringAsFixed(1) : '–',
+      ),
+      (
+        'PPG',
+        formatDouble(a.pointsPerGame),
+        b != null ? formatDouble(b.pointsPerGame) : '–',
+      ),
+      (
+        'Price',
+        formatPrice(a.nowCost),
+        b != null ? formatPrice(b.nowCost) : '–',
+      ),
     ];
 
     return Container(
@@ -1172,70 +1342,87 @@ class _RadarTabState extends State<_RadarTab> {
             child: Row(
               children: [
                 Expanded(
-                    child: Text(a.webName,
-                        style: const TextStyle(
-                            color: AppColors.primary,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600))),
-                const Text('Stat',
-                    style: TextStyle(
-                        color: AppColors.textSecondary, fontSize: 11)),
+                  child: Text(
+                    a.webName,
+                    style: const TextStyle(
+                      color: AppColors.primary,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                const Text(
+                  'Stat',
+                  style: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 11,
+                  ),
+                ),
                 Expanded(
-                    child: Text(b?.webName ?? '–',
-                        style: const TextStyle(
-                            color: AppColors.accent,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600),
-                        textAlign: TextAlign.right)),
+                  child: Text(
+                    b?.webName ?? '–',
+                    style: const TextStyle(
+                      color: AppColors.accent,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    textAlign: TextAlign.right,
+                  ),
+                ),
               ],
             ),
           ),
           const Divider(height: 1, color: AppColors.divider),
           ...rows.map((r) {
-            final numA = double.tryParse(
-                    r.$2.replaceAll(RegExp(r'[£%m]'), '')) ??
-                0;
-            final numB = double.tryParse(
-                    r.$3.replaceAll(RegExp(r'[£%m]'), '')) ??
-                0;
+            final numA =
+                double.tryParse(r.$2.replaceAll(RegExp(r'[£%m]'), '')) ?? 0;
+            final numB =
+                double.tryParse(r.$3.replaceAll(RegExp(r'[£%m]'), '')) ?? 0;
             final aWins = b != null && numA > numB;
             final bWins = b != null && numB > numA;
             return Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: const BoxDecoration(
-                  border: Border(
-                      bottom: BorderSide(
-                          color: AppColors.divider, width: 0.5))),
+                border: Border(
+                  bottom: BorderSide(color: AppColors.divider, width: 0.5),
+                ),
+              ),
               child: Row(
                 children: [
                   Expanded(
-                      child: Text(r.$2,
-                          style: TextStyle(
-                              color: aWins
-                                  ? AppColors.primary
-                                  : AppColors.textPrimary,
-                              fontSize: 13,
-                              fontWeight: aWins
-                                  ? FontWeight.w700
-                                  : FontWeight.w400))),
+                    child: Text(
+                      r.$2,
+                      style: TextStyle(
+                        color: aWins
+                            ? AppColors.primary
+                            : AppColors.textPrimary,
+                        fontSize: 13,
+                        fontWeight: aWins ? FontWeight.w700 : FontWeight.w400,
+                      ),
+                    ),
+                  ),
                   SizedBox(
-                      width: 80,
-                      child: Text(r.$1,
-                          style: const TextStyle(
-                              color: AppColors.textSecondary, fontSize: 10),
-                          textAlign: TextAlign.center)),
+                    width: 80,
+                    child: Text(
+                      r.$1,
+                      style: const TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 10,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
                   Expanded(
-                      child: Text(r.$3,
-                          style: TextStyle(
-                              color: bWins
-                                  ? AppColors.accent
-                                  : AppColors.textPrimary,
-                              fontSize: 13,
-                              fontWeight: bWins
-                                  ? FontWeight.w700
-                                  : FontWeight.w400),
-                          textAlign: TextAlign.right)),
+                    child: Text(
+                      r.$3,
+                      style: TextStyle(
+                        color: bWins ? AppColors.accent : AppColors.textPrimary,
+                        fontSize: 13,
+                        fontWeight: bWins ? FontWeight.w700 : FontWeight.w400,
+                      ),
+                      textAlign: TextAlign.right,
+                    ),
+                  ),
                 ],
               ),
             );

@@ -16,6 +16,7 @@ import 'player_detail_screen.dart';
 import 'gameweek_detail_screen.dart';
 import 'fixture_detail_screen.dart';
 import 'season_trend_detail_screen.dart';
+import 'form_leaders_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -30,13 +31,13 @@ class DashboardScreen extends StatelessWidget {
           body: provider.isLoading
               ? const _DashboardSkeleton()
               : provider.error != null && provider.players.isEmpty
-                  ? _buildError(context, provider)
-                  : RefreshIndicator(
-                      color: AppColors.primary,
-                      backgroundColor: AppColors.cardDark,
-                      onRefresh: provider.refresh,
-                      child: _DashboardContent(provider: provider),
-                    ),
+              ? _buildError(context, provider)
+              : RefreshIndicator(
+                  color: AppColors.primary,
+                  backgroundColor: AppColors.cardDark,
+                  onRefresh: provider.refresh,
+                  child: _DashboardContent(provider: provider),
+                ),
         );
       },
     );
@@ -94,7 +95,10 @@ class DashboardScreen extends StatelessWidget {
             ),
           ),
         IconButton(
-          icon: const Icon(Icons.refresh_rounded, color: AppColors.textSecondary),
+          icon: const Icon(
+            Icons.refresh_rounded,
+            color: AppColors.textSecondary,
+          ),
           onPressed: provider.refresh,
         ),
       ],
@@ -125,12 +129,20 @@ class DashboardScreen extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: AppColors.secondary,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
               onPressed: provider.loadAllData,
               icon: const Icon(Icons.refresh),
-              label: const Text('Retry', style: TextStyle(fontWeight: FontWeight.w700)),
+              label: const Text(
+                'Retry',
+                style: TextStyle(fontWeight: FontWeight.w700),
+              ),
             ),
           ],
         ),
@@ -149,47 +161,55 @@ class _DashboardContent extends StatelessWidget {
     final topScorer = provider.getTopScorersByPoints(limit: 1).firstOrNull;
     final topAssist = provider.getTopScorersByAssists(limit: 1).firstOrNull;
     final topSelected = provider.players.isNotEmpty
-        ? (List<Player>.from(provider.players)
-              ..sort((a, b) => b.selectedPercent.compareTo(a.selectedPercent)))
-            .first
+        ? (List<Player>.from(
+                provider.players,
+              )..sort((a, b) => b.selectedPercent.compareTo(a.selectedPercent)))
+              .first
         : null;
     final topValue = provider.players.isNotEmpty
-        ? (List<Player>.from(provider.players)
-              ..sort((a, b) => b.valueSeasonValue.compareTo(a.valueSeasonValue)))
-            .first
+        ? (List<Player>.from(provider.players)..sort(
+                (a, b) => b.valueSeasonValue.compareTo(a.valueSeasonValue),
+              ))
+              .first
         : null;
 
     return CustomScrollView(
-          slivers: [
-            SliverPadding(
-              padding: const EdgeInsets.all(16),
-              sliver: SliverList(
-                delegate: SliverChildListDelegate([
-                  _buildCurrentGwBanner(context),
-                  const SizedBox(height: 16),
-                  _buildSparklines(context),
-                  const SizedBox(height: 16),
-                  _buildSectionTitle(context, 'Highlights'),
-                  const SizedBox(height: 12),
-                  _buildStatsGrid(context, topScorer, topAssist, topSelected, topValue),
-                  const SizedBox(height: 20),
-                  _buildSectionTitle(context, 'Top Performers'),
-                  const SizedBox(height: 12),
-                  _buildTopPerformers(context),
-                  const SizedBox(height: 20),
-                  _buildSectionTitle(context, 'Transfer Activity'),
-                  const SizedBox(height: 12),
-                  _buildTransferSection(context),
-                  const SizedBox(height: 20),
-                  _buildSectionTitle(context, 'Upcoming Fixtures'),
-                  const SizedBox(height: 12),
-                  _buildUpcomingFixtures(context),
-                  const SizedBox(height: 24),
-                ]),
+      slivers: [
+        SliverPadding(
+          padding: const EdgeInsets.all(16),
+          sliver: SliverList(
+            delegate: SliverChildListDelegate([
+              _buildCurrentGwBanner(context),
+              const SizedBox(height: 16),
+              _buildSparklines(context),
+              const SizedBox(height: 16),
+              _buildSectionTitle(context, 'Highlights'),
+              const SizedBox(height: 12),
+              _buildStatsGrid(
+                context,
+                topScorer,
+                topAssist,
+                topSelected,
+                topValue,
               ),
-            ),
-          ],
-        );
+              const SizedBox(height: 20),
+              _buildSectionTitle(context, 'Top Performers'),
+              const SizedBox(height: 12),
+              _buildTopPerformers(context),
+              const SizedBox(height: 20),
+              _buildSectionTitle(context, 'Transfer Activity'),
+              const SizedBox(height: 12),
+              _buildTransferSection(context),
+              const SizedBox(height: 20),
+              _buildSectionTitle(context, 'Upcoming Fixtures'),
+              const SizedBox(height: 12),
+              _buildUpcomingFixtures(context),
+              const SizedBox(height: 24),
+            ]),
+          ),
+        ),
+      ],
+    );
   }
 
   Widget _buildCurrentGwBanner(BuildContext context) {
@@ -203,82 +223,89 @@ class _DashboardContent extends StatelessWidget {
         ),
       ),
       child: Container(
-      padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF160D36), Color(0xFF0D0622)],
+        padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFF160D36), Color(0xFF0D0622)],
+          ),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.divider, width: 1),
         ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.divider, width: 1),
-      ),
-      child: Row(
-        children: [
-          // GW label badge
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              color: AppColors.primary.withAlpha(22),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: AppColors.primary.withAlpha(80)),
-            ),
-            child: Text(
-              gw.name,
-              style: const TextStyle(
-                color: AppColors.primary,
-                fontSize: 13,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 0.2,
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withAlpha(22),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: AppColors.primary.withAlpha(80)),
+              ),
+              child: Text(
+                gw.name,
+                style: const TextStyle(
+                  color: AppColors.primary,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.2,
+                ),
               ),
             ),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  gw.statusLabel,
-                  style: const TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                if (gw.averageEntryScore != null)
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Text(
-                    'Avg ${gw.averageEntryScore} pts',
+                    gw.statusLabel,
                     style: const TextStyle(
-                        color: AppColors.textSecondary, fontSize: 12),
+                      color: AppColors.textPrimary,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
-              ],
+                  if (gw.averageEntryScore != null)
+                    Text(
+                      'Avg ${gw.averageEntryScore} pts',
+                      style: const TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 12,
+                      ),
+                    ),
+                ],
+              ),
             ),
-          ),
-          if (gw.highestScore != null)
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  '${gw.highestScore}',
-                  style: const TextStyle(
-                    color: AppColors.primary,
-                    fontSize: 30,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -1,
+            if (gw.highestScore != null)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    '${gw.highestScore}',
+                    style: const TextStyle(
+                      color: AppColors.primary,
+                      fontSize: 30,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -1,
+                    ),
                   ),
-                ),
-                const Text(
-                  'High Score',
-                  style: TextStyle(
-                      color: AppColors.textSecondary, fontSize: 10),
-                ),
-              ],
+                  const Text(
+                    'High Score',
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 10,
+                    ),
+                  ),
+                ],
+              ),
+            const SizedBox(width: 6),
+            const Icon(
+              Icons.chevron_right_rounded,
+              color: AppColors.textSecondary,
+              size: 16,
             ),
-          const SizedBox(width: 6),
-          const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary, size: 16),
-        ],
-      ),
+          ],
+        ),
       ),
     ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.08, end: 0);
   }
@@ -325,7 +352,8 @@ class _DashboardContent extends StatelessWidget {
                 onTap: () => Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => SeasonTrendScreenFactory.avgScore(finishedGws),
+                    builder: (_) =>
+                        SeasonTrendScreenFactory.avgScore(finishedGws),
                   ),
                 ),
               ),
@@ -342,7 +370,8 @@ class _DashboardContent extends StatelessWidget {
                 onTap: () => Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => SeasonTrendScreenFactory.highScore(finishedGws),
+                    builder: (_) =>
+                        SeasonTrendScreenFactory.highScore(finishedGws),
                   ),
                 ),
               ),
@@ -365,7 +394,8 @@ class _DashboardContent extends StatelessWidget {
                 onTap: () => Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => SeasonTrendScreenFactory.transfers(finishedGws),
+                    builder: (_) =>
+                        SeasonTrendScreenFactory.transfers(finishedGws),
                   ),
                 ),
               ),
@@ -375,12 +405,14 @@ class _DashboardContent extends StatelessWidget {
               child: _buildSparkCard(
                 context,
                 'Top Form (live)',
-                formValues.isEmpty
-                    ? '–'
-                    : formValues.first.toStringAsFixed(1),
+                formValues.isEmpty ? '–' : formValues.first.toStringAsFixed(1),
                 formValues,
                 const Color(0xFF34D399),
                 Icons.trending_up_rounded,
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const FormLeadersScreen()),
+                ),
               ),
             ),
           ],
@@ -402,46 +434,51 @@ class _DashboardContent extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-      padding: const EdgeInsets.all(12),
-      decoration: AppTheme.gradientCard(),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, color: color, size: 14),
-              const SizedBox(width: 6),
-              Expanded(
-                child: Text(
-                  title,
-                  style: const TextStyle(
-                      color: AppColors.textSecondary, fontSize: 10),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+        padding: const EdgeInsets.all(12),
+        decoration: AppTheme.gradientCard(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(icon, color: color, size: 14),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: const TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 10,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Text(
-            value,
-            style: TextStyle(
-              color: color,
-              fontSize: 18,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.5,
+                if (onTap != null)
+                  const Icon(
+                    Icons.chevron_right_rounded,
+                    color: AppColors.textSecondary,
+                    size: 14,
+                  ),
+              ],
             ),
-          ),
-          const SizedBox(height: 8),
-          if (hasData)
-            SizedBox(
-              height: 40,
-              child: _buildSparkline(data, color),
-            )
-          else
-            const SizedBox(height: 40),
-        ],
-      ),
+            const SizedBox(height: 6),
+            Text(
+              value,
+              style: TextStyle(
+                color: color,
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.5,
+              ),
+            ),
+            const SizedBox(height: 8),
+            if (hasData)
+              SizedBox(height: 40, child: _buildSparkline(data, color))
+            else
+              const SizedBox(height: 40),
+          ],
+        ),
       ),
     );
   }
@@ -466,10 +503,7 @@ class _DashboardContent extends StatelessWidget {
             color: color,
             barWidth: 2,
             dotData: const FlDotData(show: false),
-            belowBarData: BarAreaData(
-              show: true,
-              color: color.withAlpha(40),
-            ),
+            belowBarData: BarAreaData(show: true, color: color.withAlpha(40)),
           ),
         ],
         titlesData: const FlTitlesData(
@@ -486,8 +520,6 @@ class _DashboardContent extends StatelessWidget {
       ),
     );
   }
-
-
 
   Widget _buildSectionTitle(BuildContext context, String title) {
     return AppTheme.sectionTitle(context, title);
@@ -554,11 +586,51 @@ class _DashboardContent extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
               children: [
-                const Expanded(flex: 3, child: Text('Player', style: TextStyle(color: AppColors.textSecondary, fontSize: 12, fontWeight: FontWeight.w600))),
+                const Expanded(
+                  flex: 3,
+                  child: Text(
+                    'Player',
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
                 const SizedBox(width: 8),
-                const Expanded(child: Text('Pts', style: TextStyle(color: AppColors.textSecondary, fontSize: 12, fontWeight: FontWeight.w600), textAlign: TextAlign.center)),
-                const Expanded(child: Text('Form', style: TextStyle(color: AppColors.textSecondary, fontSize: 12, fontWeight: FontWeight.w600), textAlign: TextAlign.center)),
-                const Expanded(child: Text('Price', style: TextStyle(color: AppColors.textSecondary, fontSize: 12, fontWeight: FontWeight.w600), textAlign: TextAlign.center)),
+                const Expanded(
+                  child: Text(
+                    'Pts',
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                const Expanded(
+                  child: Text(
+                    'Form',
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                const Expanded(
+                  child: Text(
+                    'Price',
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
               ],
             ),
           ),
@@ -568,11 +640,24 @@ class _DashboardContent extends StatelessWidget {
             final player = entry.value;
             final team = provider.getTeamById(player.teamId);
             return InkWell(
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => PlayerDetailScreen(player: player))),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => PlayerDetailScreen(player: player),
+                ),
+              ),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
                 decoration: BoxDecoration(
-                  border: Border(bottom: BorderSide(color: AppColors.divider, width: idx < top.length - 1 ? 1 : 0)),
+                  border: Border(
+                    bottom: BorderSide(
+                      color: AppColors.divider,
+                      width: idx < top.length - 1 ? 1 : 0,
+                    ),
+                  ),
                 ),
                 child: Row(
                   children: [
@@ -588,8 +673,16 @@ class _DashboardContent extends StatelessWidget {
                       child: CachedNetworkImage(
                         imageUrl: player.photoUrl,
                         fit: BoxFit.cover,
-                        placeholder: (_, __) => const Icon(Icons.person, color: AppColors.textSecondary, size: 18),
-                        errorWidget: (_, __, ___) => const Icon(Icons.person, color: AppColors.textSecondary, size: 18),
+                        placeholder: (_, __) => const Icon(
+                          Icons.person,
+                          color: AppColors.textSecondary,
+                          size: 18,
+                        ),
+                        errorWidget: (_, __, ___) => const Icon(
+                          Icons.person,
+                          color: AppColors.textSecondary,
+                          size: 18,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -598,14 +691,18 @@ class _DashboardContent extends StatelessWidget {
                       width: 20,
                       height: 20,
                       decoration: BoxDecoration(
-                        color: idx == 0 ? AppColors.primary : AppColors.cardMedium,
+                        color: idx == 0
+                            ? AppColors.primary
+                            : AppColors.cardMedium,
                         shape: BoxShape.circle,
                       ),
                       child: Center(
                         child: Text(
                           '${idx + 1}',
                           style: TextStyle(
-                            color: idx == 0 ? AppColors.secondary : AppColors.textSecondary,
+                            color: idx == 0
+                                ? AppColors.secondary
+                                : AppColors.textSecondary,
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
                           ),
@@ -620,13 +717,20 @@ class _DashboardContent extends StatelessWidget {
                         children: [
                           Text(
                             player.webName,
-                            style: const TextStyle(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w600),
+                            style: const TextStyle(
+                              color: AppColors.textPrimary,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                            ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                           Text(
                             team?.shortName ?? '',
-                            style: const TextStyle(color: AppColors.textSecondary, fontSize: 11),
+                            style: const TextStyle(
+                              color: AppColors.textSecondary,
+                              fontSize: 11,
+                            ),
                           ),
                         ],
                       ),
@@ -634,21 +738,31 @@ class _DashboardContent extends StatelessWidget {
                     Expanded(
                       child: Text(
                         '${player.totalPoints}',
-                        style: const TextStyle(color: AppColors.primary, fontSize: 14, fontWeight: FontWeight.w700),
+                        style: const TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                        ),
                         textAlign: TextAlign.center,
                       ),
                     ),
                     Expanded(
                       child: Text(
                         formatForm(player.form),
-                        style: const TextStyle(color: AppColors.accent, fontSize: 13),
+                        style: const TextStyle(
+                          color: AppColors.accent,
+                          fontSize: 13,
+                        ),
                         textAlign: TextAlign.center,
                       ),
                     ),
                     Expanded(
                       child: Text(
                         formatPrice(player.nowCost),
-                        style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                        style: const TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 12,
+                        ),
                         textAlign: TextAlign.center,
                       ),
                     ),
@@ -669,9 +783,7 @@ class _DashboardContent extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          child: _buildTransferList(context, 'In', transfersIn, true),
-        ),
+        Expanded(child: _buildTransferList(context, 'In', transfersIn, true)),
         const SizedBox(width: 12),
         Expanded(
           child: _buildTransferList(context, 'Out', transfersOut, false),
@@ -680,7 +792,12 @@ class _DashboardContent extends StatelessWidget {
     );
   }
 
-  Widget _buildTransferList(BuildContext context, String title, List<Player> players, bool isIn) {
+  Widget _buildTransferList(
+    BuildContext context,
+    String title,
+    List<Player> players,
+    bool isIn,
+  ) {
     return Container(
       decoration: AppTheme.gradientCard(),
       child: Column(
@@ -690,12 +807,19 @@ class _DashboardContent extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
             child: Row(
               children: [
-                Icon(isIn ? Icons.arrow_circle_up : Icons.arrow_circle_down,
-                    color: isIn ? AppColors.primary : AppColors.error, size: 16),
+                Icon(
+                  isIn ? Icons.arrow_circle_up : Icons.arrow_circle_down,
+                  color: isIn ? AppColors.primary : AppColors.error,
+                  size: 16,
+                ),
                 const SizedBox(width: 6),
                 Text(
                   'Transfers $title',
-                  style: const TextStyle(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ],
             ),
@@ -704,9 +828,17 @@ class _DashboardContent extends StatelessWidget {
           ...players.map((p) {
             final count = isIn ? p.transfersInEvent : p.transfersOutEvent;
             return InkWell(
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => PlayerDetailScreen(player: p))),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => PlayerDetailScreen(player: p),
+                ),
+              ),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 7,
+                ),
                 child: Row(
                   children: [
                     Container(
@@ -720,15 +852,26 @@ class _DashboardContent extends StatelessWidget {
                       child: CachedNetworkImage(
                         imageUrl: p.photoUrl,
                         fit: BoxFit.cover,
-                        placeholder: (_, __) => const Icon(Icons.person, color: AppColors.textSecondary, size: 14),
-                        errorWidget: (_, __, ___) => const Icon(Icons.person, color: AppColors.textSecondary, size: 14),
+                        placeholder: (_, __) => const Icon(
+                          Icons.person,
+                          color: AppColors.textSecondary,
+                          size: 14,
+                        ),
+                        errorWidget: (_, __, ___) => const Icon(
+                          Icons.person,
+                          color: AppColors.textSecondary,
+                          size: 14,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         p.webName,
-                        style: const TextStyle(color: AppColors.textPrimary, fontSize: 12),
+                        style: const TextStyle(
+                          color: AppColors.textPrimary,
+                          fontSize: 12,
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -760,13 +903,18 @@ class _DashboardContent extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         decoration: AppTheme.gradientCard(),
         child: const Center(
-          child: Text('No upcoming fixtures', style: TextStyle(color: AppColors.textSecondary)),
+          child: Text(
+            'No upcoming fixtures',
+            style: TextStyle(color: AppColors.textSecondary),
+          ),
         ),
       );
     }
 
     return Column(
-      children: upcoming.map((fixture) => _buildFixtureRow(context, fixture)).toList(),
+      children: upcoming
+          .map((fixture) => _buildFixtureRow(context, fixture))
+          .toList(),
     );
   }
 
@@ -786,86 +934,105 @@ class _DashboardContent extends StatelessWidget {
         ),
       ),
       child: Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(12),
-      decoration: AppTheme.gradientCard(),
-      child: Row(
-        children: [
-          Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.all(12),
+        decoration: AppTheme.gradientCard(),
+        child: Row(
+          children: [
+            Expanded(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Flexible(
+                    child: Text(
+                      home?.shortName ?? '?',
+                      style: const TextStyle(
+                        color: AppColors.textPrimary,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      textAlign: TextAlign.right,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  if (home != null)
+                    CachedNetworkImage(
+                      imageUrl: home.badgeUrl,
+                      width: 26,
+                      height: 26,
+                      fit: BoxFit.contain,
+                      placeholder: (_, __) =>
+                          const SizedBox(width: 26, height: 26),
+                      errorWidget: (_, __, ___) =>
+                          const SizedBox(width: 26, height: 26),
+                    ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: AppColors.cardMedium,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: fixture.hasResult
+                  ? Text(
+                      '${fixture.homeTeamScore} - ${fixture.awayTeamScore}',
+                      style: const TextStyle(
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                      ),
+                    )
+                  : Text(
+                      formatDateShort(fixture.kickoffTime),
+                      style: const TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 12,
+                      ),
+                    ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Row(
+                children: [
+                  if (away != null)
+                    CachedNetworkImage(
+                      imageUrl: away.badgeUrl,
+                      width: 26,
+                      height: 26,
+                      fit: BoxFit.contain,
+                      placeholder: (_, __) =>
+                          const SizedBox(width: 26, height: 26),
+                      errorWidget: (_, __, ___) =>
+                          const SizedBox(width: 26, height: 26),
+                    ),
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: Text(
+                      away?.shortName ?? '?',
+                      style: const TextStyle(
+                        color: AppColors.textPrimary,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Row(
               children: [
-                Flexible(
-                  child: Text(
-                    home?.shortName ?? '?',
-                    style: const TextStyle(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w600),
-                    textAlign: TextAlign.right,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                const SizedBox(width: 6),
-                if (home != null)
-                  CachedNetworkImage(
-                    imageUrl: home.badgeUrl,
-                    width: 26,
-                    height: 26,
-                    fit: BoxFit.contain,
-                    placeholder: (_, __) => const SizedBox(width: 26, height: 26),
-                    errorWidget: (_, __, ___) => const SizedBox(width: 26, height: 26),
-                  ),
+                DifficultyBadge(difficulty: fixture.teamHDifficulty, size: 22),
+                const SizedBox(width: 2),
+                DifficultyBadge(difficulty: fixture.teamADifficulty, size: 22),
               ],
             ),
-          ),
-          const SizedBox(width: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: AppColors.cardMedium,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: fixture.hasResult
-                ? Text(
-                    '${fixture.homeTeamScore} - ${fixture.awayTeamScore}',
-                    style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700, fontSize: 13),
-                  )
-                : Text(
-                    formatDateShort(fixture.kickoffTime),
-                    style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
-                  ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Row(
-              children: [
-                if (away != null)
-                  CachedNetworkImage(
-                    imageUrl: away.badgeUrl,
-                    width: 26,
-                    height: 26,
-                    fit: BoxFit.contain,
-                    placeholder: (_, __) => const SizedBox(width: 26, height: 26),
-                    errorWidget: (_, __, ___) => const SizedBox(width: 26, height: 26),
-                  ),
-                const SizedBox(width: 6),
-                Flexible(
-                  child: Text(
-                    away?.shortName ?? '?',
-                    style: const TextStyle(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w600),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Row(
-            children: [
-              DifficultyBadge(difficulty: fixture.teamHDifficulty, size: 22),
-              const SizedBox(width: 2),
-              DifficultyBadge(difficulty: fixture.teamADifficulty, size: 22),
-            ],
-          ),
-        ],
-      ),
+          ],
+        ),
       ),
     );
   }

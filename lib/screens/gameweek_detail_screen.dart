@@ -8,7 +8,7 @@ import '../utils/constants.dart';
 import '../utils/formatters.dart';
 import 'player_detail_screen.dart';
 
-class GameweekDetailScreen extends StatelessWidget {
+class GameweekDetailScreen extends StatefulWidget {
   final Gameweek gw;
   final FplProvider provider;
 
@@ -19,7 +19,22 @@ class GameweekDetailScreen extends StatelessWidget {
   });
 
   @override
+  State<GameweekDetailScreen> createState() => _GameweekDetailScreenState();
+}
+
+class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.provider.loadDreamTeam(widget.gw.id);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final gw = widget.gw;
+    final provider = widget.provider;
     final topPlayer =
         gw.topElement != null ? provider.getPlayerById(gw.topElement!) : null;
     final topPlayerTeam =
@@ -98,6 +113,10 @@ class GameweekDetailScreen extends StatelessWidget {
                 icon: Icons.people_rounded,
               ),
             ],
+            const SizedBox(height: 20),
+            AppTheme.sectionTitle(context, 'Dream Team'),
+            const SizedBox(height: 12),
+            _buildDreamTeam(context),
             const SizedBox(height: 20),
             AppTheme.sectionTitle(context, 'Top Performers'),
             const SizedBox(height: 12),
@@ -351,15 +370,75 @@ class GameweekDetailScreen extends StatelessWidget {
     ).animate().fadeIn(delay: 150.ms);
   }
 
+  Widget _buildDreamTeam(BuildContext context) {
+    final squad = widget.provider.getDreamTeam(widget.gw.id);
+    if (squad.isEmpty) {
+      if (widget.gw.finished) {
+        return Container(
+          padding: const EdgeInsets.all(20),
+          decoration: AppTheme.gradientCard(),
+          child: const Center(
+            child: CircularProgressIndicator(color: AppColors.primary),
+          ),
+        );
+      } else {
+        return Container(
+          padding: const EdgeInsets.all(20),
+          decoration: AppTheme.gradientCard(),
+          child: const Center(
+            child: Text(
+              'Dream team will be available after GW completion',
+              style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+            ),
+          ),
+        );
+      }
+    }
+
+    return Container(
+      decoration: AppTheme.gradientCard(),
+      child: Column(
+        children: squad.map((p) {
+          final team = widget.provider.getTeamById(p.teamId);
+          return ListTile(
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => PlayerDetailScreen(player: p)),
+            ),
+            leading: CircleAvatar(
+              backgroundColor: AppColors.cardMedium,
+              backgroundImage: CachedNetworkImageProvider(p.photoUrl),
+            ),
+            title: Text(
+              p.webName,
+              style: const TextStyle(color: AppColors.textPrimary, fontSize: 14),
+            ),
+            subtitle: Text(
+              '${team?.shortName ?? ''} · ${getPositionShort(p.elementType)}',
+              style: const TextStyle(color: AppColors.textSecondary, fontSize: 11),
+            ),
+            trailing: Text(
+              '${p.eventPoints} pts',
+              style: const TextStyle(
+                color: AppColors.primary,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
   Widget _buildTopPerformers(BuildContext context) {
-    final top = provider.getTopScorersByPoints(limit: 10);
+    final top = widget.provider.getTopScorersByPoints(limit: 10);
     return Container(
       decoration: AppTheme.gradientCard(),
       child: Column(
         children: top.asMap().entries.map((entry) {
           final idx = entry.key;
           final player = entry.value;
-          final team = provider.getTeamById(player.teamId);
+          final team = widget.provider.getTeamById(player.teamId);
           return InkWell(
             onTap: () => Navigator.push(
               context,

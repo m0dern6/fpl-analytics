@@ -37,11 +37,13 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen>
     _tabController.addListener(() {
       if (!_tabController.indexIsChanging) {
         final idx = _tabController.index;
-        for (int i = 0; i < _scrollControllers.length; i++) {
-          if (i == idx && _scrollControllers[i].hasClients) {
-            _scrollControllers[i].jumpTo(0);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          final controller = _scrollControllers[idx];
+          if (controller.hasClients) {
+            controller.jumpTo(0);
           }
-        }
+        });
       }
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -72,25 +74,16 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen>
             flexibleSpace: FlexibleSpaceBar(background: _buildHeroHeader(team)),
             bottom: TabBar(
               controller: _tabController,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              labelPadding: const EdgeInsets.symmetric(vertical: 12),
+              indicatorSize: TabBarIndicatorSize.label,
+              indicatorWeight: 3,
+              indicatorColor: AppColors.primary,
+              dividerColor: Colors.white10,
               tabs: const [
-                Tab(
-                  child: Padding(
-                    padding: EdgeInsets.only(top: 8),
-                    child: Text('Overview'),
-                  ),
-                ),
-                Tab(
-                  child: Padding(
-                    padding: EdgeInsets.only(top: 8),
-                    child: Text('History'),
-                  ),
-                ),
-                Tab(
-                  child: Padding(
-                    padding: EdgeInsets.only(top: 8),
-                    child: Text('Fixtures'),
-                  ),
-                ),
+                Tab(text: 'Overview'),
+                Tab(text: 'History'),
+                Tab(text: 'Fixtures'),
               ],
             ),
           ),
@@ -309,7 +302,7 @@ class _OverviewTab extends StatelessWidget {
 
     return SingleChildScrollView(
       controller: scrollController,
-      padding: const EdgeInsets.fromLTRB(16, 26, 16, 16),
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -904,7 +897,7 @@ class _HistoryTabState extends State<_HistoryTab>
 
     return SingleChildScrollView(
       controller: widget.scrollController,
-      padding: const EdgeInsets.fromLTRB(16, 26, 16, 16),
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1201,8 +1194,11 @@ class _HistoryTabState extends State<_HistoryTab>
                   ),
                 ),
                 gridData: FlGridData(
-                  drawVerticalLine: false,
+                  drawVerticalLine: true,
+                  verticalInterval: 1,
                   getDrawingHorizontalLine: (_) =>
+                      const FlLine(color: AppColors.divider, strokeWidth: 0.5),
+                  getDrawingVerticalLine: (_) =>
                       const FlLine(color: AppColors.divider, strokeWidth: 0.5),
                 ),
                 borderData: FlBorderData(show: false),
@@ -1412,24 +1408,25 @@ class _HistoryTabState extends State<_HistoryTab>
     final opp = widget.provider.getTeamById(h.opponentTeam);
     final badgeColor = h.wasHome ? AppColors.primary : AppColors.accent;
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
           decoration: BoxDecoration(
-            color: badgeColor.withAlpha(26),
-            borderRadius: BorderRadius.circular(999),
-            border: Border.all(color: badgeColor.withAlpha(140)),
+            color: badgeColor.withAlpha(20),
+            borderRadius: BorderRadius.circular(4),
+            border: Border.all(color: badgeColor.withAlpha(60)),
           ),
           child: Text(
             h.wasHome ? 'H' : 'A',
             style: TextStyle(
               color: badgeColor,
-              fontSize: 10,
-              fontWeight: FontWeight.w700,
+              fontSize: 9,
+              fontWeight: FontWeight.w900,
             ),
           ),
         ),
-        const SizedBox(width: 4),
+        const SizedBox(width: 6),
         if (opp != null)
           CachedNetworkImage(
             imageUrl: opp.badgeUrl,
@@ -1484,7 +1481,7 @@ class _FixturesTab extends StatelessWidget {
 
     return ListView.separated(
       controller: scrollController,
-      padding: const EdgeInsets.fromLTRB(16, 26, 16, 16),
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
       itemCount: summary!.fixtures.length,
       separatorBuilder: (_, __) => const SizedBox(height: 8),
       itemBuilder: (_, i) {
@@ -1548,7 +1545,7 @@ class _FixturesTab extends StatelessWidget {
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
-                        isHome ? 'H' : 'A',
+                        isHome ? 'Home' : 'Away',
                         style: TextStyle(
                           color: isHome
                               ? AppColors.primary

@@ -22,26 +22,74 @@ class GameweeksScreen extends StatelessWidget {
             title: const Text('Gameweeks'),
             backgroundColor: AppColors.secondary,
           ),
-          body: provider.isLoading
-              ? const LoadingListWidget()
-              : RefreshIndicator(
-                  color: AppColors.primary,
-                  backgroundColor: AppColors.cardDark,
-                  onRefresh: provider.refresh,
-                  child: ListView.separated(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: provider.gameweeks.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 8),
-                    itemBuilder: (ctx, i) {
-                      final gw = provider.gameweeks[i];
-                      return _GameweekCard(gw: gw, provider: provider)
-                          .animate()
-                          .fadeIn(delay: Duration(milliseconds: i * 30));
-                    },
-                  ),
-                ),
+          body: _GameweeksList(provider: provider),
         );
       },
+    );
+  }
+}
+
+class _GameweeksList extends StatefulWidget {
+  final FplProvider provider;
+
+  const _GameweeksList({required this.provider});
+
+  @override
+  State<_GameweeksList> createState() => _GameweeksListState();
+}
+
+class _GameweeksListState extends State<_GameweeksList> {
+  final ScrollController _scrollController = ScrollController();
+  bool _didAutoScroll = false;
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final provider = widget.provider;
+    if (provider.isLoading) {
+      return const LoadingListWidget();
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _didAutoScroll || provider.gameweeks.isEmpty) return;
+      final targetGw =
+          provider.currentGameweek?.id ?? provider.gameweeks.last.id;
+      final targetIndex = provider.gameweeks.indexWhere(
+        (gw) => gw.id == targetGw,
+      );
+      if (targetIndex >= 0 && _scrollController.hasClients) {
+        _scrollController.jumpTo(
+          (targetIndex * 132.0).clamp(
+            0.0,
+            _scrollController.position.maxScrollExtent,
+          ),
+        );
+      }
+      _didAutoScroll = true;
+    });
+
+    return RefreshIndicator(
+      color: AppColors.primary,
+      backgroundColor: AppColors.cardDark,
+      onRefresh: provider.refresh,
+      child: ListView.separated(
+        controller: _scrollController,
+        padding: const EdgeInsets.all(16),
+        itemCount: provider.gameweeks.length,
+        separatorBuilder: (_, __) => const SizedBox(height: 8),
+        itemBuilder: (ctx, i) {
+          final gw = provider.gameweeks[i];
+          return _GameweekCard(
+            gw: gw,
+            provider: provider,
+          ).animate().fadeIn(delay: Duration(milliseconds: i * 30));
+        },
+      ),
     );
   }
 }
@@ -55,13 +103,19 @@ class _GameweekCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isHighlighted = gw.isCurrent || gw.isNext;
-    final topElementPlayer = gw.topElement != null ? provider.getPlayerById(gw.topElement!) : null;
-    final mostTransferredPlayer = gw.mostTransferredIn != null ? provider.getPlayerById(gw.mostTransferredIn!) : null;
+    final topElementPlayer = gw.topElement != null
+        ? provider.getPlayerById(gw.topElement!)
+        : null;
+    final mostTransferredPlayer = gw.mostTransferredIn != null
+        ? provider.getPlayerById(gw.mostTransferredIn!)
+        : null;
 
     return GestureDetector(
       onTap: () => Navigator.push(
         context,
-        MaterialPageRoute(builder: (_) => FixturesScreen(initialGameweek: gw.id)),
+        MaterialPageRoute(
+          builder: (_) => FixturesScreen(initialGameweek: gw.id),
+        ),
       ),
       child: Container(
         padding: const EdgeInsets.all(14),
@@ -79,7 +133,9 @@ class _GameweekCard extends StatelessWidget {
                       Text(
                         gw.name,
                         style: TextStyle(
-                          color: isHighlighted ? AppColors.primary : AppColors.textPrimary,
+                          color: isHighlighted
+                              ? AppColors.primary
+                              : AppColors.textPrimary,
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
                         ),
@@ -91,10 +147,17 @@ class _GameweekCard extends StatelessWidget {
                 ),
                 Text(
                   formatDateShort(gw.deadlineTime),
-                  style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                  style: const TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 12,
+                  ),
                 ),
                 const SizedBox(width: 8),
-                const Icon(Icons.chevron_right, color: AppColors.textSecondary, size: 18),
+                const Icon(
+                  Icons.chevron_right,
+                  color: AppColors.textSecondary,
+                  size: 18,
+                ),
               ],
             ),
             if (gw.finished || gw.isCurrent) ...[
@@ -123,7 +186,10 @@ class _GameweekCard extends StatelessWidget {
                     const SizedBox(width: 4),
                     Text(
                       'Top: ${topElementPlayer.webName}',
-                      style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                      style: const TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 12,
+                      ),
                     ),
                   ],
                 ),
@@ -132,11 +198,18 @@ class _GameweekCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    const Icon(Icons.swap_horiz, color: AppColors.primary, size: 14),
+                    const Icon(
+                      Icons.swap_horiz,
+                      color: AppColors.primary,
+                      size: 14,
+                    ),
                     const SizedBox(width: 4),
                     Text(
                       'Most Transferred: ${mostTransferredPlayer.webName}',
-                      style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                      style: const TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 12,
+                      ),
                     ),
                   ],
                 ),
@@ -171,7 +244,14 @@ class _GameweekCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(4),
         border: Border.all(color: color.withAlpha(102)),
       ),
-      child: Text(label, style: TextStyle(color: color, fontSize: 9, fontWeight: FontWeight.w700)),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: color,
+          fontSize: 9,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
     );
   }
 
@@ -179,8 +259,18 @@ class _GameweekCard extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(color: AppColors.textSecondary, fontSize: 10)),
-        Text(value, style: const TextStyle(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w600)),
+        Text(
+          label,
+          style: const TextStyle(color: AppColors.textSecondary, fontSize: 10),
+        ),
+        Text(
+          value,
+          style: const TextStyle(
+            color: AppColors.textPrimary,
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
       ],
     );
   }

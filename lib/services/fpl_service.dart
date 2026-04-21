@@ -128,6 +128,21 @@ class FplService {
     return result;
   }
 
+  Future<List<int>> fetchDreamTeam(int gw) async {
+    final response = await http.get(
+      Uri.parse(ApiConstants.dreamTeam(gw)),
+      headers: {'User-Agent': 'FPL Analytics App'},
+    ).timeout(const Duration(seconds: 30));
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to load dream team: ${response.statusCode}');
+    }
+
+    final data = json.decode(response.body) as Map<String, dynamic>;
+    final squad = data['team'] as List<dynamic>;
+    return squad.map((e) => e['element'] as int).toList();
+  }
+
   void clearCache() {
     _bootstrapCache = null;
     _bootstrapCacheTime = null;

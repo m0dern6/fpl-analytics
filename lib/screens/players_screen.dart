@@ -260,6 +260,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
               ),
+              onSelected: (id) => setState(() => _selectedTeam = id),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 180),
                 padding: const EdgeInsets.symmetric(
@@ -299,7 +300,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
                       _selectedTeam != 0
                           ? (provider.getTeamById(_selectedTeam)?.shortName ??
                                 'Team')
-                          : 'Team',
+                          : 'All Teams',
                       style: TextStyle(
                         color: _selectedTeam != 0
                             ? AppColors.primary
@@ -319,17 +320,26 @@ class _PlayersScreenState extends State<PlayersScreen> {
                   ],
                 ),
               ),
-              onSelected: (id) => setState(() => _selectedTeam = id),
               itemBuilder: (_) => [
                 PopupMenuItem(
                   value: 0,
-                  child: Text(
-                    'All Teams',
-                    style: TextStyle(
-                      color: _selectedTeam == 0
-                          ? AppColors.primary
-                          : AppColors.textPrimary,
-                    ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.groups_rounded,
+                          color: AppColors.textSecondary, size: 20),
+                      const SizedBox(width: 8),
+                      Text(
+                        'All Teams',
+                        style: TextStyle(
+                          color: _selectedTeam == 0
+                              ? AppColors.primary
+                              : AppColors.textPrimary,
+                          fontWeight: _selectedTeam == 0
+                              ? FontWeight.w700
+                              : FontWeight.w400,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 ...provider.teams.map(

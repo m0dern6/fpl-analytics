@@ -10,8 +10,8 @@ import '../utils/constants.dart';
 import '../utils/formatters.dart';
 import '../widgets/loading_widget.dart';
 import 'fixture_detail_screen.dart';
-import 'fixtures_screen.dart';
 import 'player_detail_screen.dart';
+import 'team_fixtures_screen.dart';
 
 class TeamsScreen extends StatelessWidget {
   const TeamsScreen({super.key});
@@ -203,9 +203,7 @@ class TeamDetailScreen extends StatelessWidget {
                       onPressed: () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => FixturesScreen(
-                            initialGameweek: provider.currentGameweek?.id,
-                          ),
+                          builder: (_) => TeamFixturesScreen(team: team),
                         ),
                       ),
                       child: const Text('View All'),
@@ -470,18 +468,21 @@ class TeamDetailScreen extends StatelessWidget {
     List<Fixture> fixtures,
     FplProvider provider,
   ) {
-    final recent = fixtures.reversed
-        .where((f) => f.finished == true)
-        .take(5)
-        .toList();
-    if (recent.isEmpty)
+    final recent = List<Fixture>.from(fixtures)
+      ..sort((a, b) {
+        final aKey = a.kickoffTime ?? '';
+        final bKey = b.kickoffTime ?? '';
+        return bKey.compareTo(aKey);
+      });
+    final completed = recent.where((f) => f.finished == true).take(5).toList();
+    if (completed.isEmpty)
       return const Text(
         'No completed fixtures',
         style: TextStyle(color: AppColors.textSecondary),
       );
 
     return Column(
-      children: recent.map((f) {
+      children: completed.map((f) {
         final home = provider.getTeamById(f.homeTeamId);
         final away = provider.getTeamById(f.awayTeamId);
         return GestureDetector(
