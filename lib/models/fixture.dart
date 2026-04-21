@@ -1,3 +1,44 @@
+/// A single player contribution within a fixture stat category.
+class FixtureStatEntry {
+  final int element;
+  final int value;
+  const FixtureStatEntry({required this.element, required this.value});
+
+  factory FixtureStatEntry.fromJson(Map<String, dynamic> json) {
+    return FixtureStatEntry(
+      element: json['element'] as int,
+      value: json['value'] as int? ?? 0,
+    );
+  }
+}
+
+/// One stat category for a fixture (e.g. goals_scored, assists, …).
+class FixtureStat {
+  final String identifier;
+  /// Away team contributions.
+  final List<FixtureStatEntry> away;
+  /// Home team contributions.
+  final List<FixtureStatEntry> home;
+
+  const FixtureStat({
+    required this.identifier,
+    required this.away,
+    required this.home,
+  });
+
+  factory FixtureStat.fromJson(Map<String, dynamic> json) {
+    List<FixtureStatEntry> _parse(dynamic list) =>
+        (list as List<dynamic>? ?? [])
+            .map((e) => FixtureStatEntry.fromJson(e as Map<String, dynamic>))
+            .toList();
+    return FixtureStat(
+      identifier: json['identifier'] as String,
+      away: _parse(json['a']),
+      home: _parse(json['h']),
+    );
+  }
+}
+
 class Fixture {
   final int id;
   final int? event;
@@ -14,6 +55,7 @@ class Fixture {
   final bool provisionalStartTime;
   final int? minutes;
   final int? pulseId;
+  final List<FixtureStat> stats;
 
   const Fixture({
     required this.id,
@@ -31,9 +73,11 @@ class Fixture {
     this.provisionalStartTime = false,
     this.minutes,
     this.pulseId,
+    this.stats = const [],
   });
 
   factory Fixture.fromJson(Map<String, dynamic> json) {
+    final rawStats = json['stats'] as List<dynamic>? ?? [];
     return Fixture(
       id: json['id'] as int,
       event: json['event'] as int?,
@@ -50,6 +94,9 @@ class Fixture {
       provisionalStartTime: json['provisional_start_time'] as bool? ?? false,
       minutes: json['minutes'] as int?,
       pulseId: json['pulse_id'] as int?,
+      stats: rawStats
+          .map((e) => FixtureStat.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
   }
 

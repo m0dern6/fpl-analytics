@@ -1091,6 +1091,7 @@ class _HistoryTabState extends State<_HistoryTab>
         : values.reduce((a, b) => a > b ? a : b);
     final metricColor = _metricColors[_metricIndex];
     final metricLabel = _metricLabels[_metricIndex];
+    final isDecimal = _metricIndex == 4;
 
     final spots = values.asMap().entries.map((e) {
       return FlSpot(e.key.toDouble(), e.value);
@@ -1125,7 +1126,7 @@ class _HistoryTabState extends State<_HistoryTab>
           ),
           const SizedBox(height: 16),
           SizedBox(
-            height: 180,
+            height: 200,
             child: LineChart(
               LineChartData(
                 lineBarsData: [
@@ -1139,9 +1140,9 @@ class _HistoryTabState extends State<_HistoryTab>
                       show: true,
                       getDotPainter: (spot, __, ___, ____) =>
                           FlDotCirclePainter(
-                            radius: 3.5,
+                            radius: 4,
                             color: metricColor,
-                            strokeWidth: 1.5,
+                            strokeWidth: 2,
                             strokeColor: AppColors.cardDark,
                           ),
                     ),
@@ -1149,15 +1150,38 @@ class _HistoryTabState extends State<_HistoryTab>
                       show: true,
                       color: metricColor.withAlpha(40),
                     ),
+                    showingIndicators: List.generate(spots.length, (i) => i),
                   ),
                 ],
+                lineTouchData: LineTouchData(
+                  enabled: true,
+                  touchTooltipData: LineTouchTooltipData(
+                    getTooltipColor: (_) => AppColors.cardDark,
+                    getTooltipItems: (touchedSpots) {
+                      return touchedSpots.map((s) {
+                        final idx = s.x.toInt();
+                        final gwNum = idx < history.length
+                            ? history[idx].round
+                            : '?';
+                        return LineTooltipItem(
+                          'GW$gwNum\n${s.y.toStringAsFixed(isDecimal ? 1 : 0)} $metricLabel',
+                          TextStyle(
+                            color: metricColor,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        );
+                      }).toList();
+                    },
+                  ),
+                ),
                 titlesData: FlTitlesData(
                   leftTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
-                      reservedSize: 32,
+                      reservedSize: 36,
                       getTitlesWidget: (v, _) => Text(
-                        v.toStringAsFixed(_metricIndex == 4 ? 1 : 0),
+                        v.toStringAsFixed(isDecimal ? 1 : 0),
                         style: const TextStyle(
                           color: AppColors.textSecondary,
                           fontSize: 9,
@@ -1168,6 +1192,7 @@ class _HistoryTabState extends State<_HistoryTab>
                   bottomTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
+                      reservedSize: 24,
                       getTitlesWidget: (v, _) {
                         final idx = v.toInt();
                         if (idx < 0 || idx >= history.length) {
@@ -1186,45 +1211,54 @@ class _HistoryTabState extends State<_HistoryTab>
                       },
                     ),
                   ),
-                  topTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
+                  topTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 20,
+                      getTitlesWidget: (v, _) {
+                        final idx = v.toInt();
+                        if (idx < 0 || idx >= values.length) {
+                          return const SizedBox.shrink();
+                        }
+                        final val = values[idx];
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 2),
+                          child: Text(
+                            val.toStringAsFixed(isDecimal ? 1 : 0),
+                            style: TextStyle(
+                              color: metricColor,
+                              fontSize: 8,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
                   ),
                   rightTitles: const AxisTitles(
                     sideTitles: SideTitles(showTitles: false),
                   ),
                 ),
                 gridData: FlGridData(
+                  show: true,
                   drawVerticalLine: true,
                   verticalInterval: 1,
-                  getDrawingHorizontalLine: (_) =>
-                      const FlLine(color: AppColors.divider, strokeWidth: 0.5),
-                  getDrawingVerticalLine: (_) =>
-                      const FlLine(color: AppColors.divider, strokeWidth: 0.5),
-                ),
-                borderData: FlBorderData(show: false),
-                minY: 0,
-                maxY: maxVal * 1.25 < 1 ? 2 : maxVal * 1.25,
-                lineTouchData: LineTouchData(
-                  touchTooltipData: LineTouchTooltipData(
-                    getTooltipColor: (_) => AppColors.cardDark,
-                    getTooltipItems: (spots) {
-                      return spots.map((s) {
-                        final idx = s.x.toInt();
-                        final gwNum = idx < history.length
-                            ? history[idx].round
-                            : '?';
-                        return LineTooltipItem(
-                          'GW$gwNum\n${s.y.toStringAsFixed(_metricIndex == 4 ? 1 : 0)} $metricLabel',
-                          TextStyle(
-                            color: metricColor,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        );
-                      }).toList();
-                    },
+                  horizontalInterval: maxVal > 0 ? maxVal / 4 : 1,
+                  getDrawingHorizontalLine: (_) => const FlLine(
+                    color: AppColors.divider,
+                    strokeWidth: 0.8,
+                  ),
+                  getDrawingVerticalLine: (_) => const FlLine(
+                    color: AppColors.divider,
+                    strokeWidth: 0.5,
                   ),
                 ),
+                borderData: FlBorderData(
+                  show: true,
+                  border: Border.all(color: AppColors.divider, width: 0.5),
+                ),
+                minY: 0,
+                maxY: maxVal * 1.35 < 1 ? 2 : maxVal * 1.35,
               ),
             ),
           ),

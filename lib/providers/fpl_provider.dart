@@ -18,6 +18,7 @@ class FplProvider extends ChangeNotifier {
   Map<int, PlayerSummary> _playerSummaries = {};
   Map<int, Map<String, dynamic>> _liveData = {};
   Map<int, List<Player>> _dreamTeams = {};
+  Map<int, Map<int, int>> _dreamTeamPoints = {}; // gw -> { playerId: gwPoints }
 
   bool _isLoading = false;
   bool _isLoadingFixtures = false;
@@ -106,17 +107,24 @@ class FplProvider extends ChangeNotifier {
   Future<void> loadDreamTeam(int gw) async {
     if (_dreamTeams.containsKey(gw)) return;
     try {
-      final ids = await _service.fetchDreamTeam(gw);
-      final dreamTeamPlayers = ids
+      final pointsMap = await _service.fetchDreamTeam(gw);
+      final dreamTeamPlayers = pointsMap.keys
           .map((id) => getPlayerById(id))
           .whereType<Player>()
           .toList();
       _dreamTeams[gw] = dreamTeamPlayers;
+      _dreamTeamPoints[gw] = pointsMap;
       notifyListeners();
     } catch (_) {}
   }
 
   List<Player> getDreamTeam(int gw) => _dreamTeams[gw] ?? [];
+
+  /// Returns the gameweek points for a player in a specific dream-team GW.
+  /// Falls back to [Player.eventPoints] if not available.
+  int getDreamTeamPlayerPoints(int gw, int playerId) {
+    return _dreamTeamPoints[gw]?[playerId] ?? 0;
+  }
 
   Team? getTeamById(int teamId) {
     try {

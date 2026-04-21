@@ -42,6 +42,7 @@ class Player {
   final int ownGoals;
   final int penaltiesSaved;
   final int penaltiesMissed;
+  final int eventPoints;
 
   const Player({
     required this.id,
@@ -87,6 +88,7 @@ class Player {
     this.ownGoals = 0,
     this.penaltiesSaved = 0,
     this.penaltiesMissed = 0,
+    this.eventPoints = 0,
   });
 
   factory Player.fromJson(Map<String, dynamic> json) {
@@ -133,6 +135,7 @@ class Player {
       ownGoals: json['own_goals'] as int? ?? 0,
       penaltiesSaved: json['penalties_saved'] as int? ?? 0,
       penaltiesMissed: json['penalties_missed'] as int? ?? 0,
+      eventPoints: json['event_points'] as int? ?? 0,
     );
   }
 
