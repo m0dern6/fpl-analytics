@@ -34,6 +34,13 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: widget.provider,
+      builder: (context, _) => _buildContent(context),
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
     final gw = widget.gw;
     final provider = widget.provider;
     final topPlayer =
@@ -405,16 +412,20 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
     final squad = widget.provider.getDreamTeam(widget.gw.id);
 
     if (squad.isEmpty) {
+      final isLoading = widget.provider.isDreamTeamLoading(widget.gw.id);
       return Container(
         padding: const EdgeInsets.all(20),
         decoration: AppTheme.gradientCard(),
         child: Center(
-          child: widget.gw.finished
+          child: isLoading
               ? const CircularProgressIndicator(color: AppColors.primary)
-              : const Text(
-                  'Dream team will be available after GW completion',
-                  style: TextStyle(
+              : Text(
+                  widget.gw.finished
+                      ? 'Dream team data unavailable for this gameweek'
+                      : 'Dream team will be available after GW completion',
+                  style: const TextStyle(
                       color: AppColors.textSecondary, fontSize: 12),
+                  textAlign: TextAlign.center,
                 ),
         ),
       );
