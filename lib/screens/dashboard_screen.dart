@@ -16,6 +16,8 @@ import 'player_detail_screen.dart';
 import 'gameweek_detail_screen.dart';
 import 'fixture_detail_screen.dart';
 import 'fpl_team_screen.dart';
+import 'season_trend_detail_screen.dart';
+import 'form_leaders_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
