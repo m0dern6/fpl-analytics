@@ -149,6 +149,32 @@ class FplService {
     return result;
   }
 
+  Future<Map<String, dynamic>> fetchFplEntry(int entryId) async {
+    final response = await http.get(
+      Uri.parse(ApiConstants.fplEntry(entryId)),
+      headers: {'User-Agent': 'FPL Analytics App'},
+    ).timeout(const Duration(seconds: 30));
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to load FPL entry: ${response.statusCode}');
+    }
+
+    return json.decode(response.body) as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> fetchFplEntryPicks(int entryId, int gw) async {
+    final response = await http.get(
+      Uri.parse(ApiConstants.fplEntryPicks(entryId, gw)),
+      headers: {'User-Agent': 'FPL Analytics App'},
+    ).timeout(const Duration(seconds: 30));
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to load entry picks: ${response.statusCode}');
+    }
+
+    return json.decode(response.body) as Map<String, dynamic>;
+  }
+
   void clearCache() {
     _bootstrapCache = null;
     _bootstrapCacheTime = null;

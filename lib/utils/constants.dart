@@ -8,6 +8,9 @@ class ApiConstants {
   static String elementSummary(int id) => '$baseUrl/element-summary/$id/';
   static String liveGw(int gw) => '$baseUrl/event/$gw/live/';
   static String dreamTeam(int gw) => '$baseUrl/dream-team/$gw/';
+  static String fplEntry(int entryId) => '$baseUrl/entry/$entryId/';
+  static String fplEntryPicks(int entryId, int gw) =>
+      '$baseUrl/entry/$entryId/event/$gw/picks/';
   static String playerPhotoUrl(String photo) {
     final code = photo.replaceAll('.jpg', '');
     return 'https://resources.premierleague.com/premierleague/photos/players/110x140/p$code.png';

@@ -15,8 +15,7 @@ import '../widgets/difficulty_badge.dart';
 import 'player_detail_screen.dart';
 import 'gameweek_detail_screen.dart';
 import 'fixture_detail_screen.dart';
-import 'season_trend_detail_screen.dart';
-import 'form_leaders_screen.dart';
+import 'fpl_team_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -180,6 +179,8 @@ class _DashboardContent extends StatelessWidget {
           sliver: SliverList(
             delegate: SliverChildListDelegate([
               _buildCurrentGwBanner(context),
+              const SizedBox(height: 12),
+              _buildMyFplTeamCard(context),
               const SizedBox(height: 16),
               _buildSparklines(context),
               const SizedBox(height: 16),
@@ -308,6 +309,77 @@ class _DashboardContent extends StatelessWidget {
         ),
       ),
     ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.08, end: 0);
+  }
+
+  Widget _buildMyFplTeamCard(BuildContext context) {
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const FplTeamScreen()),
+      ),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              AppColors.primary.withAlpha(20),
+              AppColors.accent.withAlpha(14),
+            ],
+          ),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: AppColors.primary.withAlpha(60), width: 1),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: AppColors.primary.withAlpha(28),
+                borderRadius: BorderRadius.circular(10),
+                border:
+                    Border.all(color: AppColors.primary.withAlpha(70)),
+              ),
+              child: const Center(
+                child: Icon(Icons.manage_accounts_rounded,
+                    color: AppColors.primary, size: 20),
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'My FPL Team',
+                    style: TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  SizedBox(height: 2),
+                  Text(
+                    'Track your official FPL team points',
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(
+              Icons.chevron_right_rounded,
+              color: AppColors.primary,
+              size: 20,
+            ),
+          ],
+        ),
+      ),
+    ).animate().fadeIn(duration: 400.ms, delay: 80.ms).slideY(begin: 0.06, end: 0);
   }
 
   // ── Sparklines ────────────────────────────────────────────────────────────
