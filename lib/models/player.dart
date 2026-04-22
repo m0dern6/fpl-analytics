@@ -141,7 +141,7 @@ class Player {
 
   String get photoUrl {
     final code = photo.replaceAll('.jpg', '');
-    return 'https://resources.premierleague.com/premierleague/photos/players/110x140/p$code.png';
+    return 'https://resources.premierleague.com/premierleague25/photos/players/110x140/$code.png';
   }
 
   String get teamBadgeUrl =>
