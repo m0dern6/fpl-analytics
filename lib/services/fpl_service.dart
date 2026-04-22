@@ -128,7 +128,7 @@ class FplService {
     return result;
   }
 
-  Future<List<int>> fetchDreamTeam(int gw) async {
+  Future<Map<int, int>> fetchDreamTeam(int gw) async {
     final response = await http.get(
       Uri.parse(ApiConstants.dreamTeam(gw)),
       headers: {'User-Agent': 'FPL Analytics App'},
@@ -140,7 +140,13 @@ class FplService {
 
     final data = json.decode(response.body) as Map<String, dynamic>;
     final squad = data['team'] as List<dynamic>;
-    return squad.map((e) => e['element'] as int).toList();
+    // Returns a map of { elementId: gwPoints }
+    final Map<int, int> result = {};
+    for (final entry in squad) {
+      final map = entry as Map<String, dynamic>;
+      result[map['element'] as int] = map['points'] as int? ?? 0;
+    }
+    return result;
   }
 
   void clearCache() {

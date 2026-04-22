@@ -69,7 +69,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
               isScrollable: true,
               tabs: const [
                 Tab(text: 'Form Chart'),
-                Tab(text: 'Value Chart'),
+                Tab(text: 'PPG Ranking'),
                 Tab(text: 'Heat Map'),
                 Tab(text: 'Radar'),
               ],
@@ -81,7 +81,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
                   controller: _tabController,
                   children: [
                     _FormChartTab(provider: provider),
-                    _ValueChartTab(provider: provider),
+                    _PpgRankingTab(provider: provider),
                     const _HeatMapTab(),
                     _RadarTab(provider: provider),
                   ],
@@ -426,38 +426,56 @@ class _FormChartTabState extends State<_FormChartTab> {
   }
 }
 
-// ── Tab 2: Value Chart ────────────────────────────────────────────────────────
+// ── Tab 2: PPG Ranking (replaces Value/Bubble Chart) ────────────────────────
 
-class _ValueChartTab extends StatefulWidget {
+class _PpgRankingTab extends StatefulWidget {
   final FplProvider provider;
-  const _ValueChartTab({required this.provider});
+  const _PpgRankingTab({required this.provider});
 
   @override
-  State<_ValueChartTab> createState() => _ValueChartTabState();
+  State<_PpgRankingTab> createState() => _PpgRankingTabState();
 }
 
-class _ValueChartTabState extends State<_ValueChartTab> {
+class _PpgRankingTabState extends State<_PpgRankingTab> {
   int _posFilter = 0;
+  int _limit = 15;
 
   @override
   Widget build(BuildContext context) {
-    final allPlayers = widget.provider.players.where((p) {
+    final players = widget.provider.players.where((p) {
       return (_posFilter == 0 || p.elementType == _posFilter) &&
-          p.totalPoints > 0;
-    }).toList();
+          p.ppgValue > 0;
+    }).toList()
+      ..sort((a, b) => b.ppgValue.compareTo(a.ppgValue));
+
+    final top = players.take(_limit).toList();
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AppTheme.sectionTitle(context, 'Price vs Points'),
-          const SizedBox(height: 10),
+          AppTheme.sectionTitle(context, 'Points Per Game Ranking'),
+          const SizedBox(height: 4),
+          const Text(
+            'Top players by average points per gameweek',
+            style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+          ),
+          const SizedBox(height: 12),
           _buildPositionFilter(),
           const SizedBox(height: 16),
-          _buildBubbleChart(context, allPlayers),
-          const SizedBox(height: 16),
-          _buildBubbleLegend(),
+          if (top.isEmpty)
+            const Center(
+              child: Text(
+                'No data',
+                style: TextStyle(color: AppColors.textSecondary),
+              ),
+            )
+          else ...[
+            _buildPpgBarChart(context, top),
+            const SizedBox(height: 20),
+            _buildPpgList(context, top),
+          ],
         ],
       ),
     );
@@ -475,9 +493,7 @@ class _ValueChartTabState extends State<_ValueChartTab> {
               ? AppColors.primary
               : PositionConstants.positionColors[e.key]!;
           return GestureDetector(
-            onTap: () => setState(() {
-              _posFilter = e.key;
-            }),
+            onTap: () => setState(() => _posFilter = e.key),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 180),
               margin: const EdgeInsets.only(right: 8),
@@ -504,52 +520,9 @@ class _ValueChartTabState extends State<_ValueChartTab> {
     );
   }
 
-  Widget _buildBubbleChart(BuildContext context, List<Player> players) {
-    if (players.isEmpty) {
-      return Container(
-        height: 300,
-        decoration: AppTheme.gradientCard(),
-        child: const Center(
-          child: Text(
-            'No data',
-            style: TextStyle(color: AppColors.textSecondary),
-          ),
-        ),
-      );
-    }
-
-    final maxSelected = players
-        .map((p) => p.selectedPercent)
-        .fold(0.0, (a, b) => a > b ? a : b);
-
-    final spots = players.asMap().entries.map((e) {
-      final p = e.value;
-      final x = p.nowCost / 10.0;
-      final y = p.totalPoints.toDouble();
-      final size = maxSelected > 0
-          ? ((p.selectedPercent / maxSelected) * 14).clamp(4.0, 14.0)
-          : 6.0;
-      final color =
-          PositionConstants.positionColors[p.elementType] ?? AppColors.primary;
-      return ScatterSpot(
-        x,
-        y,
-        dotPainter: FlDotCirclePainter(
-          radius: size,
-          color: color.withAlpha(180),
-          strokeWidth: 1,
-          strokeColor: color,
-        ),
-      );
-    }).toList();
-
-    final maxX = players
-        .map((p) => p.nowCost / 10.0)
-        .fold(0.0, (a, b) => a > b ? a : b);
-    final maxY = players
-        .map((p) => p.totalPoints.toDouble())
-        .fold(0.0, (a, b) => a > b ? a : b);
-
+  Widget _buildPpgBarChart(BuildContext context, List<Player> players) {
+    final maxPpg =
+        players.map((p) => p.ppgValue).fold(0.0, (a, b) => a > b ? a : b);
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: AppTheme.gradientCard(),
@@ -557,86 +530,130 @@ class _ValueChartTabState extends State<_ValueChartTab> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Each dot = 1 player  ·  Size = Ownership %  ·  Grid = value map',
-            style: TextStyle(color: AppColors.textSecondary, fontSize: 11),
+            'PPG comparison — top players',
+            style: TextStyle(
+              color: AppColors.textPrimary,
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           const SizedBox(height: 16),
           SizedBox(
-            height: 280,
-            child: ScatterChart(
-              ScatterChartData(
-                scatterSpots: spots,
-                minX: 3.5,
-                maxX: maxX + 1,
-                minY: 0,
-                maxY: maxY + 20,
-                borderData: FlBorderData(show: false),
-                gridData: FlGridData(
-                  drawVerticalLine: true,
-                  getDrawingHorizontalLine: (_) =>
-                      const FlLine(color: AppColors.divider, strokeWidth: 0.5),
-                  getDrawingVerticalLine: (_) =>
-                      const FlLine(color: AppColors.divider, strokeWidth: 0.5),
-                ),
+            height: 240,
+            child: BarChart(
+              BarChartData(
+                alignment: BarChartAlignment.spaceAround,
+                maxY: maxPpg * 1.2,
+                barGroups: players.asMap().entries.map((e) {
+                  final posColor =
+                      getPositionColor(e.value.elementType);
+                  return BarChartGroupData(
+                    x: e.key,
+                    barRods: [
+                      BarChartRodData(
+                        toY: e.value.ppgValue,
+                        gradient: LinearGradient(
+                          begin: Alignment.bottomCenter,
+                          end: Alignment.topCenter,
+                          colors: [posColor.withAlpha(150), posColor],
+                        ),
+                        width: 20,
+                        borderRadius: const BorderRadius.vertical(
+                          top: Radius.circular(4),
+                        ),
+                        rodStackItems: [],
+                      ),
+                    ],
+                    showingTooltipIndicators: [],
+                  );
+                }).toList(),
                 titlesData: FlTitlesData(
                   leftTitles: AxisTitles(
-                    axisNameWidget: const Text(
-                      'Points',
-                      style: TextStyle(
-                        color: AppColors.textSecondary,
-                        fontSize: 10,
-                      ),
-                    ),
                     sideTitles: SideTitles(
                       showTitles: true,
-                      reservedSize: 32,
+                      reservedSize: 30,
                       getTitlesWidget: (v, _) => Text(
-                        v.toInt().toString(),
+                        v.toStringAsFixed(1),
                         style: const TextStyle(
                           color: AppColors.textSecondary,
                           fontSize: 9,
                         ),
                       ),
+                    ),
+                  ),
+                  topTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 16,
+                      getTitlesWidget: (v, _) {
+                        final idx = v.toInt();
+                        if (idx < 0 || idx >= players.length) {
+                          return const SizedBox.shrink();
+                        }
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 2),
+                          child: Text(
+                            players[idx].ppgValue.toStringAsFixed(1),
+                            style: TextStyle(
+                              color: getPositionColor(
+                                  players[idx].elementType),
+                              fontSize: 8,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        );
+                      },
                     ),
                   ),
                   bottomTitles: AxisTitles(
-                    axisNameWidget: const Text(
-                      'Price (£m)',
-                      style: TextStyle(
-                        color: AppColors.textSecondary,
-                        fontSize: 10,
-                      ),
-                    ),
                     sideTitles: SideTitles(
                       showTitles: true,
-                      getTitlesWidget: (v, _) => Text(
-                        '£${v.toStringAsFixed(1)}',
-                        style: const TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 9,
-                        ),
-                      ),
+                      getTitlesWidget: (v, _) {
+                        final idx = v.toInt();
+                        if (idx < 0 || idx >= players.length) {
+                          return const SizedBox.shrink();
+                        }
+                        final name = players[idx].webName;
+                        final short = name.length > 6
+                            ? name.substring(0, 6)
+                            : name;
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Text(
+                            short,
+                            style: const TextStyle(
+                              color: AppColors.textSecondary,
+                              fontSize: 8,
+                            ),
+                          ),
+                        );
+                      },
                     ),
-                  ),
-                  topTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
                   ),
                   rightTitles: const AxisTitles(
                     sideTitles: SideTitles(showTitles: false),
                   ),
                 ),
-                scatterTouchData: ScatterTouchData(
-                  enabled: true,
-                  touchTooltipData: ScatterTouchTooltipData(
+                gridData: FlGridData(
+                  drawVerticalLine: false,
+                  getDrawingHorizontalLine: (_) => const FlLine(
+                    color: AppColors.divider,
+                    strokeWidth: 0.5,
+                  ),
+                ),
+                borderData: FlBorderData(show: false),
+                barTouchData: BarTouchData(
+                  touchTooltipData: BarTouchTooltipData(
                     getTooltipColor: (_) => AppColors.cardDark,
-                    getTooltipItems: (spot) {
-                      final idx = spots.indexOf(spot);
-                      if (idx < 0 || idx >= players.length) return null;
-                      final p = players[idx];
-                      return ScatterTooltipItem(
-                        '${p.webName}\n${formatPrice(p.nowCost)}  ${p.totalPoints}pts',
-                        textStyle: const TextStyle(
-                          color: AppColors.textPrimary,
+                    getTooltipItem: (group, _, rod, __) {
+                      if (group.x < 0 || group.x >= players.length) {
+                        return null;
+                      }
+                      final p = players[group.x];
+                      return BarTooltipItem(
+                        '${p.webName}\nPPG: ${p.ppgValue.toStringAsFixed(2)}\n${formatPrice(p.nowCost)}',
+                        TextStyle(
+                          color: getPositionColor(p.elementType),
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
                         ),
@@ -647,41 +664,236 @@ class _ValueChartTabState extends State<_ValueChartTab> {
               ),
             ),
           ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 12,
+            children: PositionConstants.positionColors.entries.map((e) {
+              return Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 10,
+                    height: 10,
+                    decoration: BoxDecoration(
+                      color: e.value,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    PositionConstants.positionNames[e.key] ?? '',
+                    style: const TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 10,
+                    ),
+                  ),
+                ],
+              );
+            }).toList(),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildBubbleLegend() {
+  Widget _buildPpgList(BuildContext context, List<Player> players) {
     return Container(
-      padding: const EdgeInsets.all(16),
       decoration: AppTheme.gradientCard(),
-      child: Wrap(
-        spacing: 16,
-        runSpacing: 8,
-        children: PositionConstants.positionColors.entries.map((e) {
-          return Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 12,
-                height: 12,
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            child: Row(
+              children: const [
+                SizedBox(width: 28),
+                SizedBox(width: 8),
+                Expanded(
+                  flex: 3,
+                  child: Text(
+                    'Player',
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'PPG',
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                Expanded(
+                  child: Text(
+                    'Pts',
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                Expanded(
+                  child: Text(
+                    'Price',
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 1, color: AppColors.divider),
+          ...players.asMap().entries.map((entry) {
+            final idx = entry.key;
+            final player = entry.value;
+            final team = widget.provider.getTeamById(player.teamId);
+            final posColor = getPositionColor(player.elementType);
+            return InkWell(
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => PlayerDetailScreen(player: player),
+                ),
+              ),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
                 decoration: BoxDecoration(
-                  color: e.value,
-                  shape: BoxShape.circle,
+                  border: Border(
+                    bottom: BorderSide(
+                      color: AppColors.divider,
+                      width: idx < players.length - 1 ? 1 : 0,
+                    ),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 20,
+                      height: 20,
+                      decoration: BoxDecoration(
+                        color: idx == 0
+                            ? AppColors.primary
+                            : AppColors.cardMedium,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: Text(
+                          '${idx + 1}',
+                          style: TextStyle(
+                            color: idx == 0
+                                ? AppColors.secondary
+                                : AppColors.textSecondary,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    // Player photo
+                    Container(
+                      width: 32,
+                      height: 32,
+                      clipBehavior: Clip.antiAlias,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: AppColors.cardMedium,
+                        border: Border.all(color: posColor, width: 1.5),
+                      ),
+                      child: CachedNetworkImage(
+                        imageUrl: player.photoUrl,
+                        fit: BoxFit.cover,
+                        placeholder: (_, __) => const Icon(
+                          Icons.person,
+                          color: AppColors.textSecondary,
+                          size: 16,
+                        ),
+                        errorWidget: (_, __, ___) => const Icon(
+                          Icons.person,
+                          color: AppColors.textSecondary,
+                          size: 16,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      flex: 3,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            player.webName,
+                            style: const TextStyle(
+                              color: AppColors.textPrimary,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Text(
+                            team?.shortName ?? '',
+                            style: const TextStyle(
+                              color: AppColors.textSecondary,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: Text(
+                        player.ppgValue.toStringAsFixed(2),
+                        style: const TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    Expanded(
+                      child: Text(
+                        '${player.totalPoints}',
+                        style: const TextStyle(
+                          color: AppColors.accent,
+                          fontSize: 13,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    Expanded(
+                      child: Text(
+                        formatPrice(player.nowCost),
+                        style: const TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 12,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(width: 6),
-              Text(
-                PositionConstants.positionFullNames[e.key] ?? '',
-                style: const TextStyle(
-                  color: AppColors.textSecondary,
-                  fontSize: 12,
-                ),
-              ),
-            ],
-          );
-        }).toList(),
+            );
+          }),
+        ],
       ),
     );
   }

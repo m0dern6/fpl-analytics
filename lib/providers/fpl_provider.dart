@@ -18,6 +18,8 @@ class FplProvider extends ChangeNotifier {
   Map<int, PlayerSummary> _playerSummaries = {};
   Map<int, Map<String, dynamic>> _liveData = {};
   Map<int, List<Player>> _dreamTeams = {};
+  Map<int, Map<int, int>> _dreamTeamPoints = {}; // gw -> { playerId: gwPoints }
+  final Set<int> _dreamTeamLoadingGws = {};
 
   bool _isLoading = false;
   bool _isLoadingFixtures = false;
@@ -104,19 +106,35 @@ class FplProvider extends ChangeNotifier {
   PlayerSummary? getPlayerSummary(int playerId) => _playerSummaries[playerId];
 
   Future<void> loadDreamTeam(int gw) async {
-    if (_dreamTeams.containsKey(gw)) return;
+    if (_dreamTeams.containsKey(gw) || _dreamTeamLoadingGws.contains(gw)) return;
+    _dreamTeamLoadingGws.add(gw);
+    notifyListeners();
     try {
-      final ids = await _service.fetchDreamTeam(gw);
-      final dreamTeamPlayers = ids
+      final pointsMap = await _service.fetchDreamTeam(gw);
+      final dreamTeamPlayers = pointsMap.keys
           .map((id) => getPlayerById(id))
           .whereType<Player>()
           .toList();
       _dreamTeams[gw] = dreamTeamPlayers;
+      _dreamTeamPoints[gw] = pointsMap;
+    } catch (_) {
+      // Mark as attempted (empty list) so spinner resolves even on failure
+      _dreamTeams[gw] = [];
+    } finally {
+      _dreamTeamLoadingGws.remove(gw);
       notifyListeners();
-    } catch (_) {}
+    }
   }
 
   List<Player> getDreamTeam(int gw) => _dreamTeams[gw] ?? [];
+
+  bool isDreamTeamLoading(int gw) => _dreamTeamLoadingGws.contains(gw);
+
+  /// Returns the gameweek points for a player in a specific dream-team GW.
+  /// Falls back to [Player.eventPoints] if not available.
+  int getDreamTeamPlayerPoints(int gw, int playerId) {
+    return _dreamTeamPoints[gw]?[playerId] ?? 0;
+  }
 
   Team? getTeamById(int teamId) {
     try {

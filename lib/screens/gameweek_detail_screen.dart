@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../models/gameweek.dart';
+import '../models/player.dart';
 import '../providers/fpl_provider.dart';
 import '../utils/app_theme.dart';
 import '../utils/constants.dart';
@@ -33,6 +34,13 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: widget.provider,
+      builder: (context, _) => _buildContent(context),
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
     final gw = widget.gw;
     final provider = widget.provider;
     final topPlayer =
@@ -63,6 +71,10 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
             _buildHeader(context),
             const SizedBox(height: 16),
             _buildScoreCards(),
+            const SizedBox(height: 20),
+            AppTheme.sectionTitle(context, 'Highest Scoring Team'),
+            const SizedBox(height: 12),
+            _buildDreamTeamPitch(context),
             if (topPlayer != null) ...[
               const SizedBox(height: 20),
               AppTheme.sectionTitle(context, 'Top Player This Gameweek'),
@@ -71,10 +83,13 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
                 context,
                 topPlayer,
                 topPlayerTeam,
-                gw.topElement != null ? provider.getPlayerById(gw.topElement!) : null,
                 subtitle: 'Highest Scoring Player',
                 color: AppColors.warning,
                 icon: Icons.emoji_events_rounded,
+                gwPoints: provider.getDreamTeamPlayerPoints(gw.id, topPlayer.id) > 0
+                    ? provider.getDreamTeamPlayerPoints(gw.id, topPlayer.id)
+                    : topPlayer.eventPoints,
+                isDouble: false,
               ),
             ],
             if (mostCaptainedPlayer != null) ...[
@@ -83,10 +98,11 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
                 context,
                 mostCaptainedPlayer,
                 provider.getTeamById(mostCaptainedPlayer.teamId),
-                null,
                 subtitle: 'Most Captained',
                 color: AppColors.primary,
                 icon: Icons.shield_rounded,
+                gwPoints: mostCaptainedPlayer.eventPoints,
+                isDouble: true,
               ),
             ],
             if (mostTransferredPlayer != null) ...[
@@ -95,10 +111,11 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
                 context,
                 mostTransferredPlayer,
                 provider.getTeamById(mostTransferredPlayer.teamId),
-                null,
                 subtitle: 'Most Transferred In',
                 color: AppColors.accent,
                 icon: Icons.trending_up_rounded,
+                gwPoints: mostTransferredPlayer.eventPoints,
+                isDouble: false,
               ),
             ],
             if (mostSelectedPlayer != null) ...[
@@ -107,20 +124,13 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
                 context,
                 mostSelectedPlayer,
                 provider.getTeamById(mostSelectedPlayer.teamId),
-                null,
                 subtitle: 'Most Selected',
                 color: const Color(0xFFB388FF),
                 icon: Icons.people_rounded,
+                gwPoints: mostSelectedPlayer.eventPoints,
+                isDouble: false,
               ),
             ],
-            const SizedBox(height: 20),
-            AppTheme.sectionTitle(context, 'Dream Team'),
-            const SizedBox(height: 12),
-            _buildDreamTeam(context),
-            const SizedBox(height: 20),
-            AppTheme.sectionTitle(context, 'Top Performers'),
-            const SizedBox(height: 12),
-            _buildTopPerformers(context),
             const SizedBox(height: 24),
           ],
         ),
@@ -129,6 +139,7 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
   }
 
   Widget _buildHeader(BuildContext context) {
+    final gw = widget.gw;
     Color statusColor;
     String statusText;
     if (gw.finished) {
@@ -195,6 +206,7 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
   }
 
   Widget _buildScoreCards() {
+    final gw = widget.gw;
     return Row(
       children: [
         if (gw.averageEntryScore != null)
@@ -265,13 +277,15 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
 
   Widget _buildPlayerHighlight(
     BuildContext context,
-    dynamic player,
-    dynamic team,
-    dynamic _ignored, {
+    Player player,
+    dynamic team, {
     required String subtitle,
     required Color color,
     required IconData icon,
+    required int gwPoints,
+    required bool isDouble,
   }) {
+    final displayPoints = isDouble ? gwPoints * 2 : gwPoints;
     return GestureDetector(
       onTap: () => Navigator.push(
         context,
@@ -294,7 +308,7 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
               ),
               clipBehavior: Clip.antiAlias,
               child: CachedNetworkImage(
-                imageUrl: player.photoUrl as String,
+                imageUrl: player.photoUrl,
                 fit: BoxFit.cover,
                 placeholder: (_, __) =>
                     const Icon(Icons.person, color: AppColors.textSecondary, size: 32),
@@ -326,11 +340,32 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
                           fontWeight: FontWeight.w600,
                         ),
                       ),
+                      if (isDouble) ...[
+                        const SizedBox(width: 4),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 5, vertical: 1),
+                          decoration: BoxDecoration(
+                            color: AppColors.warning.withAlpha(30),
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(
+                                color: AppColors.warning.withAlpha(100)),
+                          ),
+                          child: const Text(
+                            '2×',
+                            style: TextStyle(
+                              color: AppColors.warning,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    player.webName as String,
+                    player.webName,
                     style: const TextStyle(
                       color: AppColors.textPrimary,
                       fontSize: 17,
@@ -338,7 +373,7 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
                     ),
                   ),
                   Text(
-                    '${team?.name ?? ''} · ${getPositionShort(player.elementType as int)}',
+                    '${team?.name ?? ''} · ${getPositionShort(player.elementType)}',
                     style: const TextStyle(
                       color: AppColors.textSecondary,
                       fontSize: 12,
@@ -351,16 +386,17 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  '${player.totalPoints}',
+                  '$displayPoints',
                   style: const TextStyle(
                     color: AppColors.primary,
                     fontSize: 26,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
-                const Text(
-                  'pts',
-                  style: TextStyle(color: AppColors.textSecondary, fontSize: 11),
+                Text(
+                  isDouble ? 'pts (×2)' : 'pts',
+                  style: const TextStyle(
+                      color: AppColors.textSecondary, fontSize: 11),
                 ),
               ],
             ),
@@ -370,164 +406,193 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
     ).animate().fadeIn(delay: 150.ms);
   }
 
-  Widget _buildDreamTeam(BuildContext context) {
+  // ── Dream Team Pitch Layout ───────────────────────────────────────────────
+
+  Widget _buildDreamTeamPitch(BuildContext context) {
     final squad = widget.provider.getDreamTeam(widget.gw.id);
+
     if (squad.isEmpty) {
-      if (widget.gw.finished) {
-        return Container(
-          padding: const EdgeInsets.all(20),
-          decoration: AppTheme.gradientCard(),
-          child: const Center(
-            child: CircularProgressIndicator(color: AppColors.primary),
-          ),
-        );
-      } else {
-        return Container(
-          padding: const EdgeInsets.all(20),
-          decoration: AppTheme.gradientCard(),
-          child: const Center(
-            child: Text(
-              'Dream team will be available after GW completion',
-              style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
-            ),
-          ),
-        );
-      }
+      final isLoading = widget.provider.isDreamTeamLoading(widget.gw.id);
+      return Container(
+        padding: const EdgeInsets.all(20),
+        decoration: AppTheme.gradientCard(),
+        child: Center(
+          child: isLoading
+              ? const CircularProgressIndicator(color: AppColors.primary)
+              : Text(
+                  widget.gw.finished
+                      ? 'Dream team data unavailable for this gameweek'
+                      : 'Dream team will be available after GW completion',
+                  style: const TextStyle(
+                      color: AppColors.textSecondary, fontSize: 12),
+                  textAlign: TextAlign.center,
+                ),
+        ),
+      );
     }
 
+    // Group players by position
+    final gks = squad.where((p) => p.elementType == 1).toList();
+    final defs = squad.where((p) => p.elementType == 2).toList();
+    final mids = squad.where((p) => p.elementType == 3).toList();
+    final fwds = squad.where((p) => p.elementType == 4).toList();
+
     return Container(
-      decoration: AppTheme.gradientCard(),
-      child: Column(
-        children: squad.map((p) {
-          final team = widget.provider.getTeamById(p.teamId);
-          return ListTile(
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => PlayerDetailScreen(player: p)),
-            ),
-            leading: CircleAvatar(
-              backgroundColor: AppColors.cardMedium,
-              backgroundImage: CachedNetworkImageProvider(p.photoUrl),
-            ),
-            title: Text(
-              p.webName,
-              style: const TextStyle(color: AppColors.textPrimary, fontSize: 14),
-            ),
-            subtitle: Text(
-              '${team?.shortName ?? ''} · ${getPositionShort(p.elementType)}',
-              style: const TextStyle(color: AppColors.textSecondary, fontSize: 11),
-            ),
-            trailing: Text(
-              '${p.eventPoints} pts',
-              style: const TextStyle(
-                color: AppColors.primary,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          );
-        }).toList(),
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [AppColors.pitchGreen, AppColors.pitchGreenDark],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withAlpha(20)),
       ),
+      child: Stack(
+        children: [
+          // Pitch markings
+          Positioned.fill(child: _buildPitchMarkings()),
+          // Players
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Column(
+              children: [
+                if (fwds.isNotEmpty) _buildPitchRow(context, fwds),
+                if (fwds.isNotEmpty) const SizedBox(height: 14),
+                if (mids.isNotEmpty) _buildPitchRow(context, mids),
+                if (mids.isNotEmpty) const SizedBox(height: 14),
+                if (defs.isNotEmpty) _buildPitchRow(context, defs),
+                if (defs.isNotEmpty) const SizedBox(height: 14),
+                if (gks.isNotEmpty) _buildPitchRow(context, gks),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ).animate().fadeIn(delay: 50.ms);
+  }
+
+  Widget _buildPitchMarkings() {
+    return CustomPaint(painter: _PitchMarkingsPainter());
+  }
+
+  Widget _buildPitchRow(BuildContext context, List<Player> players) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: players.map((p) => _buildPitchPlayer(context, p)).toList(),
     );
   }
 
-  Widget _buildTopPerformers(BuildContext context) {
-    final top = widget.provider.getTopScorersByPoints(limit: 10);
-    return Container(
-      decoration: AppTheme.gradientCard(),
-      child: Column(
-        children: top.asMap().entries.map((entry) {
-          final idx = entry.key;
-          final player = entry.value;
-          final team = widget.provider.getTeamById(player.teamId);
-          return InkWell(
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => PlayerDetailScreen(player: player),
-              ),
-            ),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(
-                    color: AppColors.divider,
-                    width: idx < top.length - 1 ? 1 : 0,
+  Widget _buildPitchPlayer(BuildContext context, Player player) {
+    final gwPoints = widget.provider
+        .getDreamTeamPlayerPoints(widget.gw.id, player.id);
+    final displayPoints = gwPoints > 0 ? gwPoints : player.eventPoints;
+    final posColor = getPositionColor(player.elementType);
+    final isCaptain = player.id == widget.gw.mostCaptained;
+
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => PlayerDetailScreen(player: player)),
+      ),
+      child: SizedBox(
+        width: 64,
+        child: Column(
+          children: [
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Container(
+                  width: 50,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: AppColors.cardDark.withAlpha(180),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: posColor.withAlpha(180),
+                      width: 1.5,
+                    ),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: CachedNetworkImage(
+                    imageUrl: player.photoUrl,
+                    fit: BoxFit.cover,
+                    alignment: Alignment.topCenter,
+                    placeholder: (_, __) => Center(
+                      child: Icon(Icons.person, color: posColor, size: 26),
+                    ),
+                    errorWidget: (_, __, ___) => Center(
+                      child: Icon(Icons.person, color: posColor, size: 26),
+                    ),
                   ),
                 ),
+                if (isCaptain)
+                  Positioned(
+                    top: -6,
+                    right: -6,
+                    child: Container(
+                      width: 16,
+                      height: 16,
+                      decoration: BoxDecoration(
+                        color: AppColors.warning,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: AppColors.pitchGreen,
+                          width: 1.5,
+                        ),
+                      ),
+                      child: const Center(
+                        child: Text(
+                          'C',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 8,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 3),
+            Container(
+              constraints: const BoxConstraints(maxWidth: 62),
+              padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 1),
+              decoration: BoxDecoration(
+                color: Colors.black.withAlpha(150),
+                borderRadius: BorderRadius.circular(3),
               ),
-              child: Row(
-                children: [
-                  SizedBox(
-                    width: 22,
-                    child: Text(
-                      '${idx + 1}',
-                      style: TextStyle(
-                        color: idx == 0 ? AppColors.primary : AppColors.textSecondary,
-                        fontSize: 13,
-                        fontWeight: idx == 0 ? FontWeight.w700 : FontWeight.w400,
-                      ),
-                    ),
-                  ),
-                  Container(
-                    width: 36,
-                    height: 36,
-                    clipBehavior: Clip.antiAlias,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppColors.cardMedium,
-                      border: Border.all(
-                        color: getPositionColor(player.elementType),
-                        width: 1.5,
-                      ),
-                    ),
-                    child: CachedNetworkImage(
-                      imageUrl: player.photoUrl,
-                      fit: BoxFit.cover,
-                      placeholder: (_, __) =>
-                          const Icon(Icons.person, color: AppColors.textSecondary, size: 18),
-                      errorWidget: (_, __, ___) =>
-                          const Icon(Icons.person, color: AppColors.textSecondary, size: 18),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          player.webName,
-                          style: const TextStyle(
-                            color: AppColors.textPrimary,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        Text(
-                          '${team?.shortName ?? ''} · ${getPositionShort(player.elementType)}',
-                          style: const TextStyle(
-                            color: AppColors.textSecondary,
-                            fontSize: 11,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Text(
-                    '${player.totalPoints} pts',
-                    style: const TextStyle(
-                      color: AppColors.primary,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ],
+              child: Text(
+                player.webName,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 9,
+                  fontWeight: FontWeight.w600,
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
-          );
-        }).toList(),
+            const SizedBox(height: 2),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+              decoration: BoxDecoration(
+                color: posColor.withAlpha(230),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Text(
+                '$displayPoints',
+                style: const TextStyle(
+                  color: Colors.black,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -537,4 +602,52 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
     if (n >= 1000) return '${(n / 1000).toStringAsFixed(0)}k';
     return '$n';
   }
+}
+
+class _PitchMarkingsPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white.withAlpha(20)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0;
+
+    // Centre circle
+    canvas.drawCircle(
+      Offset(size.width / 2, size.height / 2),
+      size.width * 0.15,
+      paint,
+    );
+    // Centre line
+    canvas.drawLine(
+      Offset(0, size.height / 2),
+      Offset(size.width, size.height / 2),
+      paint,
+    );
+    // Outer border
+    canvas.drawRect(
+      Rect.fromLTWH(8, 8, size.width - 16, size.height - 16),
+      paint,
+    );
+    // Top penalty area
+    final penW = size.width * 0.5;
+    final penH = size.height * 0.15;
+    canvas.drawRect(
+      Rect.fromLTWH(
+          (size.width - penW) / 2, 8, penW, penH),
+      paint,
+    );
+    // Bottom penalty area
+    canvas.drawRect(
+      Rect.fromLTWH(
+          (size.width - penW) / 2,
+          size.height - 8 - penH,
+          penW,
+          penH),
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
