@@ -383,62 +383,59 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
     final fplProvider = context.read<FplProvider>();
     final gwInfo = fplProvider.currentGameweek;
 
-    final username = e['player_first_name'] as String? ?? '';
+    final teamName = e['name'] as String? ?? '';
     final overallPoints = e['summary_overall_points'] as int? ?? 0;
     final overallRank = e['summary_overall_rank'] as int?;
-
     final eventPoints = e['summary_event_points'] as int? ?? 0;
 
     final avgScore = gwInfo?.averageEntryScore ?? 0;
     final highScore = gwInfo?.highestScore ?? 0;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: AppTheme.gradientCard(),
       child: Column(
         children: [
-          // Top Row: Username and Season Info
+          Text(
+            teamName.toUpperCase(),
+            style: const TextStyle(
+              color: AppColors.textPrimary,
+              fontSize: 14,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 1.2,
+            ),
+          ),
+          const SizedBox(height: 14),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                username,
-                style: const TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: -0.5,
+              Expanded(
+                child: Column(
+                  children: [
+                    _summaryMiniStat(
+                      'TOTAL',
+                      '$overallPoints',
+                      AppColors.primary,
+                    ),
+                    const SizedBox(height: 10),
+                    _summaryMiniStat(
+                      'RANK',
+                      overallRank != null ? _formatRank(overallRank) : '–',
+                      AppColors.accent,
+                    ),
+                  ],
                 ),
               ),
-              Row(
-                children: [
-                  _summaryMiniTile('PTS', '$overallPoints', AppColors.primary),
-                  const SizedBox(width: 12),
-                  _summaryMiniTile(
-                    'RANK',
-                    overallRank != null ? _formatRank(overallRank) : '–',
-                    AppColors.accent,
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          // Bottom Row: GW Info
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // GW Highlight (Center-left)
               Container(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
+                  horizontal: 22,
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF34D399).withAlpha(40),
+                  color: const Color(0xFF34D399).withAlpha(30),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: const Color(0xFF34D399).withAlpha(120),
+                    color: const Color(0xFF34D399).withAlpha(80),
+                    width: 1.5,
                   ),
                 ),
                 child: Column(
@@ -447,29 +444,57 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
                       '$eventPoints',
                       style: const TextStyle(
                         color: Color(0xFF34D399),
-                        fontSize: 22,
+                        fontSize: 32,
                         fontWeight: FontWeight.w900,
+                        height: 1.1,
                       ),
                     ),
                     Text(
                       'GW$_gwNumber PTS',
                       style: const TextStyle(
                         color: Color(0xFF34D399),
-                        fontSize: 9,
-                        fontWeight: FontWeight.w700,
+                        fontSize: 8,
+                        fontWeight: FontWeight.w800,
                         letterSpacing: 0.5,
                       ),
                     ),
+                    if (_picks?['active_chip'] != null) ...[
+                      const SizedBox(height: 4),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF34D399),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          _formatChipName(_picks!['active_chip'] as String),
+                          style: const TextStyle(
+                            color: Colors.black,
+                            fontSize: 7,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
-              // Stats
-              Row(
-                children: [
-                  _summaryStatCol('AVG', '$avgScore'),
-                  const SizedBox(width: 20),
-                  _summaryStatCol('HIGH', '$highScore'),
-                ],
+              Expanded(
+                child: Column(
+                  children: [
+                    _summaryMiniStat('AVG', '$avgScore', AppColors.textPrimary),
+                    const SizedBox(height: 10),
+                    _summaryMiniStat(
+                      'HIGH',
+                      '$highScore',
+                      AppColors.textPrimary,
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -478,16 +503,15 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
     );
   }
 
-  Widget _summaryMiniTile(String label, String value, Color color) {
+  Widget _summaryMiniStat(String label, String value, Color color) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         Text(
           value,
           style: TextStyle(
             color: color,
             fontSize: 14,
-            fontWeight: FontWeight.w900,
+            fontWeight: FontWeight.w800,
           ),
         ),
         Text(
@@ -496,30 +520,7 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
             color: AppColors.textSecondary,
             fontSize: 8,
             fontWeight: FontWeight.w700,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _summaryStatCol(String label, String value) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Text(
-          value,
-          style: const TextStyle(
-            color: AppColors.textPrimary,
-            fontSize: 16,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-        Text(
-          label,
-          style: const TextStyle(
-            color: AppColors.textSecondary,
-            fontSize: 9,
-            fontWeight: FontWeight.w600,
+            letterSpacing: 0.5,
           ),
         ),
       ],
@@ -567,6 +568,7 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
       final player = fplProvider.getPlayerById(p['element'] as int);
       return player?.elementType == 4;
     }).toList();
+    final activeChip = _picks?['active_chip'] as String?;
 
     // Perspective tilt for 3D effect
     final pitchContent = Stack(
@@ -585,7 +587,7 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
             const SizedBox(height: 6),
             _buildPitchRow(fwdPicks, fplProvider, isStarting: true),
             const SizedBox(height: 10),
-            _buildBenchDivider(),
+            _buildBenchDivider(activeChip == 'bboost'),
             const SizedBox(height: 8),
             _buildPitchRow(bench, fplProvider, isStarting: false),
             const SizedBox(height: 20), // space for bottom goal
@@ -598,7 +600,9 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         AppTheme.sectionTitle(context, 'Pitch View'),
-        const SizedBox(height: 32), // Increased spacing so title isn't hidden by 3D tilt
+        const SizedBox(
+          height: 32,
+        ), // Increased spacing so title isn't hidden by 3D tilt
         // Perspective 3D tilt
         Transform(
           alignment: Alignment.bottomCenter,
@@ -628,7 +632,9 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
         children: picks.map((pick) {
           final playerId = pick['element'] as int;
           final player = provider.getPlayerById(playerId);
-          final posLabel = player != null ? getPositionShort(player.elementType) : '';
+          final posLabel = player != null
+              ? getPositionShort(player.elementType)
+              : '';
 
           return Column(
             mainAxisSize: MainAxisSize.min,
@@ -650,6 +656,8 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
                 pick: pick,
                 provider: provider,
                 isStarting: isStarting,
+                gwId: _gwNumber ?? 1,
+                activeChip: _picks?['active_chip'] as String?,
                 onTap: () => _showPlayerPointsSheet(context, pick, provider),
               ),
             ],
@@ -659,27 +667,47 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
     );
   }
 
-  Widget _buildBenchDivider() {
+  Widget _buildBenchDivider(bool isActive) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.symmetric(vertical: 5),
       decoration: BoxDecoration(
-        color: Colors.black.withAlpha(80),
+        color: isActive
+            ? const Color(0xFF34D399).withAlpha(40)
+            : Colors.black.withAlpha(80),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.white.withAlpha(25)),
+        border: Border.all(
+          color: isActive
+              ? const Color(0xFF34D399).withAlpha(120)
+              : Colors.white.withAlpha(25),
+          width: isActive ? 1.5 : 1,
+        ),
+        boxShadow: isActive
+            ? [
+                BoxShadow(
+                  color: const Color(0xFF34D399).withAlpha(40),
+                  blurRadius: 8,
+                  spreadRadius: 1,
+                ),
+              ]
+            : null,
       ),
-      child: const Row(
+      child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.chair_rounded, color: Colors.white38, size: 12),
-          SizedBox(width: 6),
+          Icon(
+            isActive ? Icons.bolt_rounded : Icons.chair_rounded,
+            color: isActive ? const Color(0xFF34D399) : Colors.white38,
+            size: 12,
+          ),
+          const SizedBox(width: 6),
           Text(
-            'SUBSTITUTES',
+            isActive ? 'BENCH BOOST ACTIVE' : 'SUBSTITUTES',
             style: TextStyle(
-              color: Colors.white38,
+              color: isActive ? const Color(0xFF34D399) : Colors.white38,
               fontSize: 10,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 2,
+              fontWeight: FontWeight.w900,
+              letterSpacing: isActive ? 1 : 2,
             ),
           ),
         ],
@@ -725,6 +753,21 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
     if (rank >= 1000000) return '${(rank / 1000000).toStringAsFixed(1)}M';
     if (rank >= 1000) return '${(rank / 1000).toStringAsFixed(0)}k';
     return rank.toString();
+  }
+
+  String _formatChipName(String chip) {
+    switch (chip) {
+      case 'bboost':
+        return 'BENCH BOOST';
+      case '3xc':
+        return 'TRIPLE CAPTAIN';
+      case 'freehit':
+        return 'FREE HIT';
+      case 'wildcard':
+        return 'WILDCARD';
+      default:
+        return chip.toUpperCase();
+    }
   }
 }
 
@@ -989,12 +1032,16 @@ class _PitchPlayerCard extends StatelessWidget {
   final Map<String, dynamic> pick;
   final FplProvider provider;
   final bool isStarting;
+  final int gwId;
+  final String? activeChip;
   final VoidCallback onTap;
 
   const _PitchPlayerCard({
     required this.pick,
     required this.provider,
     required this.isStarting,
+    required this.gwId,
+    this.activeChip,
     required this.onTap,
   });
 
@@ -1040,17 +1087,7 @@ class _PitchPlayerCard extends StatelessWidget {
     switch (state) {
       case _CardState.captain:
         borderColor = const Color(0xFFFFD700);
-        shadows = [
-          BoxShadow(
-            color: const Color(0xFFFFD700).withAlpha(160),
-            blurRadius: 14,
-            spreadRadius: 1,
-          ),
-          BoxShadow(
-            color: const Color(0xFFFFD700).withAlpha(60),
-            blurRadius: 28,
-          ),
-        ];
+        shadows = [];
         cardGradient = const LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
@@ -1058,19 +1095,7 @@ class _PitchPlayerCard extends StatelessWidget {
         );
       case _CardState.viceCaptain:
         borderColor = AppColors.accent;
-        shadows = [
-          BoxShadow(
-            color: AppColors.accent.withAlpha(130),
-            blurRadius: 12,
-            spreadRadius: 1,
-          ),
-          BoxShadow(color: AppColors.accent.withAlpha(50), blurRadius: 24),
-        ];
-        cardGradient = LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [AppColors.accent.withAlpha(30), AppColors.cardDark],
-        );
+        shadows = [];
       case _CardState.topPerformer:
         borderColor = AppColors.primary;
         shadows = [
@@ -1108,9 +1133,22 @@ class _PitchPlayerCard extends StatelessWidget {
     final borderWidth =
         (state == _CardState.captain ||
             state == _CardState.viceCaptain ||
-            state == _CardState.topPerformer)
+            state == _CardState.topPerformer ||
+            (activeChip == 'bboost' && !isStarting))
         ? 2.5
         : 1.5;
+
+    // Bench Boost effect: Highlight bench players
+    if (activeChip == 'bboost' && !isStarting) {
+      borderColor = const Color(0xFF34D399);
+      shadows = [
+        BoxShadow(
+          color: const Color(0xFF34D399).withAlpha(100),
+          blurRadius: 10,
+          spreadRadius: 1,
+        ),
+      ];
+    }
 
     const cardWidth = 60.0;
     const cardHeight = 64.0;
@@ -1150,131 +1188,193 @@ class _PitchPlayerCard extends StatelessWidget {
               else
                 Center(child: Icon(Icons.person, color: posColor, size: 26)),
 
-              // Star for top performer (inside card, top-right)
-              if (state == _CardState.topPerformer)
-                const Positioned(
+              // Captain / Vice-Captain badge inside the box (Top Left)
+              if (isCaptain)
+                Positioned(
                   top: 4,
-                  right: 4,
-                  child: Icon(
-                    Icons.star_rounded,
-                    color: Color(0xFFFFD700),
-                    size: 13,
-                    shadows: [Shadow(color: Colors.black87, blurRadius: 4)],
-                  ),
-                ),
+                  left: 4,
+                  child: _buildBadge('C', isTriple: activeChip == '3xc'),
+                )
+              else if (isViceCaptain)
+                Positioned(top: 4, left: 4, child: _buildBadge('V')),
+
+              // // Star for top performer (inside card, top-right)
+              // if (state == _CardState.topPerformer)
+              //   const Positioned(
+              //     top: 4,
+              //     right: 4,
+              //     child: Icon(
+              //       Icons.star_rounded,
+              //       color: Color(0xFFFFD700),
+              //       size: 13,
+              //       shadows: [Shadow(color: Colors.black87, blurRadius: 4)],
+              //     ),
+              //   ),
             ],
           ),
         ),
-
-        // Captain badge — half outside top-right corner
-        if (isCaptain)
-          Positioned(
-            top: -badgeRadius,
-            right: -badgeRadius,
-            child: _buildBadge('C', const Color(0xFFFFD700)),
-          ),
-
-        // Vice-captain badge — half outside top-right corner
-        if (isViceCaptain)
-          Positioned(
-            top: -badgeRadius,
-            right: -badgeRadius,
-            child: _buildBadge('V', AppColors.accent),
-          ),
       ],
     );
 
     return GestureDetector(
       onTap: onTap,
-      child: Padding(
-        // Top padding gives room for the badge to overflow above the card
-        padding: const EdgeInsets.only(top: badgeRadius),
-        child: SizedBox(
-          width: cardWidth,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Photo card — badge overflows freely (clip.none on outer Stack)
-              photoCard,
-              // Name box — same width, perfectly aligned left
-              Container(
-                width: cardWidth,
-                padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 3),
-                decoration: BoxDecoration(
-                  color: Colors.black.withAlpha(isBench ? 120 : 180),
-                ),
-                child: Text(
-                  player?.webName ?? '?',
-                  style: TextStyle(
-                    color: isBench ? Colors.white : Colors.white,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w800,
-                  ),
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
+      child: SizedBox(
+        width: cardWidth,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Photo card — badge overflows freely (clip.none on outer Stack)
+            photoCard,
+            // Name box — same width, perfectly aligned left
+            Container(
+              width: cardWidth,
+              padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 3),
+              decoration: BoxDecoration(
+                color: Colors.black.withAlpha(isBench ? 120 : 180),
               ),
-              // Points box — same width as card, flush below name
-              Container(
-                width: cardWidth,
-                padding: const EdgeInsets.symmetric(vertical: 3),
-                decoration: BoxDecoration(
-                  color: _ptsBadgeColor(state, effectivePts),
-                  borderRadius: const BorderRadius.vertical(
-                    bottom: Radius.circular(4),
-                  ),
-                  boxShadow:
-                      state == _CardState.captain ||
-                          state == _CardState.topPerformer
-                      ? [
-                          BoxShadow(
-                            color: _ptsBadgeColor(
-                              state,
-                              effectivePts,
-                            ).withAlpha(120),
-                            blurRadius: 6,
-                          ),
-                        ]
-                      : null,
+              child: Text(
+                player?.webName ?? '?',
+                style: TextStyle(
+                  color: isBench ? Colors.white : Colors.white,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w800,
                 ),
-                child: Text(
-                  '$effectivePts pts',
-                  style: TextStyle(
-                    color: _ptsBadgeTextColor(state),
-                    fontSize: 9,
-                    fontWeight: FontWeight.w900,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-            ],
-          ),
+            ),
+            // Points box — same width as card, flush below name
+            Container(
+              width: cardWidth,
+              padding: const EdgeInsets.symmetric(vertical: 3),
+              decoration: BoxDecoration(
+                color: _ptsBadgeColor(state, effectivePts),
+                borderRadius: const BorderRadius.vertical(
+                  bottom: Radius.circular(4),
+                ),
+                // boxShadow:
+                //     state == _CardState.captain ||
+                //         state == _CardState.topPerformer
+                //     ? [
+                //         BoxShadow(
+                //           color: _ptsBadgeColor(
+                //             state,
+                //             effectivePts,
+                //           ).withAlpha(120),
+                //           blurRadius: 6,
+                //         ),
+                //       ]
+                //     : null,
+              ),
+              child: Text(
+                _getStatusText(player),
+                style: TextStyle(
+                  color: _ptsBadgeTextColor(state),
+                  fontSize: 8.5,
+                  fontWeight: FontWeight.w900,
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.visible,
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildBadge(String letter, Color color) {
+  String _getStatusText(Player? player) {
+    if (player == null) return '?';
+
+    final fixtures =
+        provider
+            .getFixturesForGameweek(gwId)
+            .where(
+              (f) =>
+                  f.homeTeamId == player.teamId ||
+                  f.awayTeamId == player.teamId,
+            )
+            .toList()
+          ..sort(
+            (a, b) => (a.kickoffTime ?? '').compareTo(b.kickoffTime ?? ''),
+          );
+
+    if (fixtures.isEmpty) return '--';
+
+    final live = provider.getLiveStatsForPlayer(player.id);
+    final rawPts = live?['total_points'] as int? ?? 0;
+    final isBench = (pick['position'] as int) > 11;
+    final multiplier = pick['multiplier'] as int? ?? 1;
+
+    // If active chip is bench boost, bench players also get multiplier 1
+    int effectivePts = rawPts;
+    if (!isBench) {
+      effectivePts = rawPts * multiplier;
+    } else if (activeChip == 'bboost') {
+      effectivePts = rawPts;
+    }
+
+    // Check match status
+    bool anyStarted = fixtures.any((f) => f.started ?? false);
+    bool allFinished = fixtures.every((f) => f.finished);
+
+    if (!anyStarted) {
+      // Show opponents
+      return fixtures
+          .map((f) {
+            final isHome = f.homeTeamId == player.teamId;
+            final oppId = isHome ? f.awayTeamId : f.homeTeamId;
+            final opp = provider.getTeamById(oppId);
+            final shortName = opp?.shortName ?? 'OPP';
+            return '$shortName(${isHome ? 'H' : 'A'})';
+          })
+          .join(',');
+    }
+
+    if (allFinished) {
+      return '$effectivePts pts';
+    }
+
+    // Some started/finished, some yet to play
+    final pending = fixtures.where((f) => !(f.started ?? false)).toList();
+    if (pending.isEmpty) {
+      return '$effectivePts pts';
+    }
+
+    final pendingStr = pending
+        .map((f) {
+          final isHome = f.homeTeamId == player.teamId;
+          final oppId = isHome ? f.awayTeamId : f.homeTeamId;
+          final opp = provider.getTeamById(oppId);
+          final shortName = opp?.shortName ?? 'OPP';
+          return '$shortName(${isHome ? 'H' : 'A'})';
+        })
+        .join(',');
+
+    return '$effectivePts pts,$pendingStr';
+  }
+
+  Widget _buildBadge(String letter, {bool isTriple = false}) {
     return Container(
-      width: 16,
-      height: 16,
+      width: 14,
+      height: 14,
       decoration: BoxDecoration(
-        color: color,
+        color: isTriple ? Colors.white : Colors.black,
         shape: BoxShape.circle,
-        border: Border.all(color: Colors.white, width: 1),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withAlpha(120), blurRadius: 4),
-        ],
+        border: Border.all(
+          color: isTriple ? Colors.black : Colors.white,
+          width: 0.8,
+        ),
       ),
       child: Center(
         child: Text(
           letter,
-          style: const TextStyle(
-            fontSize: 8,
+          style: TextStyle(
+            fontSize: 7.5,
             fontWeight: FontWeight.w900,
-            color: Colors.white,
-            shadows: [Shadow(color: Colors.black54, blurRadius: 2)],
+            color: isTriple ? Colors.black : Colors.white,
           ),
         ),
       ),
@@ -1284,9 +1384,9 @@ class _PitchPlayerCard extends StatelessWidget {
   Color _ptsBadgeColor(_CardState state, int pts) {
     switch (state) {
       case _CardState.captain:
-        return const Color(0xFFFFD700);
-      case _CardState.viceCaptain:
         return AppColors.accent;
+      case _CardState.viceCaptain:
+        return AppColors.primary;
       case _CardState.topPerformer:
         return AppColors.primary;
       case _CardState.good:
