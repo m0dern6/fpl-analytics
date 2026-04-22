@@ -512,7 +512,7 @@ class FixtureDetailScreen extends StatelessWidget {
                   Icon(info.icon, color: info.color, size: 12),
                   const SizedBox(width: 4),
                   Text(
-                    _formatValue(stat: entry.stat, identifier: ''),
+                    _formatValue(entry.stat),
                     style: TextStyle(
                       color: info.color,
                       fontSize: 12,
@@ -548,7 +548,7 @@ class FixtureDetailScreen extends StatelessWidget {
     );
   }
 
-  String _formatValue({required FixtureStatEntry stat, required String identifier}) {
+  String _formatValue(FixtureStatEntry stat) {
     if (stat.value == 1) return '×1';
     return '×${stat.value}';
   }
