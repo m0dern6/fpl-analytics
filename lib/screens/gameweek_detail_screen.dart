@@ -43,10 +43,12 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
   Widget _buildContent(BuildContext context) {
     final gw = widget.gw;
     final provider = widget.provider;
-    final topPlayer =
-        gw.topElement != null ? provider.getPlayerById(gw.topElement!) : null;
-    final topPlayerTeam =
-        topPlayer != null ? provider.getTeamById(topPlayer.teamId) : null;
+    final topPlayer = gw.topElement != null
+        ? provider.getPlayerById(gw.topElement!)
+        : null;
+    final topPlayerTeam = topPlayer != null
+        ? provider.getTeamById(topPlayer.teamId)
+        : null;
     final mostTransferredPlayer = gw.mostTransferredIn != null
         ? provider.getPlayerById(gw.mostTransferredIn!)
         : null;
@@ -86,7 +88,8 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
                 subtitle: 'Highest Scoring Player',
                 color: AppColors.warning,
                 icon: Icons.emoji_events_rounded,
-                gwPoints: provider.getDreamTeamPlayerPoints(gw.id, topPlayer.id) > 0
+                gwPoints:
+                    provider.getDreamTeamPlayerPoints(gw.id, topPlayer.id) > 0
                     ? provider.getDreamTeamPlayerPoints(gw.id, topPlayer.id)
                     : topPlayer.eventPoints,
                 isDouble: false,
@@ -289,9 +292,7 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
     return GestureDetector(
       onTap: () => Navigator.push(
         context,
-        MaterialPageRoute(
-          builder: (_) => PlayerDetailScreen(player: player),
-        ),
+        MaterialPageRoute(builder: (_) => PlayerDetailScreen(player: player)),
       ),
       child: Container(
         padding: const EdgeInsets.all(16),
@@ -310,10 +311,16 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
               child: CachedNetworkImage(
                 imageUrl: player.photoUrl,
                 fit: BoxFit.cover,
-                placeholder: (_, __) =>
-                    const Icon(Icons.person, color: AppColors.textSecondary, size: 32),
-                errorWidget: (_, __, ___) =>
-                    const Icon(Icons.person, color: AppColors.textSecondary, size: 32),
+                placeholder: (_, __) => const Icon(
+                  Icons.person,
+                  color: AppColors.textSecondary,
+                  size: 32,
+                ),
+                errorWidget: (_, __, ___) => const Icon(
+                  Icons.person,
+                  color: AppColors.textSecondary,
+                  size: 32,
+                ),
               ),
             ),
             const SizedBox(width: 14),
@@ -344,12 +351,15 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
                         const SizedBox(width: 4),
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 5, vertical: 1),
+                            horizontal: 5,
+                            vertical: 1,
+                          ),
                           decoration: BoxDecoration(
                             color: AppColors.warning.withAlpha(30),
                             borderRadius: BorderRadius.circular(4),
                             border: Border.all(
-                                color: AppColors.warning.withAlpha(100)),
+                              color: AppColors.warning.withAlpha(100),
+                            ),
                           ),
                           child: const Text(
                             '2×',
@@ -396,7 +406,9 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
                 Text(
                   isDouble ? 'pts (×2)' : 'pts',
                   style: const TextStyle(
-                      color: AppColors.textSecondary, fontSize: 11),
+                    color: AppColors.textSecondary,
+                    fontSize: 11,
+                  ),
                 ),
               ],
             ),
@@ -424,7 +436,9 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
                       ? 'Dream team data unavailable for this gameweek'
                       : 'Dream team will be available after GW completion',
                   style: const TextStyle(
-                      color: AppColors.textSecondary, fontSize: 12),
+                    color: AppColors.textSecondary,
+                    fontSize: 12,
+                  ),
                   textAlign: TextAlign.center,
                 ),
         ),
@@ -484,8 +498,10 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
   }
 
   Widget _buildPitchPlayer(BuildContext context, Player player) {
-    final gwPoints = widget.provider
-        .getDreamTeamPlayerPoints(widget.gw.id, player.id);
+    final gwPoints = widget.provider.getDreamTeamPlayerPoints(
+      widget.gw.id,
+      player.id,
+    );
     final displayPoints = gwPoints > 0 ? gwPoints : player.eventPoints;
     final posColor = getPositionColor(player.elementType);
     final isCaptain = player.id == widget.gw.mostCaptained;
@@ -633,17 +649,17 @@ class _PitchMarkingsPainter extends CustomPainter {
     final penW = size.width * 0.5;
     final penH = size.height * 0.15;
     canvas.drawRect(
-      Rect.fromLTWH(
-          (size.width - penW) / 2, 8, penW, penH),
+      Rect.fromLTWH((size.width - penW) / 2, 8, penW, penH),
       paint,
     );
     // Bottom penalty area
     canvas.drawRect(
       Rect.fromLTWH(
-          (size.width - penW) / 2,
-          size.height - 8 - penH,
-          penW,
-          penH),
+        (size.width - penW) / 2,
+        size.height - 8 - penH,
+        penW,
+        penH,
+      ),
       paint,
     );
   }
