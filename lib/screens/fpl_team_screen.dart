@@ -384,9 +384,13 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
     final gwInfo = fplProvider.currentGameweek;
 
     final teamName = e['name'] as String? ?? '';
-    final overallPoints = e['summary_overall_points'] as int? ?? 0;
+    final staticEventPoints = e['summary_event_points'] as int? ?? 0;
+    final staticOverallPoints = e['summary_overall_points'] as int? ?? 0;
     final overallRank = e['summary_overall_rank'] as int?;
-    final eventPoints = e['summary_event_points'] as int? ?? 0;
+
+    final liveEventPoints = _calculateLivePoints(fplProvider);
+    final overallPoints =
+        staticOverallPoints - staticEventPoints + liveEventPoints;
 
     final avgScore = gwInfo?.averageEntryScore ?? 0;
     final highScore = gwInfo?.highestScore ?? 0;
@@ -441,7 +445,7 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
                 child: Column(
                   children: [
                     Text(
-                      '$eventPoints',
+                      '$liveEventPoints',
                       style: const TextStyle(
                         color: Color(0xFF34D399),
                         fontSize: 32,
@@ -753,6 +757,27 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
     if (rank >= 1000000) return '${(rank / 1000000).toStringAsFixed(1)}M';
     if (rank >= 1000) return '${(rank / 1000).toStringAsFixed(0)}k';
     return rank.toString();
+  }
+
+  int _calculateLivePoints(FplProvider provider) {
+    if (_picks == null || _picks!['picks'] == null) return 0;
+
+    final picksList = _picks!['picks'] as List<dynamic>;
+    final activeChip = _picks!['active_chip'] as String?;
+
+    int total = 0;
+    for (final pick in picksList) {
+      final isBench = (pick['position'] as int) > 11;
+      // Points count if in starting XI OR Bench Boost is active
+      if (!isBench || activeChip == 'bboost') {
+        final playerId = pick['element'] as int;
+        final live = provider.getLiveStatsForPlayer(playerId);
+        final rawPts = live?['total_points'] as int? ?? 0;
+        final multiplier = pick['multiplier'] as int? ?? 1;
+        total += (rawPts * multiplier);
+      }
+    }
+    return total;
   }
 
   String _formatChipName(String chip) {
