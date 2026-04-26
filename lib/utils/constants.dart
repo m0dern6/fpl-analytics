@@ -11,6 +11,8 @@ class ApiConstants {
   static String fplEntry(int entryId) => '$baseUrl/entry/$entryId/';
   static String fplEntryPicks(int entryId, int gw) =>
       '$baseUrl/entry/$entryId/event/$gw/picks/';
+  static String leagueStandings(int leagueId) =>
+      '$baseUrl/leagues-classic/$leagueId/standings/';
   static String playerPhotoUrl(String photo) {
     final code = photo.replaceAll('.jpg', '');
     return 'https://resources.premierleague.com/premierleague/photos/players/110x140/p$code.png';
