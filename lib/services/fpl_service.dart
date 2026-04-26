@@ -16,6 +16,9 @@ class FplService {
   Map<String, dynamic>? _bootstrapCache;
   DateTime? _bootstrapCacheTime;
 
+  final Map<int, Map<String, dynamic>> _entryCache = {};
+  final Map<String, Map<String, dynamic>> _picksCache = {};
+
   static const Duration _cacheDuration = Duration(minutes: 5);
 
   Future<Map<String, dynamic>> fetchBootstrapData({bool forceRefresh = false}) async {
@@ -150,6 +153,8 @@ class FplService {
   }
 
   Future<Map<String, dynamic>> fetchFplEntry(int entryId) async {
+    if (_entryCache.containsKey(entryId)) return _entryCache[entryId]!;
+
     final response = await http.get(
       Uri.parse(ApiConstants.fplEntry(entryId)),
       headers: {'User-Agent': 'FPL Analytics App'},
@@ -159,10 +164,15 @@ class FplService {
       throw Exception('Failed to load FPL entry: ${response.statusCode}');
     }
 
-    return json.decode(response.body) as Map<String, dynamic>;
+    final data = json.decode(response.body) as Map<String, dynamic>;
+    _entryCache[entryId] = data;
+    return data;
   }
 
   Future<Map<String, dynamic>> fetchFplEntryPicks(int entryId, int gw) async {
+    final cacheKey = '${entryId}_$gw';
+    if (_picksCache.containsKey(cacheKey)) return _picksCache[cacheKey]!;
+
     final response = await http.get(
       Uri.parse(ApiConstants.fplEntryPicks(entryId, gw)),
       headers: {'User-Agent': 'FPL Analytics App'},
@@ -170,6 +180,21 @@ class FplService {
 
     if (response.statusCode != 200) {
       throw Exception('Failed to load entry picks: ${response.statusCode}');
+    }
+
+    final data = json.decode(response.body) as Map<String, dynamic>;
+    _picksCache[cacheKey] = data;
+    return data;
+  }
+
+  Future<Map<String, dynamic>> fetchLeagueStandings(int leagueId) async {
+    final response = await http.get(
+      Uri.parse(ApiConstants.leagueStandings(leagueId)),
+      headers: {'User-Agent': 'FPL Analytics App'},
+    ).timeout(const Duration(seconds: 30));
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to load league standings: ${response.statusCode}');
     }
 
     return json.decode(response.body) as Map<String, dynamic>;

@@ -19,6 +19,7 @@ class FplProvider extends ChangeNotifier {
   Map<int, Map<String, dynamic>> _liveData = {};
   Map<int, List<Player>> _dreamTeams = {};
   Map<int, Map<int, int>> _dreamTeamPoints = {}; // gw -> { playerId: gwPoints }
+  Map<int, Map<int, Map<String, dynamic>>> _managerTeams = {}; // gw -> { entryId: picks }
   final Set<int> _dreamTeamLoadingGws = {};
 
   bool _isLoading = false;
@@ -135,6 +136,19 @@ class FplProvider extends ChangeNotifier {
   int getDreamTeamPlayerPoints(int gw, int playerId) {
     return _dreamTeamPoints[gw]?[playerId] ?? 0;
   }
+
+  Future<void> loadManagerTeam(int entryId, int gw) async {
+    if (_managerTeams[gw]?.containsKey(entryId) == true) return;
+    try {
+      final picks = await _service.fetchFplEntryPicks(entryId, gw);
+      _managerTeams[gw] ??= {};
+      _managerTeams[gw]![entryId] = picks;
+      notifyListeners();
+    } catch (_) {}
+  }
+
+  Map<String, dynamic>? getManagerTeam(int entryId, int gw) =>
+      _managerTeams[gw]?[entryId];
 
   Team? getTeamById(int teamId) {
     try {
