@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'constants.dart';
 
 String formatPrice(int rawCost) {
@@ -101,4 +102,8 @@ Color getStatusColor(String? status) {
     default:
       return const Color(0xFF00D68F);
   }
+}
+
+String formatNumber(num value) {
+  return NumberFormat('#,###').format(value);
 }
