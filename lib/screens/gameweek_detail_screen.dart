@@ -8,6 +8,7 @@ import '../utils/app_theme.dart';
 import '../utils/constants.dart';
 import '../utils/formatters.dart';
 import 'player_detail_screen.dart';
+import '../widgets/pitch_view.dart';
 
 class GameweekDetailScreen extends StatefulWidget {
   final Gameweek gw;
@@ -29,6 +30,13 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       widget.provider.loadDreamTeam(widget.gw.id);
+      widget.provider.loadLiveGwData(widget.gw.id);
+      if (widget.gw.highestScoringEntry != null) {
+        widget.provider.loadManagerTeam(
+          widget.gw.highestScoringEntry!,
+          widget.gw.id,
+        );
+      }
     });
   }
 
@@ -74,9 +82,35 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
             const SizedBox(height: 16),
             _buildScoreCards(),
             const SizedBox(height: 20),
-            AppTheme.sectionTitle(context, 'Highest Scoring Team'),
+            const Center(
+              child: Text(
+                'DREAM TEAM',
+                style: TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 2,
+                ),
+              ),
+            ),
             const SizedBox(height: 12),
             _buildDreamTeamPitch(context),
+            if (gw.highestScoringEntry != null) ...[
+              const SizedBox(height: 40),
+              const Center(
+                child: Text(
+                  'HIGHEST SCORING MANAGER',
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1.5,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              _buildManagerTeamPitch(context),
+            ],
             if (topPlayer != null) ...[
               const SizedBox(height: 20),
               AppTheme.sectionTitle(context, 'Top Player This Gameweek'),
@@ -425,192 +459,130 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
 
     if (squad.isEmpty) {
       final isLoading = widget.provider.isDreamTeamLoading(widget.gw.id);
-      return Container(
-        padding: const EdgeInsets.all(20),
-        decoration: AppTheme.gradientCard(),
-        child: Center(
-          child: isLoading
-              ? const CircularProgressIndicator(color: AppColors.primary)
-              : Text(
-                  widget.gw.finished
-                      ? 'Dream team data unavailable for this gameweek'
-                      : 'Dream team will be available after GW completion',
-                  style: const TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 12,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-        ),
-      );
+      return _buildLoadingOrEmptyPitch(isLoading);
     }
 
-    // Group players by position
-    final gks = squad.where((p) => p.elementType == 1).toList();
-    final defs = squad.where((p) => p.elementType == 2).toList();
-    final mids = squad.where((p) => p.elementType == 3).toList();
-    final fwds = squad.where((p) => p.elementType == 4).toList();
+    final pointsMap = <int, int>{};
+    int totalPoints = 0;
+    for (final p in squad) {
+      final pts = widget.provider.getDreamTeamPlayerPoints(widget.gw.id, p.id);
+      pointsMap[p.id] = pts;
+      totalPoints += pts;
+    }
 
-    return Container(
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [AppColors.pitchGreen, AppColors.pitchGreenDark],
+    // Map players to pick format for PitchView
+    final dreamPicks = squad.asMap().entries.map((entry) {
+      final p = entry.value;
+      return {
+        'element': p.id,
+        'position': entry.key + 1, // 1-11
+        'multiplier': 1,
+        'is_captain': p.id == widget.gw.mostCaptained,
+        'is_vice_captain': false,
+      };
+    }).toList();
+
+    return Column(
+      children: [
+        _buildTotalPointsContainer(totalPoints),
+        const SizedBox(height: 16),
+        PitchView(
+          picks: dreamPicks,
+          provider: widget.provider,
+          gwId: widget.gw.id,
+          isDreamTeam: true,
+          pointsMap: pointsMap,
+          onPlayerTap: (pick) => _showPlayerDetail(pick['element'] as int),
         ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withAlpha(20)),
+      ],
+    );
+  }
+
+  Widget _buildManagerTeamPitch(BuildContext context) {
+    final managerTeam = widget.provider.getManagerTeam(
+      widget.gw.highestScoringEntry!,
+      widget.gw.id,
+    );
+
+    if (managerTeam == null) {
+      return _buildLoadingOrEmptyPitch(true);
+    }
+
+    final picks = (managerTeam['picks'] as List).map((p) => p as Map<String, dynamic>).toList();
+    final totalPoints = managerTeam['entry_history']?['points'] as int? ?? 0;
+
+    return Column(
+      children: [
+        _buildTotalPointsContainer(totalPoints),
+        const SizedBox(height: 16),
+        PitchView(
+          picks: picks,
+          provider: widget.provider,
+          gwId: widget.gw.id,
+          activeChip: managerTeam['active_chip'] as String?,
+          onPlayerTap: (pick) => _showPlayerDetail(pick['element'] as int),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTotalPointsContainer(int points) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+      decoration: BoxDecoration(
+        color: const Color(0xFF34D399).withAlpha(30),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFF34D399).withAlpha(100), width: 1.5),
       ),
-      child: Stack(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          // Pitch markings
-          Positioned.fill(child: _buildPitchMarkings()),
-          // Players
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            child: Column(
-              children: [
-                if (fwds.isNotEmpty) _buildPitchRow(context, fwds),
-                if (fwds.isNotEmpty) const SizedBox(height: 14),
-                if (mids.isNotEmpty) _buildPitchRow(context, mids),
-                if (mids.isNotEmpty) const SizedBox(height: 14),
-                if (defs.isNotEmpty) _buildPitchRow(context, defs),
-                if (defs.isNotEmpty) const SizedBox(height: 14),
-                if (gks.isNotEmpty) _buildPitchRow(context, gks),
-              ],
+          Text(
+            '$points',
+            style: const TextStyle(
+              color: Color(0xFF34D399),
+              fontSize: 32,
+              fontWeight: FontWeight.w900,
+              height: 1.1,
+            ),
+          ),
+          Text(
+            'GW${widget.gw.id} PTS',
+            style: const TextStyle(
+              color: Color(0xFF34D399),
+              fontSize: 8,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.5,
             ),
           ),
         ],
       ),
-    ).animate().fadeIn(delay: 50.ms);
-  }
-
-  Widget _buildPitchMarkings() {
-    return CustomPaint(painter: _PitchMarkingsPainter());
-  }
-
-  Widget _buildPitchRow(BuildContext context, List<Player> players) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: players.map((p) => _buildPitchPlayer(context, p)).toList(),
     );
   }
 
-  Widget _buildPitchPlayer(BuildContext context, Player player) {
-    final gwPoints = widget.provider.getDreamTeamPlayerPoints(
-      widget.gw.id,
-      player.id,
+  Widget _buildLoadingOrEmptyPitch(bool isLoading) {
+    return Container(
+      height: 200,
+      decoration: AppTheme.gradientCard(),
+      child: Center(
+        child: isLoading
+            ? const CircularProgressIndicator(color: AppColors.primary)
+            : const Text(
+                'Data unavailable for this gameweek',
+                style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+              ),
+      ),
     );
-    final displayPoints = gwPoints > 0 ? gwPoints : player.eventPoints;
-    final posColor = getPositionColor(player.elementType);
-    final isCaptain = player.id == widget.gw.mostCaptained;
+  }
 
-    return GestureDetector(
-      onTap: () => Navigator.push(
+  void _showPlayerDetail(int playerId) {
+    final player = widget.provider.getPlayerById(playerId);
+    if (player != null) {
+      Navigator.push(
         context,
         MaterialPageRoute(builder: (_) => PlayerDetailScreen(player: player)),
-      ),
-      child: SizedBox(
-        width: 64,
-        child: Column(
-          children: [
-            Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Container(
-                  width: 50,
-                  height: 60,
-                  decoration: BoxDecoration(
-                    color: AppColors.cardDark.withAlpha(180),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: posColor.withAlpha(180),
-                      width: 1.5,
-                    ),
-                  ),
-                  clipBehavior: Clip.antiAlias,
-                  child: CachedNetworkImage(
-                    imageUrl: player.photoUrl,
-                    fit: BoxFit.cover,
-                    alignment: Alignment.topCenter,
-                    placeholder: (_, __) => Center(
-                      child: Icon(Icons.person, color: posColor, size: 26),
-                    ),
-                    errorWidget: (_, __, ___) => Center(
-                      child: Icon(Icons.person, color: posColor, size: 26),
-                    ),
-                  ),
-                ),
-                if (isCaptain)
-                  Positioned(
-                    top: -6,
-                    right: -6,
-                    child: Container(
-                      width: 16,
-                      height: 16,
-                      decoration: BoxDecoration(
-                        color: AppColors.warning,
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: AppColors.pitchGreen,
-                          width: 1.5,
-                        ),
-                      ),
-                      child: const Center(
-                        child: Text(
-                          'C',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 8,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 3),
-            Container(
-              constraints: const BoxConstraints(maxWidth: 62),
-              padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 1),
-              decoration: BoxDecoration(
-                color: Colors.black.withAlpha(150),
-                borderRadius: BorderRadius.circular(3),
-              ),
-              child: Text(
-                player.webName,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 9,
-                  fontWeight: FontWeight.w600,
-                ),
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            const SizedBox(height: 2),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-              decoration: BoxDecoration(
-                color: posColor.withAlpha(230),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(
-                '$displayPoints',
-                style: const TextStyle(
-                  color: Colors.black,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+      );
+    }
   }
 
   String _fmt(int n) {
@@ -618,52 +590,4 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
     if (n >= 1000) return '${(n / 1000).toStringAsFixed(0)}k';
     return '$n';
   }
-}
-
-class _PitchMarkingsPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.white.withAlpha(20)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.0;
-
-    // Centre circle
-    canvas.drawCircle(
-      Offset(size.width / 2, size.height / 2),
-      size.width * 0.15,
-      paint,
-    );
-    // Centre line
-    canvas.drawLine(
-      Offset(0, size.height / 2),
-      Offset(size.width, size.height / 2),
-      paint,
-    );
-    // Outer border
-    canvas.drawRect(
-      Rect.fromLTWH(8, 8, size.width - 16, size.height - 16),
-      paint,
-    );
-    // Top penalty area
-    final penW = size.width * 0.5;
-    final penH = size.height * 0.15;
-    canvas.drawRect(
-      Rect.fromLTWH((size.width - penW) / 2, 8, penW, penH),
-      paint,
-    );
-    // Bottom penalty area
-    canvas.drawRect(
-      Rect.fromLTWH(
-        (size.width - penW) / 2,
-        size.height - 8 - penH,
-        penW,
-        penH,
-      ),
-      paint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
