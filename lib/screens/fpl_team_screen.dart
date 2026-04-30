@@ -43,7 +43,7 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
     final prefs = await SharedPreferences.getInstance();
     final hidden = prefs.getStringList('hidden_leagues') ?? [];
     _hiddenLeagues = hidden.map(int.parse).toList();
-    
+
     final saved = prefs.getString(_prefKey);
     if (saved != null && saved.isNotEmpty) {
       _controller.text = saved;
@@ -56,7 +56,10 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
     setState(() {
       _hiddenLeagues.add(id);
     });
-    await prefs.setStringList('hidden_leagues', _hiddenLeagues.map((e) => e.toString()).toList());
+    await prefs.setStringList(
+      'hidden_leagues',
+      _hiddenLeagues.map((e) => e.toString()).toList(),
+    );
   }
 
   Future<void> _unhideLeagues() async {
@@ -128,7 +131,10 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
         title: const Text(
           'Change Team ID',
-          style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700),
+          style: TextStyle(
+            color: AppColors.textPrimary,
+            fontWeight: FontWeight.w700,
+          ),
         ),
         content: Form(
           key: editKey,
@@ -148,27 +154,48 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
                 style: const TextStyle(color: AppColors.textPrimary),
                 decoration: const InputDecoration(
                   hintText: 'e.g. 1234567',
-                  prefixIcon: Icon(Icons.tag_rounded, color: AppColors.textSecondary, size: 18),
+                  prefixIcon: Icon(
+                    Icons.tag_rounded,
+                    color: AppColors.textSecondary,
+                    size: 18,
+                  ),
                 ),
                 validator: (v) {
-                  if (v == null || v.trim().isEmpty) return 'Please enter a team ID';
+                  if (v == null || v.trim().isEmpty)
+                    return 'Please enter a team ID';
                   return null;
+                },
+                onChanged: (val) {
+                  // Replaced auto load with a manual confirmation to avoid unintentional reloads while typing.
                 },
               ),
             ],
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary))),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: AppColors.textSecondary),
+            ),
+          ),
           TextButton(
             onPressed: () async {
               if (editKey.currentState!.validate()) {
                 Navigator.pop(ctx);
                 _controller.text = editController.text;
-                await _fetchTeam();
+                await _saveId(editController.text);
+                await _fetchTeam(autoLoad: true);
               }
             },
-            child: const Text('Load Team', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w700)),
+            child: const Text(
+              'Load Team',
+              style: TextStyle(
+                color: AppColors.primary,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
           ),
         ],
       ),
@@ -189,14 +216,31 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
         title: const Text('My FPL Team'),
         backgroundColor: AppColors.secondary,
         actions: [
-          if (_hasTeamLoaded && _hiddenLeagues.isNotEmpty) 
+          if (_hasTeamLoaded && _hiddenLeagues.isNotEmpty)
             IconButton(
-              icon: const Icon(Icons.visibility_rounded, color: AppColors.textSecondary), 
+              icon: const Icon(
+                Icons.visibility_rounded,
+                color: AppColors.textSecondary,
+              ),
               onPressed: _unhideLeagues,
               tooltip: 'Restore hidden leagues',
             ),
-          if (_hasTeamLoaded) IconButton(icon: const Icon(Icons.edit_rounded, color: AppColors.textSecondary), onPressed: _showEditDialog),
-          if (_hasTeamLoaded) IconButton(icon: const Icon(Icons.refresh_rounded, color: AppColors.textSecondary), onPressed: () => _fetchTeam(autoLoad: true)),
+          if (_hasTeamLoaded)
+            IconButton(
+              icon: const Icon(
+                Icons.edit_rounded,
+                color: AppColors.textSecondary,
+              ),
+              onPressed: _showEditDialog,
+            ),
+          if (_hasTeamLoaded)
+            IconButton(
+              icon: const Icon(
+                Icons.refresh_rounded,
+                color: AppColors.textSecondary,
+              ),
+              onPressed: () => _fetchTeam(autoLoad: true),
+            ),
         ],
       ),
       body: _buildBody(),
@@ -204,7 +248,10 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
   }
 
   Widget _buildBody() {
-    if (_loading) return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+    if (_loading)
+      return const Center(
+        child: CircularProgressIndicator(color: AppColors.primary),
+      );
     if (!_hasTeamLoaded) return _buildInitialForm();
     return _buildTeamView();
   }
@@ -216,7 +263,10 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
         children: [
           const SizedBox(height: 24),
           _buildFormCard(),
-          if (_error != null) ...[const SizedBox(height: 16), _buildErrorCard()],
+          if (_error != null) ...[
+            const SizedBox(height: 16),
+            _buildErrorCard(),
+          ],
         ],
       ),
     );
@@ -233,11 +283,27 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
             children: [
               Container(
                 padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(color: AppColors.primary.withAlpha(24), borderRadius: BorderRadius.circular(10)),
-                child: const Icon(Icons.manage_accounts_rounded, color: AppColors.primary, size: 22),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withAlpha(24),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Icons.manage_accounts_rounded,
+                  color: AppColors.primary,
+                  size: 22,
+                ),
               ),
               const SizedBox(width: 12),
-              const Expanded(child: Text('Look up your FPL team', style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w700))),
+              const Expanded(
+                child: Text(
+                  'Look up your FPL team',
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 16),
@@ -253,17 +319,36 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
                     style: const TextStyle(color: AppColors.textPrimary),
                     decoration: const InputDecoration(
                       hintText: 'e.g. 1234567',
-                      prefixIcon: Icon(Icons.tag_rounded, color: AppColors.textSecondary, size: 18),
+                      prefixIcon: Icon(
+                        Icons.tag_rounded,
+                        color: AppColors.textSecondary,
+                        size: 18,
+                      ),
                     ),
-                    validator: (v) => (v == null || v.trim().isEmpty) ? 'Please enter a team ID' : null,
+                    validator: (v) => (v == null || v.trim().isEmpty)
+                        ? 'Please enter a team ID'
+                        : null,
                     onFieldSubmitted: (_) => _fetchTeam(),
                   ),
                 ),
                 const SizedBox(width: 10),
                 ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: AppColors.secondary, padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
-                  onPressed: _loading ? null : _fetchTeam,
-                  child: const Text('Go', style: TextStyle(fontWeight: FontWeight.w800)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: AppColors.secondary,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 16,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                  onPressed: _loading ? null : () => _fetchTeam(),
+                  child: const Text(
+                    'Go',
+                    style: TextStyle(fontWeight: FontWeight.w800),
+                  ),
                 ),
               ],
             ),
@@ -276,12 +361,21 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
   Widget _buildErrorCard() {
     return Container(
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(color: AppColors.error.withAlpha(20), borderRadius: BorderRadius.circular(14), border: Border.all(color: AppColors.error.withAlpha(80))),
+      decoration: BoxDecoration(
+        color: AppColors.error.withAlpha(20),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.error.withAlpha(80)),
+      ),
       child: Row(
         children: [
           const Icon(Icons.error_outline, color: AppColors.error, size: 20),
           const SizedBox(width: 10),
-          Expanded(child: Text(_error!, style: const TextStyle(color: AppColors.error, fontSize: 13))),
+          Expanded(
+            child: Text(
+              _error!,
+              style: const TextStyle(color: AppColors.error, fontSize: 13),
+            ),
+          ),
         ],
       ),
     );
@@ -290,19 +384,23 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
   Widget _buildTeamView() {
     final fplProvider = context.read<FplProvider>();
     final gwInfo = fplProvider.currentGameweek;
-    
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (gwInfo != null) _buildGameweekBox(gwInfo),
-          const SizedBox(height: 16),
-          _buildSummaryCard(),
-          const SizedBox(height: 20),
-          _buildLeaguesCard(),
-          const SizedBox(height: 24),
-        ],
+
+    return RefreshIndicator(
+      onRefresh: () => _fetchTeam(autoLoad: true),
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (gwInfo != null) _buildGameweekBox(gwInfo),
+            const SizedBox(height: 16),
+            _buildSummaryCard(),
+            const SizedBox(height: 20),
+            _buildLeaguesCard(),
+            const SizedBox(height: 24),
+          ],
+        ),
       ),
     );
   }
@@ -317,15 +415,39 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(gw.name.toUpperCase(), style: const TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.w900)),
-                Text('Deadline: ${formatDateTime(gw.deadlineTime)}', style: const TextStyle(color: AppColors.textSecondary, fontSize: 11)),
+                Text(
+                  gw.name.toUpperCase(),
+                  style: const TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                Text(
+                  'Deadline: ${formatDateTime(gw.deadlineTime)}',
+                  style: const TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 11,
+                  ),
+                ),
               ],
             ),
           ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(color: AppColors.primary.withAlpha(40), borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.primary.withAlpha(100))),
-            child: Text(gw.finished ? 'Finished' : (gw.isCurrent ? 'Live' : 'Upcoming'), style: const TextStyle(color: AppColors.primary, fontSize: 11, fontWeight: FontWeight.w800)),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withAlpha(40),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppColors.primary.withAlpha(100)),
+            ),
+            child: Text(
+              gw.finished ? 'Finished' : (gw.isCurrent ? 'Live' : 'Upcoming'),
+              style: const TextStyle(
+                color: AppColors.primary,
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
           ),
         ],
       ),
@@ -341,13 +463,20 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
     final staticOverallPoints = e['summary_overall_points'] as int? ?? 0;
     final overallRank = e['summary_overall_rank'] as int?;
     final liveEventPoints = _calculateLivePoints(fplProvider);
-    final overallPoints = staticOverallPoints - staticEventPoints + liveEventPoints;
+    final overallPoints =
+        staticOverallPoints - staticEventPoints + liveEventPoints;
     final avgScore = gwInfo?.averageEntryScore ?? 0;
     final highScore = gwInfo?.highestScore ?? 0;
 
     return GestureDetector(
       onTap: () {
-        Navigator.push(context, MaterialPageRoute(builder: (_) => FplPitchScreen(picks: _picks!, gwNumber: _gwNumber ?? 1)));
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) =>
+                FplPitchScreen(picks: _picks!, gwNumber: _gwNumber ?? 1),
+          ),
+        );
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -357,37 +486,128 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(teamName.toUpperCase(), style: const TextStyle(color: AppColors.textPrimary, fontSize: 14, fontWeight: FontWeight.w900, letterSpacing: 1.2)),
-                const Icon(Icons.arrow_forward_ios_rounded, color: AppColors.textSecondary, size: 14),
+                Text(
+                  teamName.toUpperCase(),
+                  style: const TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+                const Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  color: AppColors.textSecondary,
+                  size: 14,
+                ),
               ],
             ),
             const SizedBox(height: 14),
             Row(
               children: [
-                Expanded(child: Column(children: [_summaryMiniStat('TOTAL', '$overallPoints', AppColors.primary), const SizedBox(height: 10), _summaryMiniStat('RANK', overallRank != null ? _formatRank(overallRank) : '–', AppColors.accent)])),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 8),
-                  decoration: BoxDecoration(color: const Color(0xFF34D399).withAlpha(30), borderRadius: BorderRadius.circular(12), border: Border.all(color: const Color(0xFF34D399).withAlpha(80), width: 1.5)),
+                Expanded(
                   child: Column(
                     children: [
-                      Text('$liveEventPoints', style: const TextStyle(color: Color(0xFF34D399), fontSize: 32, fontWeight: FontWeight.w900, height: 1.1)),
-                      Text('GW$_gwNumber PTS', style: const TextStyle(color: Color(0xFF34D399), fontSize: 8, fontWeight: FontWeight.w800, letterSpacing: 0.5)),
+                      _summaryMiniStat(
+                        'TOTAL',
+                        '$overallPoints',
+                        AppColors.primary,
+                      ),
+                      const SizedBox(height: 10),
+                      _summaryMiniStat(
+                        'RANK',
+                        overallRank != null ? _formatRank(overallRank) : '–',
+                        AppColors.accent,
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 22,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF34D399).withAlpha(30),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: const Color(0xFF34D399).withAlpha(80),
+                      width: 1.5,
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        '$liveEventPoints',
+                        style: const TextStyle(
+                          color: Color(0xFF34D399),
+                          fontSize: 32,
+                          fontWeight: FontWeight.w900,
+                          height: 1.1,
+                        ),
+                      ),
+                      Text(
+                        'GW$_gwNumber PTS',
+                        style: const TextStyle(
+                          color: Color(0xFF34D399),
+                          fontSize: 8,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
                       if (_picks?['active_chip'] != null) ...[
                         const SizedBox(height: 4),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(color: const Color(0xFF34D399), borderRadius: BorderRadius.circular(4)),
-                          child: Text(_formatChipName(_picks!['active_chip'] as String), style: const TextStyle(color: Colors.black, fontSize: 7, fontWeight: FontWeight.w900, letterSpacing: 0.5)),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF34D399),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            _formatChipName(_picks!['active_chip'] as String),
+                            style: const TextStyle(
+                              color: Colors.black,
+                              fontSize: 7,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
                         ),
                       ],
                     ],
                   ),
                 ),
-                Expanded(child: Column(children: [_summaryMiniStat('AVG', '$avgScore', AppColors.textPrimary), const SizedBox(height: 10), _summaryMiniStat('HIGH', '$highScore', AppColors.textPrimary)])),
+                Expanded(
+                  child: Column(
+                    children: [
+                      _summaryMiniStat(
+                        'AVG',
+                        '$avgScore',
+                        AppColors.textPrimary,
+                      ),
+                      const SizedBox(height: 10),
+                      _summaryMiniStat(
+                        'HIGH',
+                        '$highScore',
+                        AppColors.textPrimary,
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 12),
-            const Text('Click to view pitch', style: TextStyle(color: AppColors.textSecondary, fontSize: 10, fontStyle: FontStyle.italic)),
+            const Text(
+              'Click to view pitch',
+              style: TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 10,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
           ],
         ),
       ),
@@ -408,7 +628,10 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
             if (_hiddenLeagues.isNotEmpty)
               TextButton(
                 onPressed: _unhideLeagues,
-                child: const Text('Unhide all', style: TextStyle(color: AppColors.primary, fontSize: 11)),
+                child: const Text(
+                  'Unhide all',
+                  style: TextStyle(color: AppColors.primary, fontSize: 11),
+                ),
               ),
           ],
         ),
@@ -420,9 +643,28 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
           final diff = lastRank - rank;
           Widget rankIcon;
           Color rankColor;
-          if (diff > 0) { rankIcon = const Icon(Icons.arrow_upward_rounded, color: Colors.green, size: 14); rankColor = Colors.green; }
-          else if (diff < 0) { rankIcon = const Icon(Icons.arrow_downward_rounded, color: Colors.red, size: 14); rankColor = Colors.red; }
-          else { rankIcon = const Icon(Icons.remove_rounded, color: AppColors.textSecondary, size: 14); rankColor = AppColors.textSecondary; }
+          if (diff > 0) {
+            rankIcon = const Icon(
+              Icons.arrow_upward_rounded,
+              color: Colors.green,
+              size: 14,
+            );
+            rankColor = Colors.green;
+          } else if (diff < 0) {
+            rankIcon = const Icon(
+              Icons.arrow_downward_rounded,
+              color: Colors.red,
+              size: 14,
+            );
+            rankColor = Colors.red;
+          } else {
+            rankIcon = const Icon(
+              Icons.remove_rounded,
+              color: AppColors.textSecondary,
+              size: 14,
+            );
+            rankColor = AppColors.textSecondary;
+          }
 
           return Dismissible(
             key: Key('league_$id'),
@@ -431,15 +673,28 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
               alignment: Alignment.centerRight,
               padding: const EdgeInsets.only(right: 20),
               margin: const EdgeInsets.only(bottom: 10),
-              decoration: BoxDecoration(color: AppColors.error.withAlpha(40), borderRadius: BorderRadius.circular(14)),
-              child: const Icon(Icons.visibility_off_rounded, color: AppColors.error),
+              decoration: BoxDecoration(
+                color: AppColors.error.withAlpha(40),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: const Icon(
+                Icons.visibility_off_rounded,
+                color: AppColors.error,
+              ),
             ),
             onDismissed: (_) => _hideLeague(id),
             child: GestureDetector(
               onTap: () {
+                final myEntryId = int.tryParse(_controller.text.trim());
                 Navigator.push(
-                  context, 
-                  MaterialPageRoute(builder: (_) => LeagueDetailScreen(leagueId: id, leagueName: l['name'] as String? ?? 'League'))
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => LeagueDetailScreen(
+                      leagueId: id,
+                      leagueName: l['name'] as String? ?? 'League',
+                      userEntryId: myEntryId,
+                    ),
+                  ),
                 );
               },
               child: Container(
@@ -448,13 +703,45 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
                 decoration: AppTheme.gradientCard(),
                 child: Row(
                   children: [
-                    Expanded(child: Text(l['name'] as String? ?? 'League', style: const TextStyle(color: AppColors.textPrimary, fontSize: 14, fontWeight: FontWeight.w700), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                    Expanded(
+                      child: Text(
+                        l['name'] as String? ?? 'League',
+                        style: const TextStyle(
+                          color: AppColors.textPrimary,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
                     const SizedBox(width: 12),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text(formatNumber(rank), style: const TextStyle(color: AppColors.textPrimary, fontSize: 15, fontWeight: FontWeight.w800)),
-                        Row(mainAxisSize: MainAxisSize.min, children: [rankIcon, const SizedBox(width: 2), Text(diff == 0 ? 'No change' : '${diff.abs()}', style: TextStyle(color: rankColor, fontSize: 11, fontWeight: FontWeight.w600))]),
+                        Text(
+                          formatNumber(rank),
+                          style: const TextStyle(
+                            color: AppColors.textPrimary,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            rankIcon,
+                            const SizedBox(width: 2),
+                            Text(
+                              diff == 0 ? 'No change' : '${diff.abs()}',
+                              style: TextStyle(
+                                color: rankColor,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                   ],
@@ -470,8 +757,23 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
   Widget _summaryMiniStat(String label, String value, Color color) {
     return Column(
       children: [
-        Text(value, style: TextStyle(color: color, fontSize: 14, fontWeight: FontWeight.w800)),
-        Text(label, style: const TextStyle(color: AppColors.textSecondary, fontSize: 8, fontWeight: FontWeight.w700, letterSpacing: 0.5)),
+        Text(
+          value,
+          style: TextStyle(
+            color: color,
+            fontSize: 14,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        Text(
+          label,
+          style: const TextStyle(
+            color: AppColors.textSecondary,
+            fontSize: 8,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.5,
+          ),
+        ),
       ],
     );
   }
@@ -502,11 +804,16 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
 
   String _formatChipName(String chip) {
     switch (chip) {
-      case 'bboost': return 'BENCH BOOST';
-      case '3xc': return 'TRIPLE CAPTAIN';
-      case 'freehit': return 'FREE HIT';
-      case 'wildcard': return 'WILDCARD';
-      default: return chip.toUpperCase();
+      case 'bboost':
+        return 'BENCH BOOST';
+      case '3xc':
+        return 'TRIPLE CAPTAIN';
+      case 'freehit':
+        return 'FREE HIT';
+      case 'wildcard':
+        return 'WILDCARD';
+      default:
+        return chip.toUpperCase();
     }
   }
 }
