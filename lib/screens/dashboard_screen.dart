@@ -315,73 +315,81 @@ class _DashboardContent extends StatelessWidget {
 
   Widget _buildMyFplTeamCard(BuildContext context) {
     return GestureDetector(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => const FplTeamScreen()),
-      ),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              AppColors.primary.withAlpha(20),
-              AppColors.accent.withAlpha(14),
-            ],
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const FplTeamScreen()),
           ),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppColors.primary.withAlpha(60), width: 1),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 38,
-              height: 38,
-              decoration: BoxDecoration(
-                color: AppColors.primary.withAlpha(28),
-                borderRadius: BorderRadius.circular(10),
-                border:
-                    Border.all(color: AppColors.primary.withAlpha(70)),
-              ),
-              child: const Center(
-                child: Icon(Icons.manage_accounts_rounded,
-                    color: AppColors.primary, size: 20),
-              ),
-            ),
-            const SizedBox(width: 12),
-            const Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'My FPL Team',
-                    style: TextStyle(
-                      color: AppColors.textPrimary,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  SizedBox(height: 2),
-                  Text(
-                    'Track your official FPL team points',
-                    style: TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: 11,
-                    ),
-                  ),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  AppColors.primary.withAlpha(20),
+                  AppColors.accent.withAlpha(14),
                 ],
               ),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: AppColors.primary.withAlpha(60),
+                width: 1,
+              ),
             ),
-            const Icon(
-              Icons.chevron_right_rounded,
-              color: AppColors.primary,
-              size: 20,
+            child: Row(
+              children: [
+                Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withAlpha(28),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: AppColors.primary.withAlpha(70)),
+                  ),
+                  child: const Center(
+                    child: Icon(
+                      Icons.manage_accounts_rounded,
+                      color: AppColors.primary,
+                      size: 20,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'My FPL Team',
+                        style: TextStyle(
+                          color: AppColors.textPrimary,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      SizedBox(height: 2),
+                      Text(
+                        'Track your official FPL team points',
+                        style: TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(
+                  Icons.chevron_right_rounded,
+                  color: AppColors.primary,
+                  size: 20,
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
-    ).animate().fadeIn(duration: 400.ms, delay: 80.ms).slideY(begin: 0.06, end: 0);
+          ),
+        )
+        .animate()
+        .fadeIn(duration: 400.ms, delay: 80.ms)
+        .slideY(begin: 0.06, end: 0);
   }
 
   // ── Sparklines ────────────────────────────────────────────────────────────
@@ -971,7 +979,25 @@ class _DashboardContent extends StatelessWidget {
   }
 
   Widget _buildUpcomingFixtures(BuildContext context) {
-    final upcoming = provider.getUpcomingFixtures(limit: 6);
+    final gameweek = provider.currentGameweek;
+    final isLive = gameweek != null && gameweek.isCurrent && !gameweek.finished;
+
+    // If GW is live, get only the remaining fixtures for the current GW
+    // Otherwise just get the next upcoming fixtures
+    List<Fixture> upcoming;
+    if (isLive) {
+      final allGwFixtures = provider.fixtures
+          .where((f) => f.event == gameweek.id)
+          .toList();
+      upcoming = allGwFixtures.where((f) => !f.finished).toList();
+      // If all fixtures in the live game week are somehow finished, default to next
+      if (upcoming.isEmpty) {
+        upcoming = provider.getUpcomingFixtures(limit: 10);
+      }
+    } else {
+      upcoming = provider.getUpcomingFixtures(limit: 10);
+    }
+
     if (upcoming.isEmpty) {
       return Container(
         padding: const EdgeInsets.all(20),
@@ -985,11 +1011,53 @@ class _DashboardContent extends StatelessWidget {
       );
     }
 
+    // Group fixtures by day
+    final Map<String, List<Fixture>> groupedByDay = {};
+    for (final f in upcoming) {
+      if (f.kickoffTime == null) continue;
+      // Format to get the day string
+      final dateStr = formatDateShort(f.kickoffTime!);
+      groupedByDay.putIfAbsent(dateStr, () => []).add(f);
+    }
+
+    final children = <Widget>[];
+    for (final entry in groupedByDay.entries) {
+      children.add(
+        Padding(
+          padding: const EdgeInsets.only(top: 8.0, bottom: 8.0, left: 4.0),
+          child: Text(
+            entry.key,
+            style: const TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+      );
+      children.addAll(
+        entry.value
+            .map((fixture) => _buildFixtureRow(context, fixture))
+            .toList(),
+      );
+    }
+
     return Column(
-      children: upcoming
-          .map((fixture) => _buildFixtureRow(context, fixture))
-          .toList(),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: children,
     );
+  }
+
+  String _formatTimeShort(String? timeStr) {
+    if (timeStr == null) return '';
+    try {
+      final time = DateTime.parse(timeStr).toLocal();
+      final hour = time.hour.toString().padLeft(2, '0');
+      final minute = time.minute.toString().padLeft(2, '0');
+      return '$hour:$minute';
+    } catch (_) {
+      return '';
+    }
   }
 
   Widget _buildFixtureRow(BuildContext context, Fixture fixture) {
@@ -1061,7 +1129,7 @@ class _DashboardContent extends StatelessWidget {
                       ),
                     )
                   : Text(
-                      formatDateShort(fixture.kickoffTime),
+                      _formatTimeShort(fixture.kickoffTime),
                       style: const TextStyle(
                         color: AppColors.textSecondary,
                         fontSize: 12,
