@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import '../services/fpl_service.dart';
 import '../models/gameweek.dart';
 import '../models/player.dart';
 import '../providers/fpl_provider.dart';
@@ -107,6 +108,33 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
                     letterSpacing: 1.5,
                   ),
                 ),
+              ),
+              FutureBuilder<Map<String, dynamic>>(
+                future: FplService().fetchFplEntry(gw.highestScoringEntry!),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    final data = snapshot.data!;
+                    final name = data['name'] ?? '';
+                    final playerFirstName = data['player_first_name'] ?? '';
+                    final playerLastName = data['player_last_name'] ?? '';
+                    final managerName = '$playerFirstName $playerLastName'
+                        .trim();
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 4.0),
+                      child: Center(
+                        child: Text(
+                          '$name ($managerName)',
+                          style: const TextStyle(
+                            color: AppColors.textSecondary,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
               ),
               const SizedBox(height: 12),
               _buildManagerTeamPitch(context),
@@ -508,13 +536,15 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
       return _buildLoadingOrEmptyPitch(true);
     }
 
-    final picks = (managerTeam['picks'] as List).map((p) => p as Map<String, dynamic>).toList();
+    final picks = (managerTeam['picks'] as List)
+        .map((p) => p as Map<String, dynamic>)
+        .toList();
     final totalPoints = managerTeam['entry_history']?['points'] as int? ?? 0;
 
     return Column(
       children: [
         _buildTotalPointsContainer(totalPoints),
-        const SizedBox(height: 16),
+        const SizedBox(height: 24),
         PitchView(
           picks: picks,
           provider: widget.provider,
@@ -532,7 +562,10 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
       decoration: BoxDecoration(
         color: const Color(0xFF34D399).withAlpha(30),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFF34D399).withAlpha(100), width: 1.5),
+        border: Border.all(
+          color: const Color(0xFF34D399).withAlpha(100),
+          width: 1.5,
+        ),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
