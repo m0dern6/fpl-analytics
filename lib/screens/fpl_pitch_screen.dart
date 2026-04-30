@@ -32,24 +32,38 @@ class FplPitchScreen extends StatelessWidget {
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: constraints.maxHeight - 32),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _buildTotalPointsContainer(totalPoints),
-                  const SizedBox(height: 24),
-                  PitchView(
-                    picks: (picks['picks'] as List).map((p) => p as Map<String, dynamic>).toList(),
-                    provider: provider,
-                    gwId: gwNumber,
-                    activeChip: activeChip,
-                    onPlayerTap: (pick) => _showPlayerPointsSheet(context, pick, provider, activeChip),
-                  ),
-                  const SizedBox(height: 24),
-                ],
+          return RefreshIndicator(
+            onRefresh: () =>
+                provider.loadLiveGwData(gwNumber), // Example refresh
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(16),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight - 32,
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _buildTotalPointsContainer(totalPoints),
+                    const SizedBox(height: 32),
+                    PitchView(
+                      picks: (picks['picks'] as List)
+                          .map((p) => p as Map<String, dynamic>)
+                          .toList(),
+                      provider: provider,
+                      gwId: gwNumber,
+                      activeChip: activeChip,
+                      onPlayerTap: (pick) => _showPlayerPointsSheet(
+                        context,
+                        pick,
+                        provider,
+                        activeChip,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+                ),
               ),
             ),
           );
@@ -64,7 +78,10 @@ class FplPitchScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFF34D399).withAlpha(30),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFF34D399).withAlpha(100), width: 1.5),
+        border: Border.all(
+          color: const Color(0xFF34D399).withAlpha(100),
+          width: 1.5,
+        ),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -107,7 +124,7 @@ class FplPitchScreen extends StatelessWidget {
     final player = provider.getPlayerById(playerId);
     final live = provider.getLiveStatsForPlayer(playerId);
     final rawPts = live?['total_points'] as int? ?? 0;
-    
+
     int effectivePts = rawPts;
     if (!isBench) {
       effectivePts = rawPts * multiplier;
@@ -329,9 +346,12 @@ class _PlayerPointsSheet extends StatelessWidget {
 
   Widget _buildStatsGrid(Map<String, dynamic> stats) {
     final items = <_StatItem>[];
-    if (stats['minutes'] > 0) items.add(_StatItem('Minutes', '${stats['minutes']}'));
-    if (stats['goals_scored'] > 0) items.add(_StatItem('Goals', '${stats['goals_scored']}'));
-    if (stats['assists'] > 0) items.add(_StatItem('Assists', '${stats['assists']}'));
+    if (stats['minutes'] > 0)
+      items.add(_StatItem('Minutes', '${stats['minutes']}'));
+    if (stats['goals_scored'] > 0)
+      items.add(_StatItem('Goals', '${stats['goals_scored']}'));
+    if (stats['assists'] > 0)
+      items.add(_StatItem('Assists', '${stats['assists']}'));
     if (stats['clean_sheets'] > 0) items.add(_StatItem('Clean Sheet', '1'));
     if (stats['saves'] > 0) items.add(_StatItem('Saves', '${stats['saves']}'));
     if (stats['yellow_cards'] > 0) items.add(_StatItem('Yellow Card', '1'));
@@ -369,7 +389,10 @@ class _PlayerPointsSheet extends StatelessWidget {
           children: [
             Text(
               items[i].label,
-              style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+              style: const TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 12,
+              ),
             ),
             Text(
               items[i].value,
@@ -395,7 +418,11 @@ class _PlayerPointsSheet extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.w900),
+        style: TextStyle(
+          color: color,
+          fontSize: 10,
+          fontWeight: FontWeight.w900,
+        ),
       ),
     );
   }
