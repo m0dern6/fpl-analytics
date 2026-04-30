@@ -68,7 +68,7 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen>
       body: NestedScrollView(
         headerSliverBuilder: (ctx, innerBoxIsScrolled) => [
           SliverAppBar(
-            expandedHeight: 220,
+            expandedHeight: 300,
             pinned: true,
             backgroundColor: AppColors.secondary,
             flexibleSpace: FlexibleSpaceBar(background: _buildHeroHeader(team)),
@@ -901,8 +901,6 @@ class _HistoryTabState extends State<_HistoryTab>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildPlayerHeader(),
-          const SizedBox(height: 16),
           _buildRangeSelector(),
           const SizedBox(height: 12),
           _buildMetricTabs(),
@@ -910,82 +908,6 @@ class _HistoryTabState extends State<_HistoryTab>
           _buildLineChart(rangedHistory),
           const SizedBox(height: 20),
           _buildHistoryTable(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPlayerHeader() {
-    final posColor = getPositionColor(widget.player.elementType);
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: AppTheme.gradientCard(),
-      child: Row(
-        children: [
-          Container(
-            width: 52,
-            height: 52,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.cardMedium,
-              border: Border.all(color: posColor, width: 2),
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: CachedNetworkImage(
-              imageUrl: widget.player.photoUrl,
-              fit: BoxFit.cover,
-              placeholder: (_, __) => const Icon(
-                Icons.person,
-                color: AppColors.textSecondary,
-                size: 26,
-              ),
-              errorWidget: (_, __, ___) => const Icon(
-                Icons.person,
-                color: AppColors.textSecondary,
-                size: 26,
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  widget.player.webName,
-                  style: const TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                Text(
-                  '${widget.player.firstName} ${widget.player.secondName}',
-                  style: const TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                '${widget.player.totalPoints}',
-                style: const TextStyle(
-                  color: AppColors.primary,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              const Text(
-                'total pts',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 10),
-              ),
-            ],
-          ),
         ],
       ),
     );
@@ -1072,6 +994,8 @@ class _HistoryTabState extends State<_HistoryTab>
           borderRadius: BorderRadius.circular(8),
           border: Border.all(color: AppColors.primary.withAlpha(80)),
         ),
+        labelPadding: const EdgeInsets.symmetric(horizontal: 16),
+        tabAlignment: TabAlignment.start,
         labelColor: AppColors.primary,
         unselectedLabelColor: AppColors.textSecondary,
         labelStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
@@ -1244,14 +1168,10 @@ class _HistoryTabState extends State<_HistoryTab>
                   drawVerticalLine: true,
                   verticalInterval: 1,
                   horizontalInterval: maxVal > 0 ? maxVal / 4 : 1,
-                  getDrawingHorizontalLine: (_) => const FlLine(
-                    color: AppColors.divider,
-                    strokeWidth: 0.8,
-                  ),
-                  getDrawingVerticalLine: (_) => const FlLine(
-                    color: AppColors.divider,
-                    strokeWidth: 0.5,
-                  ),
+                  getDrawingHorizontalLine: (_) =>
+                      const FlLine(color: AppColors.divider, strokeWidth: 0.8),
+                  getDrawingVerticalLine: (_) =>
+                      const FlLine(color: AppColors.divider, strokeWidth: 0.5),
                 ),
                 borderData: FlBorderData(
                   show: true,
