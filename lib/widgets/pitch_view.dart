@@ -31,14 +31,10 @@ class PitchView extends StatelessWidget {
   Widget build(BuildContext context) {
     if (picks.isEmpty) return const SizedBox.shrink();
 
-    final starting = picks
-        .where((p) => (p['position'] as int) <= 11)
-        .toList()
+    final starting = picks.where((p) => (p['position'] as int) <= 11).toList()
       ..sort((a, b) => (a['position'] as int).compareTo(b['position'] as int));
 
-    final bench = picks
-        .where((p) => (p['position'] as int) > 11)
-        .toList()
+    final bench = picks.where((p) => (p['position'] as int) > 11).toList()
       ..sort((a, b) => (a['position'] as int).compareTo(b['position'] as int));
 
     final gkPicks = _filterByPos(starting, 1);
@@ -59,11 +55,24 @@ class PitchView extends StatelessWidget {
             _buildPitchRow(midPicks, isStarting: true),
             const SizedBox(height: 6),
             _buildPitchRow(fwdPicks, isStarting: true),
-            if (bench.isNotEmpty) ...[
+            if (bench.isNotEmpty || isDreamTeam) ...[
               const SizedBox(height: 10),
               _buildBenchDivider(activeChip == 'bboost'),
               const SizedBox(height: 8),
-              _buildPitchRow(bench, isStarting: false),
+              if (bench.isNotEmpty) _buildPitchRow(bench, isStarting: false),
+              if (bench.isEmpty && isDreamTeam)
+                // show 4 empty spots for bench in dream team
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: List.generate(
+                      4,
+                      (_) =>
+                          Opacity(opacity: 0.5, child: _buildEmptyBenchSpot()),
+                    ),
+                  ),
+                ),
             ],
             const SizedBox(height: 20),
           ],
@@ -83,14 +92,54 @@ class PitchView extends StatelessWidget {
     );
   }
 
-  List<Map<String, dynamic>> _filterByPos(List<Map<String, dynamic>> list, int type) {
+  Widget _buildEmptyBenchSpot() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 50,
+          height: 50,
+          decoration: BoxDecoration(
+            color: Colors.white.withAlpha(20),
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.white.withAlpha(30)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withAlpha(30),
+                blurRadius: 4,
+                spreadRadius: 1,
+              ),
+            ],
+          ),
+          child: const Icon(Icons.person, color: Colors.white54, size: 24),
+        ),
+        const SizedBox(height: 6),
+        Container(
+          width: 50,
+          height: 14,
+          decoration: BoxDecoration(
+            color: Colors.black.withAlpha(120),
+            borderRadius: BorderRadius.circular(4),
+          ),
+        ),
+      ],
+    );
+  }
+
+  List<Map<String, dynamic>> _filterByPos(
+    List<Map<String, dynamic>> list,
+    int type,
+  ) {
     return list.where((p) {
       final player = provider.getPlayerById(p['element'] as int);
       return player?.elementType == type;
     }).toList();
   }
 
-  Widget _buildPitchRow(List<Map<String, dynamic>> picksRow, {required bool isStarting}) {
+  Widget _buildPitchRow(
+    List<Map<String, dynamic>> picksRow, {
+    required bool isStarting,
+  }) {
     if (picksRow.isEmpty) return const SizedBox.shrink();
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -98,7 +147,9 @@ class PitchView extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: picksRow.map((pick) {
           final player = provider.getPlayerById(pick['element'] as int);
-          final posLabel = player != null ? getPositionShort(player.elementType) : '';
+          final posLabel = player != null
+              ? getPositionShort(player.elementType)
+              : '';
 
           return Column(
             mainAxisSize: MainAxisSize.min,
@@ -138,10 +189,14 @@ class PitchView extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.symmetric(vertical: 5),
       decoration: BoxDecoration(
-        color: isActive ? const Color(0xFF34D399).withAlpha(40) : Colors.black.withAlpha(80),
+        color: isActive
+            ? const Color(0xFF34D399).withAlpha(40)
+            : Colors.black.withAlpha(80),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: isActive ? const Color(0xFF34D399).withAlpha(120) : Colors.white.withAlpha(25),
+          color: isActive
+              ? const Color(0xFF34D399).withAlpha(120)
+              : Colors.white.withAlpha(25),
           width: isActive ? 1.5 : 1,
         ),
       ),
@@ -204,7 +259,11 @@ class _FplPitchPainter extends CustomPainter {
     double py(double ny) => border + ny * innerH;
 
     canvas.drawRect(Rect.fromLTWH(border, border, innerW, innerH), lp);
-    canvas.drawLine(Offset(border, py(0.5)), Offset(border + innerW, py(0.5)), lp);
+    canvas.drawLine(
+      Offset(border, py(0.5)),
+      Offset(border + innerW, py(0.5)),
+      lp,
+    );
 
     final ccRadius = innerW * 0.14;
     canvas.drawCircle(Offset(px(0.5), py(0.5)), ccRadius, lp);
@@ -229,9 +288,21 @@ class _FplPitchPainter extends CustomPainter {
     final tGoalRight = px(0.5) + goalW / 2;
     final tGoalCrossbar = border;
     final tGoalTop = border - goalDepth;
-    canvas.drawLine(Offset(tGoalLeft, tGoalCrossbar), Offset(tGoalLeft, tGoalTop), goalLp);
-    canvas.drawLine(Offset(tGoalRight, tGoalCrossbar), Offset(tGoalRight, tGoalTop), goalLp);
-    canvas.drawLine(Offset(tGoalLeft, tGoalTop), Offset(tGoalRight, tGoalTop), goalLp);
+    canvas.drawLine(
+      Offset(tGoalLeft, tGoalCrossbar),
+      Offset(tGoalLeft, tGoalTop),
+      goalLp,
+    );
+    canvas.drawLine(
+      Offset(tGoalRight, tGoalCrossbar),
+      Offset(tGoalRight, tGoalTop),
+      goalLp,
+    );
+    canvas.drawLine(
+      Offset(tGoalLeft, tGoalTop),
+      Offset(tGoalRight, tGoalTop),
+      goalLp,
+    );
 
     const tSpotNy = 0.115;
     canvas.drawCircle(Offset(px(0.5), py(tSpotNy)), 2.5, spotPaint);
@@ -245,20 +316,44 @@ class _FplPitchPainter extends CustomPainter {
       final arcStartAngle = math.pi / 2 - tTheta - 0.02;
       final arcSweep = math.pi - (math.pi / 2 - tTheta) * 2 + 0.04;
       if (arcSweep > 0) {
-        canvas.drawArc(Rect.fromCircle(center: tArcCenter, radius: arcR), arcStartAngle, arcSweep, false, lp);
+        canvas.drawArc(
+          Rect.fromCircle(center: tArcCenter, radius: arcR),
+          arcStartAngle,
+          arcSweep,
+          false,
+          lp,
+        );
       }
     }
 
-    canvas.drawRect(Rect.fromLTWH(px(0.5) - tPAW / 2, border + innerH - tPAH, tPAW, tPAH), lp);
-    canvas.drawRect(Rect.fromLTWH(px(0.5) - tGAW / 2, border + innerH - tGAH, tGAW, tGAH), lp);
+    canvas.drawRect(
+      Rect.fromLTWH(px(0.5) - tPAW / 2, border + innerH - tPAH, tPAW, tPAH),
+      lp,
+    );
+    canvas.drawRect(
+      Rect.fromLTWH(px(0.5) - tGAW / 2, border + innerH - tGAH, tGAW, tGAH),
+      lp,
+    );
 
     final bGoalLeft = px(0.5) - goalW / 2;
     final bGoalRight = px(0.5) + goalW / 2;
     final bGoalCrossbar = border + innerH;
     final bGoalBottom = border + innerH + goalDepth;
-    canvas.drawLine(Offset(bGoalLeft, bGoalCrossbar), Offset(bGoalLeft, bGoalBottom), goalLp);
-    canvas.drawLine(Offset(bGoalRight, bGoalCrossbar), Offset(bGoalRight, bGoalBottom), goalLp);
-    canvas.drawLine(Offset(bGoalLeft, bGoalBottom), Offset(bGoalRight, bGoalBottom), goalLp);
+    canvas.drawLine(
+      Offset(bGoalLeft, bGoalCrossbar),
+      Offset(bGoalLeft, bGoalBottom),
+      goalLp,
+    );
+    canvas.drawLine(
+      Offset(bGoalRight, bGoalCrossbar),
+      Offset(bGoalRight, bGoalBottom),
+      goalLp,
+    );
+    canvas.drawLine(
+      Offset(bGoalLeft, bGoalBottom),
+      Offset(bGoalRight, bGoalBottom),
+      goalLp,
+    );
 
     const bSpotNy = 1.0 - tSpotNy;
     canvas.drawCircle(Offset(px(0.5), py(bSpotNy)), 2.5, spotPaint);
@@ -271,18 +366,71 @@ class _FplPitchPainter extends CustomPainter {
       final arcStartAngle = -math.pi / 2 - bTheta - 0.02 + math.pi;
       final arcSweep = math.pi - (math.pi / 2 - bTheta) * 2 + 0.04;
       if (arcSweep > 0) {
-        canvas.drawArc(Rect.fromCircle(center: bArcCenter, radius: arcR), arcStartAngle, arcSweep, false, lp);
+        canvas.drawArc(
+          Rect.fromCircle(center: bArcCenter, radius: arcR),
+          arcStartAngle,
+          arcSweep,
+          false,
+          lp,
+        );
       }
     }
 
     final cr = innerW * 0.030;
-    final cornerLp = Paint()..color = Colors.white.withAlpha(200)..strokeWidth = 1.4..style = PaintingStyle.stroke;
-    canvas.drawArc(Rect.fromCenter(center: Offset(border, border), width: cr * 2, height: cr * 2), 0, math.pi / 2, false, cornerLp);
-    canvas.drawArc(Rect.fromCenter(center: Offset(border + innerW, border), width: cr * 2, height: cr * 2), math.pi / 2, math.pi / 2, false, cornerLp);
-    canvas.drawArc(Rect.fromCenter(center: Offset(border, border + innerH), width: cr * 2, height: cr * 2), -math.pi / 2, math.pi / 2, false, cornerLp);
-    canvas.drawArc(Rect.fromCenter(center: Offset(border + innerW, border + innerH), width: cr * 2, height: cr * 2), math.pi, math.pi / 2, false, cornerLp);
+    final cornerLp = Paint()
+      ..color = Colors.white.withAlpha(200)
+      ..strokeWidth = 1.4
+      ..style = PaintingStyle.stroke;
+    canvas.drawArc(
+      Rect.fromCenter(
+        center: Offset(border, border),
+        width: cr * 2,
+        height: cr * 2,
+      ),
+      0,
+      math.pi / 2,
+      false,
+      cornerLp,
+    );
+    canvas.drawArc(
+      Rect.fromCenter(
+        center: Offset(border + innerW, border),
+        width: cr * 2,
+        height: cr * 2,
+      ),
+      math.pi / 2,
+      math.pi / 2,
+      false,
+      cornerLp,
+    );
+    canvas.drawArc(
+      Rect.fromCenter(
+        center: Offset(border, border + innerH),
+        width: cr * 2,
+        height: cr * 2,
+      ),
+      -math.pi / 2,
+      math.pi / 2,
+      false,
+      cornerLp,
+    );
+    canvas.drawArc(
+      Rect.fromCenter(
+        center: Offset(border + innerW, border + innerH),
+        width: cr * 2,
+        height: cr * 2,
+      ),
+      math.pi,
+      math.pi / 2,
+      false,
+      cornerLp,
+    );
 
-    final vignette = Paint()..shader = RadialGradient(colors: [Colors.transparent, Colors.black.withAlpha(60)], stops: const [0.6, 1.0]).createShader(Rect.fromLTWH(0, 0, w, h));
+    final vignette = Paint()
+      ..shader = RadialGradient(
+        colors: [Colors.transparent, Colors.black.withAlpha(60)],
+        stops: const [0.6, 1.0],
+      ).createShader(Rect.fromLTWH(0, 0, w, h));
     canvas.drawRect(Rect.fromLTWH(0, 0, w, h), vignette);
   }
 
@@ -322,7 +470,7 @@ class _PitchPlayerCard extends StatelessWidget {
     final isBench = (pick['position'] as int) > 11;
 
     final player = provider.getPlayerById(playerId);
-    
+
     int effectivePts;
     if (pointsMap != null && pointsMap!.containsKey(playerId)) {
       effectivePts = pointsMap![playerId]!;
@@ -332,7 +480,9 @@ class _PitchPlayerCard extends StatelessWidget {
       effectivePts = isBench ? rawPts : rawPts * multiplier;
     }
 
-    final posColor = player != null ? getPositionColor(player.elementType) : AppColors.textSecondary;
+    final posColor = player != null
+        ? getPositionColor(player.elementType)
+        : AppColors.textSecondary;
 
     final _CardState state;
     if (isCaptain) {
@@ -355,13 +505,21 @@ class _PitchPlayerCard extends StatelessWidget {
     switch (state) {
       case _CardState.captain:
         borderColor = const Color(0xFFFFD700);
-        cardGradient = const LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Color(0xFF2A2008), Color(0xFF1A1505)]);
+        cardGradient = const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0x33FFD700), Color(0x1A150505)],
+        );
       case _CardState.viceCaptain:
         borderColor = AppColors.accent;
         cardGradient = null;
       case _CardState.topPerformer:
         borderColor = AppColors.primary;
-        cardGradient = LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [AppColors.primary.withAlpha(30), AppColors.cardDark]);
+        cardGradient = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [AppColors.primary.withAlpha(30), Colors.white.withAlpha(10)],
+        );
       case _CardState.good:
         borderColor = const Color(0xFF34D399);
         cardGradient = null;
@@ -388,7 +546,7 @@ class _PitchPlayerCard extends StatelessWidget {
           height: cardHeight,
           decoration: BoxDecoration(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
-            color: AppColors.cardDark,
+            color: Colors.white.withAlpha(10), // Glassy background
             gradient: cardGradient,
           ),
           clipBehavior: Clip.antiAlias,
@@ -400,14 +558,22 @@ class _PitchPlayerCard extends StatelessWidget {
                   imageUrl: player.photoUrl,
                   fit: BoxFit.cover,
                   alignment: Alignment.topCenter,
-                  placeholder: (_, __) => Center(child: Icon(Icons.person, color: posColor, size: 26)),
-                  errorWidget: (_, __, ___) => Center(child: Icon(Icons.person, color: posColor, size: 26)),
+                  placeholder: (_, __) => Center(
+                    child: Icon(Icons.person, color: posColor, size: 26),
+                  ),
+                  errorWidget: (_, __, ___) => Center(
+                    child: Icon(Icons.person, color: posColor, size: 26),
+                  ),
                 )
               else
                 Center(child: Icon(Icons.person, color: posColor, size: 26)),
 
               if (isCaptain)
-                Positioned(top: 4, left: 4, child: _buildBadge('C', isTriple: activeChip == '3xc'))
+                Positioned(
+                  top: 4,
+                  left: 4,
+                  child: _buildBadge('C', isTriple: activeChip == '3xc'),
+                )
               else if (isViceCaptain)
                 Positioned(top: 4, left: 4, child: _buildBadge('V')),
             ],
@@ -427,10 +593,16 @@ class _PitchPlayerCard extends StatelessWidget {
             Container(
               width: cardWidth,
               padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 3),
-              decoration: BoxDecoration(color: Colors.black.withAlpha(isBench ? 120 : 180)),
+              decoration: BoxDecoration(
+                color: Colors.black.withAlpha(isBench ? 120 : 180),
+              ),
               child: Text(
                 player?.webName ?? '?',
-                style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w800),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w800,
+                ),
                 textAlign: TextAlign.center,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -441,11 +613,17 @@ class _PitchPlayerCard extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 3),
               decoration: BoxDecoration(
                 color: _ptsBadgeColor(state, effectivePts),
-                borderRadius: const BorderRadius.vertical(bottom: Radius.circular(4)),
+                borderRadius: const BorderRadius.vertical(
+                  bottom: Radius.circular(4),
+                ),
               ),
               child: Text(
                 _getStatusText(player, effectivePts),
-                style: const TextStyle(color: Colors.black, fontSize: 8.5, fontWeight: FontWeight.w900),
+                style: const TextStyle(
+                  color: Colors.black,
+                  fontSize: 8.5,
+                  fontWeight: FontWeight.w900,
+                ),
                 textAlign: TextAlign.center,
                 maxLines: 1,
                 overflow: TextOverflow.visible,
@@ -461,8 +639,18 @@ class _PitchPlayerCard extends StatelessWidget {
     if (player == null) return '?';
     if (isDreamTeam) return '$points pts';
 
-    final fixtures = provider.getFixturesForGameweek(gwId).where((f) => f.homeTeamId == player.teamId || f.awayTeamId == player.teamId).toList()
-      ..sort((a, b) => (a.kickoffTime ?? '').compareTo(b.kickoffTime ?? ''));
+    final fixtures =
+        provider
+            .getFixturesForGameweek(gwId)
+            .where(
+              (f) =>
+                  f.homeTeamId == player.teamId ||
+                  f.awayTeamId == player.teamId,
+            )
+            .toList()
+          ..sort(
+            (a, b) => (a.kickoffTime ?? '').compareTo(b.kickoffTime ?? ''),
+          );
 
     if (fixtures.isEmpty) return '$points pts';
 
@@ -473,13 +661,15 @@ class _PitchPlayerCard extends StatelessWidget {
     bool allFinished = fixtures.every((f) => f.finished);
 
     if (!anyStarted) {
-      return fixtures.map((f) {
-        final isHome = f.homeTeamId == player.teamId;
-        final oppId = isHome ? f.awayTeamId : f.homeTeamId;
-        final opp = provider.getTeamById(oppId);
-        final shortName = opp?.shortName ?? 'OPP';
-        return '$shortName(${isHome ? 'H' : 'A'})';
-      }).join(',');
+      return fixtures
+          .map((f) {
+            final isHome = f.homeTeamId == player.teamId;
+            final oppId = isHome ? f.awayTeamId : f.homeTeamId;
+            final opp = provider.getTeamById(oppId);
+            final shortName = opp?.shortName ?? 'OPP';
+            return '$shortName(${isHome ? 'H' : 'A'})';
+          })
+          .join(',');
     }
 
     if (allFinished) return '$effectivePts pts';
@@ -487,13 +677,15 @@ class _PitchPlayerCard extends StatelessWidget {
     final pending = fixtures.where((f) => !(f.started ?? false)).toList();
     if (pending.isEmpty) return '$effectivePts pts';
 
-    final pendingStr = pending.map((f) {
-      final isHome = f.homeTeamId == player.teamId;
-      final oppId = isHome ? f.awayTeamId : f.homeTeamId;
-      final opp = provider.getTeamById(oppId);
-      final shortName = opp?.shortName ?? 'OPP';
-      return '$shortName(${isHome ? 'H' : 'A'})';
-    }).join(',');
+    final pendingStr = pending
+        .map((f) {
+          final isHome = f.homeTeamId == player.teamId;
+          final oppId = isHome ? f.awayTeamId : f.homeTeamId;
+          final opp = provider.getTeamById(oppId);
+          final shortName = opp?.shortName ?? 'OPP';
+          return '$shortName(${isHome ? 'H' : 'A'})';
+        })
+        .join(',');
 
     return '$effectivePts pts,$pendingStr';
   }
@@ -505,12 +697,19 @@ class _PitchPlayerCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: isTriple ? Colors.white : Colors.black,
         shape: BoxShape.circle,
-        border: Border.all(color: isTriple ? Colors.black : Colors.white, width: 0.8),
+        border: Border.all(
+          color: isTriple ? Colors.black : Colors.white,
+          width: 0.8,
+        ),
       ),
       child: Center(
         child: Text(
           letter,
-          style: TextStyle(fontSize: 7.5, fontWeight: FontWeight.w900, color: isTriple ? Colors.black : Colors.white),
+          style: TextStyle(
+            fontSize: 7.5,
+            fontWeight: FontWeight.w900,
+            color: isTriple ? Colors.black : Colors.white,
+          ),
         ),
       ),
     );
@@ -518,12 +717,18 @@ class _PitchPlayerCard extends StatelessWidget {
 
   Color _ptsBadgeColor(_CardState state, int pts) {
     switch (state) {
-      case _CardState.captain: return AppColors.accent;
-      case _CardState.viceCaptain: return AppColors.primary;
-      case _CardState.topPerformer: return AppColors.primary;
-      case _CardState.good: return const Color(0xFF34D399);
-      case _CardState.bench: return AppColors.primary.withAlpha(90);
-      case _CardState.regular: return AppColors.primary.withAlpha(160);
+      case _CardState.captain:
+        return AppColors.accent;
+      case _CardState.viceCaptain:
+        return AppColors.primary;
+      case _CardState.topPerformer:
+        return AppColors.primary;
+      case _CardState.good:
+        return const Color(0xFF34D399);
+      case _CardState.bench:
+        return AppColors.primary.withAlpha(90);
+      case _CardState.regular:
+        return AppColors.primary.withAlpha(160);
     }
     return AppColors.primary.withAlpha(160);
   }
