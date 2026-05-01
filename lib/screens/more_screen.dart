@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../utils/constants.dart';
+import '../providers/theme_provider.dart';
 import 'fixture_difficulty_screen.dart';
 import 'stats_leaders_screen.dart';
 import 'compare_screen.dart';
@@ -17,7 +19,7 @@ class MoreScreen extends StatelessWidget {
         title: 'Gameweeks',
         subtitle: 'History & live scores',
         icon: Icons.calendar_month_rounded,
-        iconColor: AppColors.accent,
+        iconColor: AppColors.of(context).accent,
         onTap: () => Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => const GameweeksScreen()),
@@ -27,7 +29,7 @@ class MoreScreen extends StatelessWidget {
         title: 'Fixture Difficulty',
         subtitle: 'FDR matrix for all teams',
         icon: Icons.grid_4x4_rounded,
-        iconColor: AppColors.primary,
+        iconColor: AppColors.of(context).primary,
         onTap: () => Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => const FixtureDifficultyScreen()),
@@ -76,10 +78,18 @@ class MoreScreen extends StatelessWidget {
     ];
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.of(context).background,
       appBar: AppBar(
         title: const Text('Explore'),
-        backgroundColor: AppColors.secondary,
+        backgroundColor: AppColors.of(context).secondary,
+        actions: [
+          Consumer<ThemeProvider>(
+            builder: (context, themeProvider, _) => IconButton(
+              icon: Icon(themeProvider.isDark ? Icons.light_mode : Icons.dark_mode),
+              onPressed: () => context.read<ThemeProvider>().toggle(),
+            ),
+          ),
+        ],
       ),
       body: GridView.builder(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
@@ -123,9 +133,9 @@ class _ExploreCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppColors.cardDark,
+          color: AppColors.of(context).cardDark,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.divider, width: 1),
+          border: Border.all(color: AppColors.of(context).divider, width: 1),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -141,8 +151,8 @@ class _ExploreCard extends StatelessWidget {
             const Spacer(),
             Text(
               item.title,
-              style: const TextStyle(
-                color: AppColors.textPrimary,
+              style: TextStyle(
+                color: AppColors.of(context).textPrimary,
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
               ),
@@ -150,8 +160,8 @@ class _ExploreCard extends StatelessWidget {
             const SizedBox(height: 3),
             Text(
               item.subtitle,
-              style: const TextStyle(
-                color: AppColors.textSecondary,
+              style: TextStyle(
+                color: AppColors.of(context).textSecondary,
                 fontSize: 11,
               ),
               maxLines: 2,

@@ -26,14 +26,14 @@ class StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final accentColor = valueColor ?? AppColors.primary;
+    final accentColor = valueColor ?? AppColors.of(context).primary;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: AppColors.cardDark,
+          color: AppColors.of(context).cardDark,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppColors.divider, width: 1),
+          border: Border.all(color: AppColors.of(context).divider, width: 1),
         ),
         clipBehavior: Clip.antiAlias,
         child: Stack(
@@ -63,7 +63,7 @@ class StatCard extends StatelessWidget {
                         if (onTap != null && imageUrl == null) ...[
                           const Spacer(),
                           Icon(Icons.chevron_right,
-                              color: AppColors.textSecondary, size: 16),
+                              color: AppColors.of(context).textSecondary, size: 16),
                         ],
                       ],
                     ),
@@ -82,8 +82,8 @@ class StatCard extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       title,
-                      style: const TextStyle(
-                        color: AppColors.textSecondary,
+                      style: TextStyle(
+                        color: AppColors.of(context).textSecondary,
                         fontSize: 11,
                         fontWeight: FontWeight.w500,
                       ),
@@ -94,8 +94,8 @@ class StatCard extends StatelessWidget {
                       const SizedBox(height: 2),
                       Text(
                         subtitle!,
-                        style: const TextStyle(
-                          color: AppColors.textSecondary,
+                        style: TextStyle(
+                          color: AppColors.of(context).textSecondary,
                           fontSize: 10,
                         ),
                         maxLines: 1,

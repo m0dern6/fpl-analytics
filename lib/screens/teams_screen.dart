@@ -21,16 +21,16 @@ class TeamsScreen extends StatelessWidget {
     return Consumer<FplProvider>(
       builder: (context, provider, _) {
         return Scaffold(
-          backgroundColor: AppColors.background,
+          backgroundColor: AppColors.of(context).background,
           appBar: AppBar(
             title: const Text('Teams'),
-            backgroundColor: AppColors.secondary,
+            backgroundColor: AppColors.of(context).secondary,
           ),
           body: provider.isLoading
               ? const LoadingGridWidget(itemCount: 20)
               : RefreshIndicator(
-                  color: AppColors.primary,
-                  backgroundColor: AppColors.cardDark,
+                  color: AppColors.of(context).primary,
+                  backgroundColor: AppColors.of(context).cardDark,
                   onRefresh: provider.refresh,
                   child: GridView.builder(
                     padding: const EdgeInsets.all(16),
@@ -68,7 +68,7 @@ class _TeamCard extends StatelessWidget {
       ),
       child: Container(
         padding: const EdgeInsets.all(12),
-        decoration: AppTheme.gradientCard(),
+        decoration: AppTheme.gradientCard(context: context, ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -80,23 +80,23 @@ class _TeamCard extends StatelessWidget {
                 width: 50,
                 height: 50,
                 decoration: BoxDecoration(
-                  color: AppColors.cardMedium,
+                  color: AppColors.of(context).cardMedium,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Icon(Icons.shield, color: AppColors.textSecondary),
+                child: Icon(Icons.shield, color: AppColors.of(context).textSecondary),
               ),
               errorWidget: (_, __, ___) => Container(
                 width: 50,
                 height: 50,
                 decoration: BoxDecoration(
-                  color: AppColors.cardMedium,
+                  color: AppColors.of(context).cardMedium,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Center(
                   child: Text(
                     team.shortName,
-                    style: const TextStyle(
-                      color: AppColors.primary,
+                    style: TextStyle(
+                      color: AppColors.of(context).primary,
                       fontWeight: FontWeight.w700,
                       fontSize: 14,
                     ),
@@ -107,16 +107,16 @@ class _TeamCard extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               team.shortName,
-              style: const TextStyle(
-                color: AppColors.primary,
+              style: TextStyle(
+                color: AppColors.of(context).primary,
                 fontWeight: FontWeight.w700,
                 fontSize: 14,
               ),
             ),
             Text(
               team.name,
-              style: const TextStyle(
-                color: AppColors.textSecondary,
+              style: TextStyle(
+                color: AppColors.of(context).textSecondary,
                 fontSize: 11,
               ),
               maxLines: 1,
@@ -126,9 +126,9 @@ class _TeamCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _strengthDot(team.strengthOverallHome, 'H'),
+                _strengthDot(context, team.strengthOverallHome, 'H'),
                 const SizedBox(width: 4),
-                _strengthDot(team.strengthOverallAway, 'A'),
+                _strengthDot(context, team.strengthOverallAway, 'A'),
               ],
             ),
           ],
@@ -137,14 +137,14 @@ class _TeamCard extends StatelessWidget {
     );
   }
 
-  Widget _strengthDot(int strength, String label) {
+  Widget _strengthDot(BuildContext context, int strength, String label) {
     final color = strength >= 1300
-        ? AppColors.primary
+        ? AppColors.of(context).primary
         : strength >= 1200
-        ? AppColors.accent
+        ? AppColors.of(context).accent
         : strength >= 1100
-        ? AppColors.warning
-        : AppColors.error;
+        ? AppColors.of(context).warning
+        : AppColors.of(context).error;
     return Row(
       children: [
         Container(
@@ -155,7 +155,7 @@ class _TeamCard extends StatelessWidget {
         const SizedBox(width: 2),
         Text(
           label,
-          style: const TextStyle(color: AppColors.textSecondary, fontSize: 9),
+          style: TextStyle(color: AppColors.of(context).textSecondary, fontSize: 9),
         ),
       ],
     );
@@ -178,27 +178,27 @@ class TeamDetailScreen extends StatelessWidget {
         final teamFixtures = provider.getFixturesForTeam(team.id);
 
         return Scaffold(
-          backgroundColor: AppColors.background,
+          backgroundColor: AppColors.of(context).background,
           appBar: AppBar(
             title: Text(team.name),
-            backgroundColor: AppColors.secondary,
+            backgroundColor: AppColors.of(context).secondary,
           ),
           body: SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildTeamHeader(),
+                _buildTeamHeader(context),
                 const SizedBox(height: 16),
-                _buildStrengthSection(),
+                _buildStrengthSection(context),
                 const SizedBox(height: 20),
-                _buildSectionTitle('Squad'),
+                _buildSectionTitle(context, 'Squad'),
                 const SizedBox(height: 12),
                 _buildSquadByPosition(context, teamPlayers, provider),
                 const SizedBox(height: 20),
                 Row(
                   children: [
-                    Expanded(child: _buildSectionTitle('Recent Fixtures')),
+                    Expanded(child: _buildSectionTitle(context, 'Recent Fixtures')),
                     TextButton(
                       onPressed: () => Navigator.push(
                         context,
@@ -220,7 +220,7 @@ class TeamDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTeamHeader() {
+  Widget _buildTeamHeader(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: AppTheme.purpleGradient(),
@@ -233,12 +233,12 @@ class TeamDetailScreen extends StatelessWidget {
             errorWidget: (_, __, ___) => Container(
               width: 70,
               height: 70,
-              color: AppColors.cardMedium,
+              color: AppColors.of(context).cardMedium,
               child: Center(
                 child: Text(
                   team.shortName,
-                  style: const TextStyle(
-                    color: AppColors.primary,
+                  style: TextStyle(
+                    color: AppColors.of(context).primary,
                     fontWeight: FontWeight.w700,
                     fontSize: 16,
                   ),
@@ -252,16 +252,16 @@ class TeamDetailScreen extends StatelessWidget {
             children: [
               Text(
                 team.name,
-                style: const TextStyle(
-                  color: AppColors.textPrimary,
+                style: TextStyle(
+                  color: AppColors.of(context).textPrimary,
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
                 ),
               ),
               Text(
                 'Strength: ${team.strength}',
-                style: const TextStyle(
-                  color: AppColors.textSecondary,
+                style: TextStyle(
+                  color: AppColors.of(context).textSecondary,
                   fontSize: 13,
                 ),
               ),
@@ -272,55 +272,55 @@ class TeamDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStrengthSection() {
+  Widget _buildStrengthSection(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: AppTheme.gradientCard(),
+      decoration: AppTheme.gradientCard(context: context, ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Team Strength',
             style: TextStyle(
-              color: AppColors.textPrimary,
+              color: AppColors.of(context).textPrimary,
               fontSize: 15,
               fontWeight: FontWeight.w600,
             ),
           ),
           const SizedBox(height: 12),
-          _strengthBar('Overall Home', team.strengthOverallHome, 1400),
+          _strengthBar(context, 'Overall Home', team.strengthOverallHome, 1400),
           const SizedBox(height: 8),
-          _strengthBar('Overall Away', team.strengthOverallAway, 1400),
+          _strengthBar(context, 'Overall Away', team.strengthOverallAway, 1400),
           const SizedBox(height: 8),
-          _strengthBar('Attack Home', team.strengthAttackHome, 1400),
+          _strengthBar(context, 'Attack Home', team.strengthAttackHome, 1400),
           const SizedBox(height: 8),
-          _strengthBar('Attack Away', team.strengthAttackAway, 1400),
+          _strengthBar(context, 'Attack Away', team.strengthAttackAway, 1400),
           const SizedBox(height: 8),
-          _strengthBar('Defence Home', team.strengthDefenceHome, 1400),
+          _strengthBar(context, 'Defence Home', team.strengthDefenceHome, 1400),
           const SizedBox(height: 8),
-          _strengthBar('Defence Away', team.strengthDefenceAway, 1400),
+          _strengthBar(context, 'Defence Away', team.strengthDefenceAway, 1400),
         ],
       ),
     );
   }
 
-  Widget _strengthBar(String label, int value, int max) {
+  Widget _strengthBar(BuildContext context, String label, int value, int max) {
     final pct = (value / max).clamp(0.0, 1.0);
     final color = value >= 1300
-        ? AppColors.primary
+        ? AppColors.of(context).primary
         : value >= 1200
-        ? AppColors.accent
+        ? AppColors.of(context).accent
         : value >= 1100
-        ? AppColors.warning
-        : AppColors.error;
+        ? AppColors.of(context).warning
+        : AppColors.of(context).error;
     return Row(
       children: [
         SizedBox(
           width: 100,
           child: Text(
             label,
-            style: const TextStyle(
-              color: AppColors.textSecondary,
+            style: TextStyle(
+              color: AppColors.of(context).textSecondary,
               fontSize: 11,
             ),
           ),
@@ -331,7 +331,7 @@ class TeamDetailScreen extends StatelessWidget {
               Container(
                 height: 6,
                 decoration: BoxDecoration(
-                  color: AppColors.cardMedium,
+                  color: AppColors.of(context).cardMedium,
                   borderRadius: BorderRadius.circular(3),
                 ),
               ),
@@ -361,22 +361,22 @@ class TeamDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionTitle(String title) {
+  Widget _buildSectionTitle(BuildContext context, String title) {
     return Row(
       children: [
         Container(
           width: 4,
           height: 18,
           decoration: BoxDecoration(
-            color: AppColors.primary,
+            color: AppColors.of(context).primary,
             borderRadius: BorderRadius.circular(2),
           ),
         ),
         const SizedBox(width: 8),
         Text(
           title,
-          style: const TextStyle(
-            color: AppColors.textPrimary,
+          style: TextStyle(
+            color: AppColors.of(context).textPrimary,
             fontSize: 16,
             fontWeight: FontWeight.w700,
           ),
@@ -423,30 +423,30 @@ class TeamDetailScreen extends StatelessWidget {
                     horizontal: 12,
                     vertical: 8,
                   ),
-                  decoration: AppTheme.gradientCard(),
+                  decoration: AppTheme.gradientCard(context: context, ),
                   child: Row(
                     children: [
                       Expanded(
                         child: Text(
                           p.webName,
-                          style: const TextStyle(
-                            color: AppColors.textPrimary,
+                          style: TextStyle(
+                            color: AppColors.of(context).textPrimary,
                             fontSize: 13,
                           ),
                         ),
                       ),
                       Text(
                         formatPrice(p.nowCost),
-                        style: const TextStyle(
-                          color: AppColors.textSecondary,
+                        style: TextStyle(
+                          color: AppColors.of(context).textSecondary,
                           fontSize: 12,
                         ),
                       ),
                       const SizedBox(width: 12),
                       Text(
                         '${p.totalPoints} pts',
-                        style: const TextStyle(
-                          color: AppColors.primary,
+                        style: TextStyle(
+                          color: AppColors.of(context).primary,
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                         ),
@@ -476,9 +476,9 @@ class TeamDetailScreen extends StatelessWidget {
       });
     final completed = recent.where((f) => f.finished == true).take(5).toList();
     if (completed.isEmpty)
-      return const Text(
+      return Text(
         'No completed fixtures',
-        style: TextStyle(color: AppColors.textSecondary),
+        style: TextStyle(color: AppColors.of(context).textSecondary),
       );
 
     return Column(
@@ -499,14 +499,14 @@ class TeamDetailScreen extends StatelessWidget {
           child: Container(
             margin: const EdgeInsets.only(bottom: 8),
             padding: const EdgeInsets.all(12),
-            decoration: AppTheme.gradientCard(),
+            decoration: AppTheme.gradientCard(context: context, ),
             child: Row(
               children: [
                 Expanded(
                   child: Text(
                     home?.shortName ?? '?',
-                    style: const TextStyle(
-                      color: AppColors.textPrimary,
+                    style: TextStyle(
+                      color: AppColors.of(context).textPrimary,
                       fontWeight: FontWeight.w600,
                     ),
                     textAlign: TextAlign.right,
@@ -519,13 +519,13 @@ class TeamDetailScreen extends StatelessWidget {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.cardMedium,
+                    color: AppColors.of(context).cardMedium,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
                     '${f.homeTeamScore} - ${f.awayTeamScore}',
-                    style: const TextStyle(
-                      color: AppColors.textPrimary,
+                    style: TextStyle(
+                      color: AppColors.of(context).textPrimary,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -534,8 +534,8 @@ class TeamDetailScreen extends StatelessWidget {
                 Expanded(
                   child: Text(
                     away?.shortName ?? '?',
-                    style: const TextStyle(
-                      color: AppColors.textPrimary,
+                    style: TextStyle(
+                      color: AppColors.of(context).textPrimary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),

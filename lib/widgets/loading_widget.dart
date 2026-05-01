@@ -17,13 +17,13 @@ class LoadingWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
-      baseColor: AppColors.cardDark,
-      highlightColor: AppColors.cardMedium,
+      baseColor: AppColors.of(context).cardDark,
+      highlightColor: AppColors.of(context).cardMedium,
       child: Container(
         height: height,
         width: width ?? double.infinity,
         decoration: BoxDecoration(
-          color: AppColors.cardDark,
+          color: AppColors.of(context).cardDark,
           borderRadius: borderRadius ?? BorderRadius.circular(12),
         ),
       ),
@@ -86,21 +86,21 @@ class LoadingCardWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
-      baseColor: AppColors.cardDark,
-      highlightColor: AppColors.cardMedium,
+      baseColor: AppColors.of(context).cardDark,
+      highlightColor: AppColors.of(context).cardMedium,
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppColors.cardDark,
+          color: AppColors.of(context).cardDark,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(height: 14, width: 100, color: AppColors.cardMedium, margin: const EdgeInsets.only(bottom: 8)),
-            Container(height: 24, width: 60, color: AppColors.cardMedium),
+            Container(height: 14, width: 100, color: AppColors.of(context).cardMedium, margin: EdgeInsets.only(bottom: 8)),
+            Container(height: 24, width: 60, color: AppColors.of(context).cardMedium),
             const SizedBox(height: 8),
-            Container(height: 12, width: 140, color: AppColors.cardMedium),
+            Container(height: 12, width: 140, color: AppColors.of(context).cardMedium),
           ],
         ),
       ),

@@ -69,10 +69,10 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
         : null;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.of(context).background,
       appBar: AppBar(
         title: Text(gw.name),
-        backgroundColor: AppColors.secondary,
+        backgroundColor: AppColors.of(context).secondary,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -83,11 +83,11 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
             const SizedBox(height: 16),
             _buildScoreCards(),
             const SizedBox(height: 20),
-            const Center(
+            Center(
               child: Text(
                 'DREAM TEAM',
                 style: TextStyle(
-                  color: AppColors.textPrimary,
+                  color: AppColors.of(context).textPrimary,
                   fontSize: 16,
                   fontWeight: FontWeight.w900,
                   letterSpacing: 2,
@@ -98,11 +98,11 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
             _buildDreamTeamPitch(context),
             if (gw.highestScoringEntry != null) ...[
               const SizedBox(height: 40),
-              const Center(
+              Center(
                 child: Text(
                   'HIGHEST SCORING MANAGER',
                   style: TextStyle(
-                    color: AppColors.textPrimary,
+                    color: AppColors.of(context).textPrimary,
                     fontSize: 14,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 1.5,
@@ -124,8 +124,8 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
                       child: Center(
                         child: Text(
                           '$name ($managerName)',
-                          style: const TextStyle(
-                            color: AppColors.textSecondary,
+                          style: TextStyle(
+                            color: AppColors.of(context).textSecondary,
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                           ),
@@ -148,7 +148,7 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
                 topPlayer,
                 topPlayerTeam,
                 subtitle: 'Highest Scoring Player',
-                color: AppColors.warning,
+                color: AppColors.of(context).warning,
                 icon: Icons.emoji_events_rounded,
                 gwPoints:
                     provider.getDreamTeamPlayerPoints(gw.id, topPlayer.id) > 0
@@ -164,7 +164,7 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
                 mostCaptainedPlayer,
                 provider.getTeamById(mostCaptainedPlayer.teamId),
                 subtitle: 'Most Captained',
-                color: AppColors.primary,
+                color: AppColors.of(context).primary,
                 icon: Icons.shield_rounded,
                 gwPoints: mostCaptainedPlayer.eventPoints,
                 isDouble: true,
@@ -177,7 +177,7 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
                 mostTransferredPlayer,
                 provider.getTeamById(mostTransferredPlayer.teamId),
                 subtitle: 'Most Transferred In',
-                color: AppColors.accent,
+                color: AppColors.of(context).accent,
                 icon: Icons.trending_up_rounded,
                 gwPoints: mostTransferredPlayer.eventPoints,
                 isDouble: false,
@@ -208,16 +208,16 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
     Color statusColor;
     String statusText;
     if (gw.finished) {
-      statusColor = AppColors.textSecondary;
+      statusColor = AppColors.of(context).textSecondary;
       statusText = 'Finished';
     } else if (gw.isCurrent) {
-      statusColor = AppColors.primary;
+      statusColor = AppColors.of(context).primary;
       statusText = 'Live';
     } else if (gw.isNext) {
-      statusColor = AppColors.accent;
+      statusColor = AppColors.of(context).accent;
       statusText = 'Next';
     } else {
-      statusColor = AppColors.warning;
+      statusColor = AppColors.of(context).warning;
       statusText = 'Upcoming';
     }
 
@@ -232,8 +232,8 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
               children: [
                 Text(
                   gw.name,
-                  style: const TextStyle(
-                    color: AppColors.textPrimary,
+                  style: TextStyle(
+                    color: AppColors.of(context).textPrimary,
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
                   ),
@@ -241,8 +241,8 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
                 const SizedBox(height: 4),
                 Text(
                   'Deadline: ${formatDateTime(gw.deadlineTime)}',
-                  style: const TextStyle(
-                    color: AppColors.textSecondary,
+                  style: TextStyle(
+                    color: AppColors.of(context).textSecondary,
                     fontSize: 12,
                   ),
                 ),
@@ -280,7 +280,7 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
               'Avg Score',
               '${gw.averageEntryScore} pts',
               Icons.show_chart_rounded,
-              AppColors.accent,
+              AppColors.of(context).accent,
             ),
           ),
         if (gw.averageEntryScore != null && gw.highestScore != null)
@@ -291,7 +291,7 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
               'High Score',
               '${gw.highestScore} pts',
               Icons.emoji_events_rounded,
-              AppColors.warning,
+              AppColors.of(context).warning,
             ),
           ),
         if ((gw.averageEntryScore != null || gw.highestScore != null) &&
@@ -303,7 +303,7 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
               'Transfers',
               _fmt(gw.transfersMade),
               Icons.swap_horiz_rounded,
-              AppColors.primary,
+              AppColors.of(context).primary,
             ),
           ),
       ],
@@ -313,7 +313,7 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
   Widget _statTile(String label, String value, IconData icon, Color color) {
     return Container(
       padding: const EdgeInsets.all(14),
-      decoration: AppTheme.gradientCard(),
+      decoration: AppTheme.gradientCard(context: context, ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -330,8 +330,8 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
           const SizedBox(height: 2),
           Text(
             label,
-            style: const TextStyle(
-              color: AppColors.textSecondary,
+            style: TextStyle(
+              color: AppColors.of(context).textSecondary,
               fontSize: 11,
             ),
           ),
@@ -358,14 +358,14 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
       ),
       child: Container(
         padding: const EdgeInsets.all(16),
-        decoration: AppTheme.gradientCard(),
+        decoration: AppTheme.gradientCard(context: context, ),
         child: Row(
           children: [
             Container(
               width: 60,
               height: 70,
               decoration: BoxDecoration(
-                color: AppColors.cardMedium,
+                color: AppColors.of(context).cardMedium,
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(color: color.withAlpha(100)),
               ),
@@ -373,14 +373,14 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
               child: CachedNetworkImage(
                 imageUrl: player.photoUrl,
                 fit: BoxFit.cover,
-                placeholder: (_, __) => const Icon(
+                placeholder: (_, __) => Icon(
                   Icons.person,
-                  color: AppColors.textSecondary,
+                  color: AppColors.of(context).textSecondary,
                   size: 32,
                 ),
-                errorWidget: (_, __, ___) => const Icon(
+                errorWidget: (_, __, ___) => Icon(
                   Icons.person,
-                  color: AppColors.textSecondary,
+                  color: AppColors.of(context).textSecondary,
                   size: 32,
                 ),
               ),
@@ -417,16 +417,16 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
                             vertical: 1,
                           ),
                           decoration: BoxDecoration(
-                            color: AppColors.warning.withAlpha(30),
+                            color: AppColors.of(context).warning.withAlpha(30),
                             borderRadius: BorderRadius.circular(4),
                             border: Border.all(
-                              color: AppColors.warning.withAlpha(100),
+                              color: AppColors.of(context).warning.withAlpha(100),
                             ),
                           ),
-                          child: const Text(
+                          child: Text(
                             '2×',
                             style: TextStyle(
-                              color: AppColors.warning,
+                              color: AppColors.of(context).warning,
                               fontSize: 10,
                               fontWeight: FontWeight.w700,
                             ),
@@ -438,16 +438,16 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
                   const SizedBox(height: 6),
                   Text(
                     player.webName,
-                    style: const TextStyle(
-                      color: AppColors.textPrimary,
+                    style: TextStyle(
+                      color: AppColors.of(context).textPrimary,
                       fontSize: 17,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
                   Text(
                     '${team?.name ?? ''} · ${getPositionShort(player.elementType)}',
-                    style: const TextStyle(
-                      color: AppColors.textSecondary,
+                    style: TextStyle(
+                      color: AppColors.of(context).textSecondary,
                       fontSize: 12,
                     ),
                   ),
@@ -459,16 +459,16 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
               children: [
                 Text(
                   '$displayPoints',
-                  style: const TextStyle(
-                    color: AppColors.primary,
+                  style: TextStyle(
+                    color: AppColors.of(context).primary,
                     fontSize: 26,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
                 Text(
                   isDouble ? 'pts (×2)' : 'pts',
-                  style: const TextStyle(
-                    color: AppColors.textSecondary,
+                  style: TextStyle(
+                    color: AppColors.of(context).textSecondary,
                     fontSize: 11,
                   ),
                 ),
@@ -596,13 +596,13 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
   Widget _buildLoadingOrEmptyPitch(bool isLoading) {
     return Container(
       height: 200,
-      decoration: AppTheme.gradientCard(),
+      decoration: AppTheme.gradientCard(context: context, ),
       child: Center(
         child: isLoading
-            ? const CircularProgressIndicator(color: AppColors.primary)
-            : const Text(
+            ? CircularProgressIndicator(color: AppColors.of(context).primary)
+            : Text(
                 'Data unavailable for this gameweek',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                style: TextStyle(color: AppColors.of(context).textSecondary, fontSize: 12),
               ),
       ),
     );

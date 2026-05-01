@@ -27,15 +27,15 @@ class DashboardScreen extends StatelessWidget {
     return Consumer<FplProvider>(
       builder: (context, provider, _) {
         return Scaffold(
-          backgroundColor: AppColors.background,
+          backgroundColor: AppColors.of(context).background,
           appBar: _buildAppBar(context, provider),
           body: provider.isLoading
               ? const _DashboardSkeleton()
               : provider.error != null && provider.players.isEmpty
               ? _buildError(context, provider)
               : RefreshIndicator(
-                  color: AppColors.primary,
-                  backgroundColor: AppColors.cardDark,
+                  color: AppColors.of(context).primary,
+                  backgroundColor: AppColors.of(context).cardDark,
                   onRefresh: provider.refresh,
                   child: _DashboardContent(provider: provider),
                 ),
@@ -46,7 +46,7 @@ class DashboardScreen extends StatelessWidget {
 
   AppBar _buildAppBar(BuildContext context, FplProvider provider) {
     return AppBar(
-      backgroundColor: AppColors.secondary,
+      backgroundColor: AppColors.of(context).secondary,
       title: Row(
         children: [
           Container(
@@ -82,23 +82,23 @@ class DashboardScreen extends StatelessWidget {
             margin: const EdgeInsets.only(right: 6),
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             decoration: BoxDecoration(
-              color: AppColors.primary.withAlpha(20),
+              color: AppColors.of(context).primary.withAlpha(20),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: AppColors.primary.withAlpha(80)),
+              border: Border.all(color: AppColors.of(context).primary.withAlpha(80)),
             ),
             child: Text(
               'GW${provider.currentGameweek!.id}',
-              style: const TextStyle(
-                color: AppColors.primary,
+              style: TextStyle(
+                color: AppColors.of(context).primary,
                 fontWeight: FontWeight.w700,
                 fontSize: 12,
               ),
             ),
           ),
         IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.refresh_rounded,
-            color: AppColors.textSecondary,
+            color: AppColors.of(context).textSecondary,
           ),
           onPressed: provider.refresh,
         ),
@@ -113,7 +113,7 @@ class DashboardScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.cloud_off, color: AppColors.error, size: 64),
+            Icon(Icons.cloud_off, color: AppColors.of(context).error, size: 64),
             const SizedBox(height: 16),
             Text(
               'Failed to load data',
@@ -128,8 +128,8 @@ class DashboardScreen extends StatelessWidget {
             const SizedBox(height: 24),
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: AppColors.secondary,
+                backgroundColor: AppColors.of(context).primary,
+                foregroundColor: AppColors.of(context).secondary,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 24,
                   vertical: 12,
@@ -234,21 +234,21 @@ class _DashboardContent extends StatelessWidget {
             colors: [Color(0xFF160D36), Color(0xFF0D0622)],
           ),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.divider, width: 1),
+          border: Border.all(color: AppColors.of(context).divider, width: 1),
         ),
         child: Row(
           children: [
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
-                color: AppColors.primary.withAlpha(22),
+                color: AppColors.of(context).primary.withAlpha(22),
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: AppColors.primary.withAlpha(80)),
+                border: Border.all(color: AppColors.of(context).primary.withAlpha(80)),
               ),
               child: Text(
                 gw.name,
-                style: const TextStyle(
-                  color: AppColors.primary,
+                style: TextStyle(
+                  color: AppColors.of(context).primary,
                   fontSize: 13,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 0.2,
@@ -262,8 +262,8 @@ class _DashboardContent extends StatelessWidget {
                 children: [
                   Text(
                     gw.statusLabel,
-                    style: const TextStyle(
-                      color: AppColors.textPrimary,
+                    style: TextStyle(
+                      color: AppColors.of(context).textPrimary,
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
                     ),
@@ -271,8 +271,8 @@ class _DashboardContent extends StatelessWidget {
                   if (gw.averageEntryScore != null)
                     Text(
                       'Avg ${gw.averageEntryScore} pts',
-                      style: const TextStyle(
-                        color: AppColors.textSecondary,
+                      style: TextStyle(
+                        color: AppColors.of(context).textSecondary,
                         fontSize: 12,
                       ),
                     ),
@@ -285,26 +285,26 @@ class _DashboardContent extends StatelessWidget {
                 children: [
                   Text(
                     '${gw.highestScore}',
-                    style: const TextStyle(
-                      color: AppColors.primary,
+                    style: TextStyle(
+                      color: AppColors.of(context).primary,
                       fontSize: 30,
                       fontWeight: FontWeight.w800,
                       letterSpacing: -1,
                     ),
                   ),
-                  const Text(
+                  Text(
                     'High Score',
                     style: TextStyle(
-                      color: AppColors.textSecondary,
+                      color: AppColors.of(context).textSecondary,
                       fontSize: 10,
                     ),
                   ),
                 ],
               ),
             const SizedBox(width: 6),
-            const Icon(
+            Icon(
               Icons.chevron_right_rounded,
-              color: AppColors.textSecondary,
+              color: AppColors.of(context).textSecondary,
               size: 16,
             ),
           ],
@@ -326,13 +326,13 @@ class _DashboardContent extends StatelessWidget {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  AppColors.primary.withAlpha(20),
-                  AppColors.accent.withAlpha(14),
+                  AppColors.of(context).primary.withAlpha(20),
+                  AppColors.of(context).accent.withAlpha(14),
                 ],
               ),
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
-                color: AppColors.primary.withAlpha(60),
+                color: AppColors.of(context).primary.withAlpha(60),
                 width: 1,
               ),
             ),
@@ -342,14 +342,14 @@ class _DashboardContent extends StatelessWidget {
                   width: 38,
                   height: 38,
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withAlpha(28),
+                    color: AppColors.of(context).primary.withAlpha(28),
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: AppColors.primary.withAlpha(70)),
+                    border: Border.all(color: AppColors.of(context).primary.withAlpha(70)),
                   ),
-                  child: const Center(
+                  child: Center(
                     child: Icon(
                       Icons.manage_accounts_rounded,
-                      color: AppColors.primary,
+                      color: AppColors.of(context).primary,
                       size: 20,
                     ),
                   ),
@@ -362,7 +362,7 @@ class _DashboardContent extends StatelessWidget {
                       Text(
                         'My FPL Team',
                         style: TextStyle(
-                          color: AppColors.textPrimary,
+                          color: AppColors.of(context).textPrimary,
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
                         ),
@@ -371,16 +371,16 @@ class _DashboardContent extends StatelessWidget {
                       Text(
                         'Track your official FPL team points',
                         style: TextStyle(
-                          color: AppColors.textSecondary,
+                          color: AppColors.of(context).textSecondary,
                           fontSize: 11,
                         ),
                       ),
                     ],
                   ),
                 ),
-                const Icon(
+                Icon(
                   Icons.chevron_right_rounded,
-                  color: AppColors.primary,
+                  color: AppColors.of(context).primary,
                   size: 20,
                 ),
               ],
@@ -429,7 +429,7 @@ class _DashboardContent extends StatelessWidget {
                 'GW Avg Score',
                 avgScores.isEmpty ? '–' : '${avgScores.last.toInt()} pts',
                 avgScores,
-                AppColors.primary,
+                AppColors.of(context).primary,
                 Icons.show_chart_rounded,
                 onTap: () => Navigator.push(
                   context,
@@ -447,7 +447,7 @@ class _DashboardContent extends StatelessWidget {
                 'GW High Score',
                 highScores.isEmpty ? '–' : '${highScores.last.toInt()} pts',
                 highScores,
-                AppColors.warning,
+                AppColors.of(context).warning,
                 Icons.emoji_events_rounded,
                 onTap: () => Navigator.push(
                   context,
@@ -471,7 +471,7 @@ class _DashboardContent extends StatelessWidget {
                     ? '–'
                     : '${(transfers.last / 1000).toStringAsFixed(0)}k',
                 transfers,
-                AppColors.accent,
+                AppColors.of(context).accent,
                 Icons.swap_horiz_rounded,
                 onTap: () => Navigator.push(
                   context,
@@ -517,7 +517,7 @@ class _DashboardContent extends StatelessWidget {
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(12),
-        decoration: AppTheme.gradientCard(),
+        decoration: AppTheme.gradientCard(context: context, ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -528,8 +528,8 @@ class _DashboardContent extends StatelessWidget {
                 Expanded(
                   child: Text(
                     title,
-                    style: const TextStyle(
-                      color: AppColors.textSecondary,
+                    style: TextStyle(
+                      color: AppColors.of(context).textSecondary,
                       fontSize: 10,
                     ),
                     maxLines: 1,
@@ -537,9 +537,9 @@ class _DashboardContent extends StatelessWidget {
                   ),
                 ),
                 if (onTap != null)
-                  const Icon(
+                  Icon(
                     Icons.chevron_right_rounded,
-                    color: AppColors.textSecondary,
+                    color: AppColors.of(context).textSecondary,
                     size: 14,
                   ),
               ],
@@ -627,7 +627,7 @@ class _DashboardContent extends StatelessWidget {
           value: topScorer?.webName ?? '-',
           subtitle: '${topScorer?.totalPoints ?? 0} pts',
           icon: Icons.star_rounded,
-          valueColor: AppColors.primary,
+          valueColor: AppColors.of(context).primary,
           imageUrl: topScorer?.photoUrl,
         ).animate().fadeIn(delay: 100.ms),
         StatCard(
@@ -635,7 +635,7 @@ class _DashboardContent extends StatelessWidget {
           value: topAssist?.webName ?? '-',
           subtitle: '${topAssist?.assists ?? 0} assists',
           icon: Icons.sports_soccer_rounded,
-          valueColor: AppColors.accent,
+          valueColor: AppColors.of(context).accent,
           imageUrl: topAssist?.photoUrl,
         ).animate().fadeIn(delay: 200.ms),
         StatCard(
@@ -661,7 +661,7 @@ class _DashboardContent extends StatelessWidget {
   Widget _buildTopPerformers(BuildContext context) {
     final top = provider.getTopScorersByPoints(limit: 5);
     return Container(
-      decoration: AppTheme.gradientCard(),
+      decoration: AppTheme.gradientCard(context: context, ),
       child: Column(
         children: [
           Padding(
@@ -673,7 +673,7 @@ class _DashboardContent extends StatelessWidget {
                   child: Text(
                     'Player',
                     style: TextStyle(
-                      color: AppColors.textSecondary,
+                      color: AppColors.of(context).textSecondary,
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                     ),
@@ -684,7 +684,7 @@ class _DashboardContent extends StatelessWidget {
                   child: Text(
                     'Pts',
                     style: TextStyle(
-                      color: AppColors.textSecondary,
+                      color: AppColors.of(context).textSecondary,
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                     ),
@@ -695,7 +695,7 @@ class _DashboardContent extends StatelessWidget {
                   child: Text(
                     'Form',
                     style: TextStyle(
-                      color: AppColors.textSecondary,
+                      color: AppColors.of(context).textSecondary,
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                     ),
@@ -706,7 +706,7 @@ class _DashboardContent extends StatelessWidget {
                   child: Text(
                     'Price',
                     style: TextStyle(
-                      color: AppColors.textSecondary,
+                      color: AppColors.of(context).textSecondary,
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                     ),
@@ -716,7 +716,7 @@ class _DashboardContent extends StatelessWidget {
               ],
             ),
           ),
-          const Divider(height: 1, color: AppColors.divider),
+          Divider(height: 1, color: AppColors.of(context).divider),
           ...top.asMap().entries.map((entry) {
             final idx = entry.key;
             final player = entry.value;
@@ -736,7 +736,7 @@ class _DashboardContent extends StatelessWidget {
                 decoration: BoxDecoration(
                   border: Border(
                     bottom: BorderSide(
-                      color: AppColors.divider,
+                      color: AppColors.of(context).divider,
                       width: idx < top.length - 1 ? 1 : 0,
                     ),
                   ),
@@ -748,21 +748,21 @@ class _DashboardContent extends StatelessWidget {
                       width: 36,
                       height: 36,
                       clipBehavior: Clip.antiAlias,
-                      decoration: const BoxDecoration(
+                      decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: AppColors.cardMedium,
+                        color: AppColors.of(context).cardMedium,
                       ),
                       child: CachedNetworkImage(
                         imageUrl: player.photoUrl,
                         fit: BoxFit.cover,
-                        placeholder: (_, __) => const Icon(
+                        placeholder: (_, __) => Icon(
                           Icons.person,
-                          color: AppColors.textSecondary,
+                          color: AppColors.of(context).textSecondary,
                           size: 18,
                         ),
-                        errorWidget: (_, __, ___) => const Icon(
+                        errorWidget: (_, __, ___) => Icon(
                           Icons.person,
-                          color: AppColors.textSecondary,
+                          color: AppColors.of(context).textSecondary,
                           size: 18,
                         ),
                       ),
@@ -774,8 +774,8 @@ class _DashboardContent extends StatelessWidget {
                       height: 20,
                       decoration: BoxDecoration(
                         color: idx == 0
-                            ? AppColors.primary
-                            : AppColors.cardMedium,
+                            ? AppColors.of(context).primary
+                            : AppColors.of(context).cardMedium,
                         shape: BoxShape.circle,
                       ),
                       child: Center(
@@ -783,8 +783,8 @@ class _DashboardContent extends StatelessWidget {
                           '${idx + 1}',
                           style: TextStyle(
                             color: idx == 0
-                                ? AppColors.secondary
-                                : AppColors.textSecondary,
+                                ? AppColors.of(context).secondary
+                                : AppColors.of(context).textSecondary,
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
                           ),
@@ -799,8 +799,8 @@ class _DashboardContent extends StatelessWidget {
                         children: [
                           Text(
                             player.webName,
-                            style: const TextStyle(
-                              color: AppColors.textPrimary,
+                            style: TextStyle(
+                              color: AppColors.of(context).textPrimary,
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
                             ),
@@ -809,8 +809,8 @@ class _DashboardContent extends StatelessWidget {
                           ),
                           Text(
                             team?.shortName ?? '',
-                            style: const TextStyle(
-                              color: AppColors.textSecondary,
+                            style: TextStyle(
+                              color: AppColors.of(context).textSecondary,
                               fontSize: 11,
                             ),
                           ),
@@ -820,8 +820,8 @@ class _DashboardContent extends StatelessWidget {
                     Expanded(
                       child: Text(
                         '${player.totalPoints}',
-                        style: const TextStyle(
-                          color: AppColors.primary,
+                        style: TextStyle(
+                          color: AppColors.of(context).primary,
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
                         ),
@@ -831,8 +831,8 @@ class _DashboardContent extends StatelessWidget {
                     Expanded(
                       child: Text(
                         formatForm(player.form),
-                        style: const TextStyle(
-                          color: AppColors.accent,
+                        style: TextStyle(
+                          color: AppColors.of(context).accent,
                           fontSize: 13,
                         ),
                         textAlign: TextAlign.center,
@@ -841,8 +841,8 @@ class _DashboardContent extends StatelessWidget {
                     Expanded(
                       child: Text(
                         formatPrice(player.nowCost),
-                        style: const TextStyle(
-                          color: AppColors.textSecondary,
+                        style: TextStyle(
+                          color: AppColors.of(context).textSecondary,
                           fontSize: 12,
                         ),
                         textAlign: TextAlign.center,
@@ -881,7 +881,7 @@ class _DashboardContent extends StatelessWidget {
     bool isIn,
   ) {
     return Container(
-      decoration: AppTheme.gradientCard(),
+      decoration: AppTheme.gradientCard(context: context, ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -891,14 +891,14 @@ class _DashboardContent extends StatelessWidget {
               children: [
                 Icon(
                   isIn ? Icons.arrow_circle_up : Icons.arrow_circle_down,
-                  color: isIn ? AppColors.primary : AppColors.error,
+                  color: isIn ? AppColors.of(context).primary : AppColors.of(context).error,
                   size: 16,
                 ),
                 const SizedBox(width: 6),
                 Text(
                   'Transfers $title',
-                  style: const TextStyle(
-                    color: AppColors.textPrimary,
+                  style: TextStyle(
+                    color: AppColors.of(context).textPrimary,
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                   ),
@@ -906,7 +906,7 @@ class _DashboardContent extends StatelessWidget {
               ],
             ),
           ),
-          const Divider(height: 1, color: AppColors.divider),
+          Divider(height: 1, color: AppColors.of(context).divider),
           ...players.map((p) {
             final count = isIn ? p.transfersInEvent : p.transfersOutEvent;
             return InkWell(
@@ -927,21 +927,21 @@ class _DashboardContent extends StatelessWidget {
                       width: 30,
                       height: 30,
                       clipBehavior: Clip.antiAlias,
-                      decoration: const BoxDecoration(
+                      decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: AppColors.cardMedium,
+                        color: AppColors.of(context).cardMedium,
                       ),
                       child: CachedNetworkImage(
                         imageUrl: p.photoUrl,
                         fit: BoxFit.cover,
-                        placeholder: (_, __) => const Icon(
+                        placeholder: (_, __) => Icon(
                           Icons.person,
-                          color: AppColors.textSecondary,
+                          color: AppColors.of(context).textSecondary,
                           size: 14,
                         ),
-                        errorWidget: (_, __, ___) => const Icon(
+                        errorWidget: (_, __, ___) => Icon(
                           Icons.person,
-                          color: AppColors.textSecondary,
+                          color: AppColors.of(context).textSecondary,
                           size: 14,
                         ),
                       ),
@@ -950,8 +950,8 @@ class _DashboardContent extends StatelessWidget {
                     Expanded(
                       child: Text(
                         p.webName,
-                        style: const TextStyle(
-                          color: AppColors.textPrimary,
+                        style: TextStyle(
+                          color: AppColors.of(context).textPrimary,
                           fontSize: 12,
                         ),
                         maxLines: 1,
@@ -963,7 +963,7 @@ class _DashboardContent extends StatelessWidget {
                           ? '${(count / 1000).toStringAsFixed(1)}k'
                           : '$count',
                       style: TextStyle(
-                        color: isIn ? AppColors.primary : AppColors.error,
+                        color: isIn ? AppColors.of(context).primary : AppColors.of(context).error,
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                       ),
@@ -1001,11 +1001,11 @@ class _DashboardContent extends StatelessWidget {
     if (upcoming.isEmpty) {
       return Container(
         padding: const EdgeInsets.all(20),
-        decoration: AppTheme.gradientCard(),
-        child: const Center(
+        decoration: AppTheme.gradientCard(context: context, ),
+        child: Center(
           child: Text(
             'No upcoming fixtures',
-            style: TextStyle(color: AppColors.textSecondary),
+            style: TextStyle(color: AppColors.of(context).textSecondary),
           ),
         ),
       );
@@ -1027,8 +1027,8 @@ class _DashboardContent extends StatelessWidget {
           padding: const EdgeInsets.only(top: 8.0, bottom: 8.0, left: 4.0),
           child: Text(
             entry.key,
-            style: const TextStyle(
-              color: AppColors.textSecondary,
+            style: TextStyle(
+              color: AppColors.of(context).textSecondary,
               fontSize: 12,
               fontWeight: FontWeight.w700,
             ),
@@ -1078,7 +1078,7 @@ class _DashboardContent extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.all(12),
-        decoration: AppTheme.gradientCard(),
+        decoration: AppTheme.gradientCard(context: context, ),
         child: Row(
           children: [
             Expanded(
@@ -1088,8 +1088,8 @@ class _DashboardContent extends StatelessWidget {
                   Flexible(
                     child: Text(
                       home?.shortName ?? '?',
-                      style: const TextStyle(
-                        color: AppColors.textPrimary,
+                      style: TextStyle(
+                        color: AppColors.of(context).textPrimary,
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                       ),
@@ -1116,22 +1116,22 @@ class _DashboardContent extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: AppColors.cardMedium,
+                color: AppColors.of(context).cardMedium,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: fixture.hasResult
                   ? Text(
                       '${fixture.homeTeamScore} - ${fixture.awayTeamScore}',
-                      style: const TextStyle(
-                        color: AppColors.textPrimary,
+                      style: TextStyle(
+                        color: AppColors.of(context).textPrimary,
                         fontWeight: FontWeight.w700,
                         fontSize: 13,
                       ),
                     )
                   : Text(
                       _formatTimeShort(fixture.kickoffTime),
-                      style: const TextStyle(
-                        color: AppColors.textSecondary,
+                      style: TextStyle(
+                        color: AppColors.of(context).textSecondary,
                         fontSize: 12,
                       ),
                     ),
@@ -1155,8 +1155,8 @@ class _DashboardContent extends StatelessWidget {
                   Flexible(
                     child: Text(
                       away?.shortName ?? '?',
-                      style: const TextStyle(
-                        color: AppColors.textPrimary,
+                      style: TextStyle(
+                        color: AppColors.of(context).textPrimary,
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                       ),

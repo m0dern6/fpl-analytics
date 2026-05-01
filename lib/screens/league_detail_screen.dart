@@ -62,10 +62,10 @@ class _LeagueDetailScreenState extends State<LeagueDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.of(context).background,
       appBar: AppBar(
         title: Text(widget.leagueName),
-        backgroundColor: AppColors.secondary,
+        backgroundColor: AppColors.of(context).secondary,
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh_rounded),
@@ -79,8 +79,8 @@ class _LeagueDetailScreenState extends State<LeagueDetailScreen> {
 
   Widget _buildBody() {
     if (_loading) {
-      return const Center(
-        child: CircularProgressIndicator(color: AppColors.primary),
+      return Center(
+        child: CircularProgressIndicator(color: AppColors.of(context).primary),
       );
     }
 
@@ -91,18 +91,18 @@ class _LeagueDetailScreenState extends State<LeagueDetailScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline, color: AppColors.error, size: 48),
+              Icon(Icons.error_outline, color: AppColors.of(context).error, size: 48),
               const SizedBox(height: 16),
               Text(
                 _error!,
-                style: const TextStyle(color: AppColors.textSecondary),
+                style: TextStyle(color: AppColors.of(context).textSecondary),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _fetchStandings,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
+                  backgroundColor: AppColors.of(context).primary,
                 ),
                 child: const Text('Retry'),
               ),
@@ -113,10 +113,10 @@ class _LeagueDetailScreenState extends State<LeagueDetailScreen> {
     }
 
     if (_standings.isEmpty) {
-      return const Center(
+      return Center(
         child: Text(
           'No standings found for this league',
-          style: TextStyle(color: AppColors.textSecondary),
+          style: TextStyle(color: AppColors.of(context).textSecondary),
         ),
       );
     }
@@ -149,9 +149,9 @@ class _LeagueDetailScreenState extends State<LeagueDetailScreen> {
             size: 12,
           );
         } else {
-          rankIcon = const Icon(
+          rankIcon = Icon(
             Icons.remove_rounded,
-            color: AppColors.textSecondary,
+            color: AppColors.of(context).textSecondary,
             size: 12,
           );
         }
@@ -167,8 +167,8 @@ class _LeagueDetailScreenState extends State<LeagueDetailScreen> {
             showDialog(
               context: context,
               barrierDismissible: false,
-              builder: (_) => const Center(
-                child: CircularProgressIndicator(color: AppColors.primary),
+              builder: (_) => Center(
+                child: CircularProgressIndicator(color: AppColors.of(context).primary),
               ),
             );
 
@@ -197,13 +197,13 @@ class _LeagueDetailScreenState extends State<LeagueDetailScreen> {
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
               color: isMe
-                  ? AppColors.primary.withAlpha(20)
-                  : AppColors.cardMedium,
+                  ? AppColors.of(context).primary.withAlpha(20)
+                  : AppColors.of(context).cardMedium,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: isMe
-                    ? AppColors.primary.withAlpha(150)
-                    : AppColors.cardDark,
+                    ? AppColors.of(context).primary.withAlpha(150)
+                    : AppColors.of(context).cardDark,
               ),
             ),
             child: Row(
@@ -213,7 +213,7 @@ class _LeagueDetailScreenState extends State<LeagueDetailScreen> {
                   child: Text(
                     formatNumber(rank),
                     style: TextStyle(
-                      color: isMe ? AppColors.primary : AppColors.textPrimary,
+                      color: isMe ? AppColors.of(context).primary : AppColors.of(context).textPrimary,
                       fontSize: 14,
                       fontWeight: FontWeight.w800,
                     ),
@@ -228,8 +228,8 @@ class _LeagueDetailScreenState extends State<LeagueDetailScreen> {
                         teamName,
                         style: TextStyle(
                           color: isMe
-                              ? AppColors.primary
-                              : AppColors.textPrimary,
+                              ? AppColors.of(context).primary
+                              : AppColors.of(context).textPrimary,
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
                         ),
@@ -240,8 +240,8 @@ class _LeagueDetailScreenState extends State<LeagueDetailScreen> {
                         playerName,
                         style: TextStyle(
                           color: isMe
-                              ? AppColors.primary.withAlpha(200)
-                              : AppColors.textSecondary,
+                              ? AppColors.of(context).primary.withAlpha(200)
+                              : AppColors.of(context).textSecondary,
                           fontSize: 12,
                         ),
                         maxLines: 1,
@@ -257,7 +257,7 @@ class _LeagueDetailScreenState extends State<LeagueDetailScreen> {
                     Text(
                       formatNumber(total),
                       style: TextStyle(
-                        color: isMe ? AppColors.primary : AppColors.primary,
+                        color: isMe ? AppColors.of(context).primary : AppColors.of(context).primary,
                         fontSize: 15,
                         fontWeight: FontWeight.w800,
                       ),
@@ -269,8 +269,8 @@ class _LeagueDetailScreenState extends State<LeagueDetailScreen> {
                           'GW: $eventTotal  ',
                           style: TextStyle(
                             color: isMe
-                                ? AppColors.primary.withAlpha(200)
-                                : AppColors.textSecondary,
+                                ? AppColors.of(context).primary.withAlpha(200)
+                                : AppColors.of(context).textSecondary,
                             fontSize: 10,
                             fontWeight: FontWeight.w600,
                           ),
@@ -284,7 +284,7 @@ class _LeagueDetailScreenState extends State<LeagueDetailScreen> {
                                 ? Colors.green
                                 : (diff < 0
                                       ? Colors.red
-                                      : AppColors.textSecondary),
+                                      : AppColors.of(context).textSecondary),
                             fontSize: 10,
                             fontWeight: FontWeight.w600,
                           ),

@@ -25,10 +25,10 @@ class FplPitchScreen extends StatelessWidget {
     final totalPoints = picks['entry_history']?['points'] as int? ?? 0;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.of(context).background,
       appBar: AppBar(
         title: Text('Gameweek $gwNumber Pitch'),
-        backgroundColor: AppColors.secondary,
+        backgroundColor: AppColors.of(context).secondary,
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
@@ -176,12 +176,12 @@ class _PlayerPointsSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final posColor = player != null
         ? getPositionColor(player!.elementType)
-        : AppColors.textSecondary;
+        : AppColors.of(context).textSecondary;
     final team = player != null ? provider.getTeamById(player!.teamId) : null;
 
     return Container(
-      decoration: const BoxDecoration(
-        color: AppColors.cardDark,
+      decoration: BoxDecoration(
+        color: AppColors.of(context).cardDark,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
@@ -192,7 +192,7 @@ class _PlayerPointsSheet extends StatelessWidget {
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: AppColors.divider,
+              color: AppColors.of(context).divider,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -204,7 +204,7 @@ class _PlayerPointsSheet extends StatelessWidget {
                 height: 56,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AppColors.cardMedium,
+                  color: AppColors.of(context).cardMedium,
                   border: Border.all(color: posColor.withAlpha(120), width: 2),
                 ),
                 clipBehavior: Clip.antiAlias,
@@ -217,9 +217,9 @@ class _PlayerPointsSheet extends StatelessWidget {
                         errorWidget: (_, __, ___) =>
                             Icon(Icons.person, color: posColor, size: 28),
                       )
-                    : const Icon(
+                    : Icon(
                         Icons.person,
-                        color: AppColors.textSecondary,
+                        color: AppColors.of(context).textSecondary,
                         size: 28,
                       ),
               ),
@@ -232,8 +232,8 @@ class _PlayerPointsSheet extends StatelessWidget {
                       children: [
                         Text(
                           player?.webName ?? 'Unknown',
-                          style: const TextStyle(
-                            color: AppColors.textPrimary,
+                          style: TextStyle(
+                            color: AppColors.of(context).textPrimary,
                             fontSize: 18,
                             fontWeight: FontWeight.w800,
                           ),
@@ -243,7 +243,7 @@ class _PlayerPointsSheet extends StatelessWidget {
                           _badge('C', const Color(0xFFFFD700)),
                         ] else if (isViceCaptain) ...[
                           const SizedBox(width: 8),
-                          _badge('V', AppColors.accent),
+                          _badge('V', AppColors.of(context).accent),
                         ],
                       ],
                     ),
@@ -274,17 +274,17 @@ class _PlayerPointsSheet extends StatelessWidget {
                         const SizedBox(width: 8),
                         Text(
                           team?.name ?? '',
-                          style: const TextStyle(
-                            color: AppColors.textSecondary,
+                          style: TextStyle(
+                            color: AppColors.of(context).textSecondary,
                             fontSize: 12,
                           ),
                         ),
                         if (isBench) ...[
                           const SizedBox(width: 8),
-                          const Text(
+                          Text(
                             '(Bench)',
                             style: TextStyle(
-                              color: AppColors.textSecondary,
+                              color: AppColors.of(context).textSecondary,
                               fontSize: 11,
                             ),
                           ),
@@ -300,24 +300,24 @@ class _PlayerPointsSheet extends StatelessWidget {
                   vertical: 10,
                 ),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withAlpha(22),
+                  color: AppColors.of(context).primary.withAlpha(22),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.primary.withAlpha(80)),
+                  border: Border.all(color: AppColors.of(context).primary.withAlpha(80)),
                 ),
                 child: Column(
                   children: [
                     Text(
                       '$effectivePts',
-                      style: const TextStyle(
-                        color: AppColors.primary,
+                      style: TextStyle(
+                        color: AppColors.of(context).primary,
                         fontSize: 24,
                         fontWeight: FontWeight.w900,
                       ),
                     ),
-                    const Text(
+                    Text(
                       'PTS',
                       style: TextStyle(
-                        color: AppColors.textSecondary,
+                        color: AppColors.of(context).textSecondary,
                         fontSize: 9,
                         fontWeight: FontWeight.w700,
                       ),
@@ -328,15 +328,15 @@ class _PlayerPointsSheet extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 24),
-          const Divider(color: AppColors.divider, height: 1),
+          Divider(color: AppColors.of(context).divider, height: 1),
           const SizedBox(height: 16),
           if (live != null)
-            _buildStatsGrid(live!)
+            _buildStatsGrid(context, live!)
           else
-            const Center(
+            Center(
               child: Text(
                 'No live data for this player yet',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                style: TextStyle(color: AppColors.of(context).textSecondary, fontSize: 13),
               ),
             ),
         ],
@@ -344,7 +344,7 @@ class _PlayerPointsSheet extends StatelessWidget {
     );
   }
 
-  Widget _buildStatsGrid(Map<String, dynamic> stats) {
+  Widget _buildStatsGrid(BuildContext context, Map<String, dynamic> stats) {
     final items = <_StatItem>[];
     if (stats['minutes'] > 0)
       items.add(_StatItem('Minutes', '${stats['minutes']}'));
@@ -359,11 +359,11 @@ class _PlayerPointsSheet extends StatelessWidget {
     if (stats['bonus'] > 0) items.add(_StatItem('Bonus', '${stats['bonus']}'));
 
     if (items.isEmpty) {
-      return const Padding(
+      return Padding(
         padding: EdgeInsets.symmetric(vertical: 20),
         child: Text(
           'Played 0 mins or no attacking returns yet',
-          style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+          style: TextStyle(color: AppColors.of(context).textSecondary, fontSize: 12),
         ),
       );
     }
@@ -381,7 +381,7 @@ class _PlayerPointsSheet extends StatelessWidget {
       itemBuilder: (ctx, i) => Container(
         padding: const EdgeInsets.symmetric(horizontal: 12),
         decoration: BoxDecoration(
-          color: AppColors.cardMedium,
+          color: AppColors.of(context).cardMedium,
           borderRadius: BorderRadius.circular(10),
         ),
         child: Row(
@@ -389,15 +389,15 @@ class _PlayerPointsSheet extends StatelessWidget {
           children: [
             Text(
               items[i].label,
-              style: const TextStyle(
-                color: AppColors.textSecondary,
+              style: TextStyle(
+                color: AppColors.of(context).textSecondary,
                 fontSize: 12,
               ),
             ),
             Text(
               items[i].value,
-              style: const TextStyle(
-                color: AppColors.textPrimary,
+              style: TextStyle(
+                color: AppColors.of(context).textPrimary,
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
               ),

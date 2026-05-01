@@ -19,25 +19,25 @@ class FormLeadersScreen extends StatelessWidget {
           provider.getTopScorersByForm(limit: 20),
         );
         return Scaffold(
-          backgroundColor: AppColors.background,
+          backgroundColor: AppColors.of(context).background,
           appBar: AppBar(
             title: const Text('Form Leaders'),
-            backgroundColor: AppColors.secondary,
+            backgroundColor: AppColors.of(context).secondary,
           ),
           body: provider.isLoading
-              ? const Center(
-                  child: CircularProgressIndicator(color: AppColors.primary),
+              ? Center(
+                  child: CircularProgressIndicator(color: AppColors.of(context).primary),
                 )
               : ListView(
                   padding: const EdgeInsets.all(16),
                   children: [
                     Container(
                       padding: const EdgeInsets.all(16),
-                      decoration: AppTheme.gradientCard(),
-                      child: const Text(
+                      decoration: AppTheme.gradientCard(context: context, ),
+                      child: Text(
                         'Current top-form players by 5-game rolling average.',
                         style: TextStyle(
-                          color: AppColors.textSecondary,
+                          color: AppColors.of(context).textSecondary,
                           fontSize: 12,
                         ),
                       ),
@@ -59,7 +59,7 @@ class FormLeadersScreen extends StatelessWidget {
                           ),
                           child: Container(
                             padding: const EdgeInsets.all(14),
-                            decoration: AppTheme.gradientCard(),
+                            decoration: AppTheme.gradientCard(context: context, ),
                             child: Row(
                               children: [
                                 SizedBox(
@@ -68,8 +68,8 @@ class FormLeadersScreen extends StatelessWidget {
                                     '${index + 1}',
                                     style: TextStyle(
                                       color: index == 0
-                                          ? AppColors.primary
-                                          : AppColors.textSecondary,
+                                          ? AppColors.of(context).primary
+                                          : AppColors.of(context).textSecondary,
                                       fontSize: 13,
                                       fontWeight: FontWeight.w700,
                                     ),
@@ -79,21 +79,21 @@ class FormLeadersScreen extends StatelessWidget {
                                   width: 36,
                                   height: 36,
                                   clipBehavior: Clip.antiAlias,
-                                  decoration: const BoxDecoration(
+                                  decoration: BoxDecoration(
                                     shape: BoxShape.circle,
-                                    color: AppColors.cardMedium,
+                                    color: AppColors.of(context).cardMedium,
                                   ),
                                   child: CachedNetworkImage(
                                     imageUrl: player.photoUrl,
                                     fit: BoxFit.cover,
-                                    placeholder: (_, __) => const Icon(
+                                    placeholder: (_, __) => Icon(
                                       Icons.person,
-                                      color: AppColors.textSecondary,
+                                      color: AppColors.of(context).textSecondary,
                                       size: 18,
                                     ),
-                                    errorWidget: (_, __, ___) => const Icon(
+                                    errorWidget: (_, __, ___) => Icon(
                                       Icons.person,
-                                      color: AppColors.textSecondary,
+                                      color: AppColors.of(context).textSecondary,
                                       size: 18,
                                     ),
                                   ),
@@ -106,8 +106,8 @@ class FormLeadersScreen extends StatelessWidget {
                                     children: [
                                       Text(
                                         player.webName,
-                                        style: const TextStyle(
-                                          color: AppColors.textPrimary,
+                                        style: TextStyle(
+                                          color: AppColors.of(context).textPrimary,
                                           fontSize: 13,
                                           fontWeight: FontWeight.w600,
                                         ),
@@ -117,8 +117,8 @@ class FormLeadersScreen extends StatelessWidget {
                                       const SizedBox(height: 2),
                                       Text(
                                         '${team?.shortName ?? ''} · ${formatPrice(player.nowCost)}',
-                                        style: const TextStyle(
-                                          color: AppColors.textSecondary,
+                                        style: TextStyle(
+                                          color: AppColors.of(context).textSecondary,
                                           fontSize: 11,
                                         ),
                                       ),
@@ -127,8 +127,8 @@ class FormLeadersScreen extends StatelessWidget {
                                 ),
                                 Text(
                                   formatForm(player.form),
-                                  style: const TextStyle(
-                                    color: AppColors.accent,
+                                  style: TextStyle(
+                                    color: AppColors.of(context).accent,
                                     fontSize: 16,
                                     fontWeight: FontWeight.w800,
                                   ),

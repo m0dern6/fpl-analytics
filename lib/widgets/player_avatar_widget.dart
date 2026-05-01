@@ -30,7 +30,7 @@ class PlayerAvatarWidget extends StatelessWidget {
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: AppColors.cardMedium,
+        color: AppColors.of(context).cardMedium,
         border: Border.all(color: border, width: 1.5),
       ),
       clipBehavior: Clip.antiAlias,
@@ -39,12 +39,12 @@ class PlayerAvatarWidget extends StatelessWidget {
         fit: BoxFit.cover,
         placeholder: (_, __) => Icon(
           Icons.person,
-          color: AppColors.textSecondary,
+          color: AppColors.of(context).textSecondary,
           size: size * 0.55,
         ),
         errorWidget: (_, __, ___) => Icon(
           Icons.person,
-          color: AppColors.textSecondary,
+          color: AppColors.of(context).textSecondary,
           size: size * 0.55,
         ),
       ),
@@ -65,8 +65,8 @@ class PlayerAvatarWidget extends StatelessWidget {
             width: size + 8,
             child: Text(
               player.webName,
-              style: const TextStyle(
-                color: AppColors.textPrimary,
+              style: TextStyle(
+                color: AppColors.of(context).textPrimary,
                 fontSize: 9,
                 fontWeight: FontWeight.w600,
               ),

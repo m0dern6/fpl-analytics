@@ -68,9 +68,9 @@ class _BottomNav extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.navBar,
-        border: const Border(
-          top: BorderSide(color: AppColors.divider, width: 0.5),
+        color: AppColors.of(context).navBar,
+        border: Border(
+          top: BorderSide(color: AppColors.of(context).divider, width: 0.5),
         ),
         boxShadow: [
           BoxShadow(
@@ -136,13 +136,13 @@ class _NavItem extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
               decoration: BoxDecoration(
                 color: isSelected
-                    ? AppColors.primary.withAlpha(28)
+                    ? AppColors.of(context).primary.withAlpha(28)
                     : Colors.transparent,
                 borderRadius: BorderRadius.circular(28),
               ),
               child: Icon(
                 isSelected ? dest.filledIcon : dest.outlinedIcon,
-                color: isSelected ? AppColors.primary : AppColors.textSecondary,
+                color: isSelected ? AppColors.of(context).primary : AppColors.of(context).textSecondary,
                 size: 22,
               ),
             ),
@@ -150,7 +150,7 @@ class _NavItem extends StatelessWidget {
             AnimatedDefaultTextStyle(
               duration: const Duration(milliseconds: 220),
               style: TextStyle(
-                color: isSelected ? AppColors.primary : AppColors.textSecondary,
+                color: isSelected ? AppColors.of(context).primary : AppColors.of(context).textSecondary,
                 fontSize: 10,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
                 letterSpacing: isSelected ? 0.1 : 0,

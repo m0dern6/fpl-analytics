@@ -77,17 +77,17 @@ class _PlayersScreenState extends State<PlayersScreen> {
       builder: (context, provider, _) {
         final filtered = _filteredAndSorted(provider.players);
         return Scaffold(
-          backgroundColor: AppColors.background,
+          backgroundColor: AppColors.of(context).background,
           appBar: AppBar(
             title: const Text('Players'),
-            backgroundColor: AppColors.secondary,
+            backgroundColor: AppColors.of(context).secondary,
             actions: [
               PopupMenuButton<SortOption>(
-                icon: const Icon(
+                icon: Icon(
                   Icons.sort_rounded,
-                  color: AppColors.textPrimary,
+                  color: AppColors.of(context).textPrimary,
                 ),
-                color: AppColors.cardDark,
+                color: AppColors.of(context).cardDark,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
                 ),
@@ -134,8 +134,8 @@ class _PlayersScreenState extends State<PlayersScreen> {
                 child: provider.isLoading
                     ? const LoadingListWidget()
                     : RefreshIndicator(
-                        color: AppColors.primary,
-                        backgroundColor: AppColors.cardDark,
+                        color: AppColors.of(context).primary,
+                        backgroundColor: AppColors.of(context).cardDark,
                         onRefresh: provider.refresh,
                         child: filtered.isEmpty
                             ? _buildEmpty()
@@ -190,21 +190,21 @@ class _PlayersScreenState extends State<PlayersScreen> {
         children: [
           Icon(
             icon,
-            color: isSelected ? AppColors.primary : AppColors.textSecondary,
+            color: isSelected ? AppColors.of(context).primary : AppColors.of(context).textSecondary,
             size: 18,
           ),
           const SizedBox(width: 8),
           Text(
             label,
             style: TextStyle(
-              color: isSelected ? AppColors.primary : AppColors.textPrimary,
+              color: isSelected ? AppColors.of(context).primary : AppColors.of(context).textPrimary,
             ),
           ),
           if (isSelected) ...[
             const Spacer(),
             Icon(
               _sortAscending ? Icons.arrow_upward : Icons.arrow_downward,
-              color: AppColors.primary,
+              color: AppColors.of(context).primary,
               size: 16,
             ),
           ],
@@ -219,15 +219,15 @@ class _PlayersScreenState extends State<PlayersScreen> {
       child: TextField(
         controller: _searchController,
         onChanged: (v) => setState(() => _searchQuery = v),
-        style: const TextStyle(color: AppColors.textPrimary, fontSize: 14),
+        style: TextStyle(color: AppColors.of(context).textPrimary, fontSize: 14),
         decoration: InputDecoration(
           hintText: 'Search players…',
           prefixIcon: const Icon(Icons.search_rounded, size: 20),
           suffixIcon: _searchQuery.isNotEmpty
               ? IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.close_rounded,
-                    color: AppColors.textSecondary,
+                    color: AppColors.of(context).textSecondary,
                     size: 18,
                   ),
                   onPressed: () {
@@ -256,7 +256,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
           const SizedBox(width: 8),
           if (provider.teams.isNotEmpty)
             PopupMenuButton<int>(
-              color: AppColors.cardDark,
+              color: AppColors.of(context).cardDark,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
               ),
@@ -269,12 +269,12 @@ class _PlayersScreenState extends State<PlayersScreen> {
                 ),
                 decoration: BoxDecoration(
                   color: _selectedTeam != 0
-                      ? AppColors.primary.withAlpha(28)
-                      : AppColors.cardMedium,
+                      ? AppColors.of(context).primary.withAlpha(28)
+                      : AppColors.of(context).cardMedium,
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(
                     color: _selectedTeam != 0
-                        ? AppColors.primary.withAlpha(160)
+                        ? AppColors.of(context).primary.withAlpha(160)
                         : Colors.transparent,
                     width: 1,
                   ),
@@ -303,8 +303,8 @@ class _PlayersScreenState extends State<PlayersScreen> {
                           : 'All Teams',
                       style: TextStyle(
                         color: _selectedTeam != 0
-                            ? AppColors.primary
-                            : AppColors.textSecondary,
+                            ? AppColors.of(context).primary
+                            : AppColors.of(context).textSecondary,
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                       ),
@@ -313,8 +313,8 @@ class _PlayersScreenState extends State<PlayersScreen> {
                     Icon(
                       Icons.keyboard_arrow_down_rounded,
                       color: _selectedTeam != 0
-                          ? AppColors.primary
-                          : AppColors.textSecondary,
+                          ? AppColors.of(context).primary
+                          : AppColors.of(context).textSecondary,
                       size: 14,
                     ),
                   ],
@@ -325,15 +325,15 @@ class _PlayersScreenState extends State<PlayersScreen> {
                   value: 0,
                   child: Row(
                     children: [
-                      const Icon(Icons.groups_rounded,
-                          color: AppColors.textSecondary, size: 20),
+                      Icon(Icons.groups_rounded,
+                          color: AppColors.of(context).textSecondary, size: 20),
                       const SizedBox(width: 8),
                       Text(
                         'All Teams',
                         style: TextStyle(
                           color: _selectedTeam == 0
-                              ? AppColors.primary
-                              : AppColors.textPrimary,
+                              ? AppColors.of(context).primary
+                              : AppColors.of(context).textPrimary,
                           fontWeight: _selectedTeam == 0
                               ? FontWeight.w700
                               : FontWeight.w400,
@@ -362,8 +362,8 @@ class _PlayersScreenState extends State<PlayersScreen> {
                           t.name,
                           style: TextStyle(
                             color: _selectedTeam == t.id
-                                ? AppColors.primary
-                                : AppColors.textPrimary,
+                                ? AppColors.of(context).primary
+                                : AppColors.of(context).textPrimary,
                           ),
                         ),
                       ],
@@ -381,7 +381,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
     final isSelected = _selectedPosition == pos;
     Color? chipColor;
     if (pos > 0) chipColor = PositionConstants.positionColors[pos];
-    final color = chipColor ?? AppColors.primary;
+    final color = chipColor ?? AppColors.of(context).primary;
     return GestureDetector(
       onTap: () => setState(() => _selectedPosition = pos),
       child: AnimatedContainer(
@@ -389,7 +389,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
         margin: const EdgeInsets.only(right: 8),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
         decoration: BoxDecoration(
-          color: isSelected ? color.withAlpha(28) : AppColors.cardMedium,
+          color: isSelected ? color.withAlpha(28) : AppColors.of(context).cardMedium,
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
             color: isSelected ? color.withAlpha(160) : Colors.transparent,
@@ -399,7 +399,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
         child: Text(
           label,
           style: TextStyle(
-            color: isSelected ? color : AppColors.textSecondary,
+            color: isSelected ? color : AppColors.of(context).textSecondary,
             fontSize: 12,
             fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
           ),
@@ -409,15 +409,15 @@ class _PlayersScreenState extends State<PlayersScreen> {
   }
 
   Widget _buildEmpty() {
-    return const Center(
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.search_off, color: AppColors.textSecondary, size: 48),
+          Icon(Icons.search_off, color: AppColors.of(context).textSecondary, size: 48),
           SizedBox(height: 12),
           Text(
             'No players found',
-            style: TextStyle(color: AppColors.textSecondary),
+            style: TextStyle(color: AppColors.of(context).textSecondary),
           ),
         ],
       ),

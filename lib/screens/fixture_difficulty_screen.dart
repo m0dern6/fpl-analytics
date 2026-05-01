@@ -14,10 +14,10 @@ class FixtureDifficultyScreen extends StatelessWidget {
     return Consumer<FplProvider>(
       builder: (context, provider, _) {
         return Scaffold(
-          backgroundColor: AppColors.background,
+          backgroundColor: AppColors.of(context).background,
           appBar: AppBar(
             title: const Text('Fixture Difficulty Ratings'),
-            backgroundColor: AppColors.secondary,
+            backgroundColor: AppColors.of(context).secondary,
           ),
           body: provider.isLoading
               ? const LoadingWidget(height: 300)
@@ -33,7 +33,7 @@ class FixtureDifficultyScreen extends StatelessWidget {
 
     return Column(
       children: [
-        _buildLegend(),
+        _buildLegend(context),
         Expanded(
           child: SingleChildScrollView(
             scrollDirection: Axis.vertical,
@@ -44,9 +44,9 @@ class FixtureDifficultyScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildHeader(nextGws),
+                    _buildHeader(context, nextGws),
                     const SizedBox(height: 4),
-                    ...provider.teams.map((team) => _buildTeamRow(team, nextGws, provider)),
+                    ...provider.teams.map((team) => _buildTeamRow(context, team, nextGws, provider)),
                   ],
                 ),
               ),
@@ -57,15 +57,15 @@ class FixtureDifficultyScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildLegend() {
+  Widget _buildLegend(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      color: AppColors.cardDark,
+      color: AppColors.of(context).cardDark,
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Row(
           children: [
-            const Text('Difficulty: ', style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+            Text('Difficulty: ', style: TextStyle(color: AppColors.of(context).textSecondary, fontSize: 12)),
             ...DifficultyConstants.colors.entries.map(
               (e) => Padding(
                 padding: const EdgeInsets.only(right: 8),
@@ -80,7 +80,7 @@ class FixtureDifficultyScreen extends StatelessWidget {
                     const SizedBox(width: 3),
                     Text(
                       '${e.key} - ${DifficultyConstants.labels[e.key]}',
-                      style: const TextStyle(color: AppColors.textSecondary, fontSize: 11),
+                      style: TextStyle(color: AppColors.of(context).textSecondary, fontSize: 11),
                     ),
                   ],
                 ),
@@ -92,18 +92,18 @@ class FixtureDifficultyScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(List<int> gws) {
+  Widget _buildHeader(BuildContext context, List<int> gws) {
     return Row(
       children: [
-        const SizedBox(
+        SizedBox(
           width: 72,
-          child: Text('Team', style: TextStyle(color: AppColors.textSecondary, fontSize: 12, fontWeight: FontWeight.w600)),
+          child: Text('Team', style: TextStyle(color: AppColors.of(context).textSecondary, fontSize: 12, fontWeight: FontWeight.w600)),
         ),
         ...gws.map((gw) => SizedBox(
               width: 90,
               child: Text(
                 'GW$gw',
-                style: const TextStyle(color: AppColors.textSecondary, fontSize: 12, fontWeight: FontWeight.w600),
+                style: TextStyle(color: AppColors.of(context).textSecondary, fontSize: 12, fontWeight: FontWeight.w600),
                 textAlign: TextAlign.center,
               ),
             )),
@@ -111,7 +111,7 @@ class FixtureDifficultyScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTeamRow(Team team, List<int> gws, FplProvider provider) {
+  Widget _buildTeamRow(BuildContext context, Team team, List<int> gws, FplProvider provider) {
     return Container(
       margin: const EdgeInsets.only(bottom: 2),
       child: Row(
@@ -120,7 +120,7 @@ class FixtureDifficultyScreen extends StatelessWidget {
             width: 72,
             child: Text(
               team.shortName,
-              style: const TextStyle(color: AppColors.textPrimary, fontSize: 12, fontWeight: FontWeight.w600),
+              style: TextStyle(color: AppColors.of(context).textPrimary, fontSize: 12, fontWeight: FontWeight.w600),
               overflow: TextOverflow.ellipsis,
             ),
           ),
@@ -136,11 +136,11 @@ class FixtureDifficultyScreen extends StatelessWidget {
                   margin: const EdgeInsets.all(2),
                   height: 38,
                   decoration: BoxDecoration(
-                    color: AppColors.cardMedium,
+                    color: AppColors.of(context).cardMedium,
                     borderRadius: BorderRadius.circular(4),
                   ),
-                  child: const Center(
-                    child: Text('-', style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+                  child: Center(
+                    child: Text('-', style: TextStyle(color: AppColors.of(context).textSecondary, fontSize: 12)),
                   ),
                 ),
               );

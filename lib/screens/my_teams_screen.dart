@@ -30,20 +30,20 @@ class _MyTeamsScreenState extends State<MyTeamsScreen> {
     return Consumer2<UserTeamsProvider, FplProvider>(
       builder: (context, teamsProvider, fplProvider, _) {
         return Scaffold(
-          backgroundColor: AppColors.background,
+          backgroundColor: AppColors.of(context).background,
           appBar: AppBar(
             title: const Text('My Teams'),
-            backgroundColor: AppColors.secondary,
+            backgroundColor: AppColors.of(context).secondary,
           ),
           body: teamsProvider.isLoading
-              ? const Center(
-                  child: CircularProgressIndicator(color: AppColors.primary))
+              ? Center(
+                  child: CircularProgressIndicator(color: AppColors.of(context).primary))
               : teamsProvider.teams.isEmpty
                   ? _buildEmpty(context)
                   : _buildTeamList(context, teamsProvider, fplProvider),
           floatingActionButton: FloatingActionButton.extended(
-            backgroundColor: AppColors.primary,
-            foregroundColor: AppColors.secondary,
+            backgroundColor: AppColors.of(context).primary,
+            foregroundColor: AppColors.of(context).secondary,
             onPressed: () => _openBuilder(context, null),
             icon: const Icon(Icons.add),
             label: const Text('Create Team',
@@ -65,30 +65,30 @@ class _MyTeamsScreenState extends State<MyTeamsScreen> {
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: AppColors.primary.withAlpha(26),
+                color: AppColors.of(context).primary.withAlpha(26),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.group_add,
-                  color: AppColors.primary, size: 40),
+              child: Icon(Icons.group_add,
+                  color: AppColors.of(context).primary, size: 40),
             ),
             const SizedBox(height: 16),
-            const Text('No Teams Yet',
+            Text('No Teams Yet',
                 style: TextStyle(
-                    color: AppColors.textPrimary,
+                    color: AppColors.of(context).textPrimary,
                     fontSize: 20,
                     fontWeight: FontWeight.w700)),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Create your first FPL team with unlimited\ntransfers and the official £100m budget.',
               textAlign: TextAlign.center,
               style:
-                  TextStyle(color: AppColors.textSecondary, fontSize: 14),
+                  TextStyle(color: AppColors.of(context).textSecondary, fontSize: 14),
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: AppColors.secondary,
+                backgroundColor: AppColors.of(context).primary,
+                foregroundColor: AppColors.of(context).secondary,
                 padding: const EdgeInsets.symmetric(
                     horizontal: 24, vertical: 12),
                 shape: RoundedRectangleBorder(
@@ -136,21 +136,21 @@ class _MyTeamsScreenState extends State<MyTeamsScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        backgroundColor: AppColors.cardDark,
-        title: const Text('Delete Team',
-            style: TextStyle(color: AppColors.textPrimary)),
+        backgroundColor: AppColors.of(context).cardDark,
+        title: Text('Delete Team',
+            style: TextStyle(color: AppColors.of(context).textPrimary)),
         content: Text('Delete "${team.name}"? This cannot be undone.',
-            style: const TextStyle(color: AppColors.textSecondary)),
+            style: TextStyle(color: AppColors.of(context).textSecondary)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel',
-                style: TextStyle(color: AppColors.textSecondary)),
+            child: Text('Cancel',
+                style: TextStyle(color: AppColors.of(context).textSecondary)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete',
-                style: TextStyle(color: AppColors.error)),
+            child: Text('Delete',
+                style: TextStyle(color: AppColors.of(context).error)),
           ),
         ],
       ),
@@ -196,30 +196,30 @@ class _TeamCard extends StatelessWidget {
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 20),
         decoration: BoxDecoration(
-          color: AppColors.error.withAlpha(51),
+          color: AppColors.of(context).error.withAlpha(51),
           borderRadius: BorderRadius.circular(16),
         ),
-        child: const Icon(Icons.delete_outline, color: AppColors.error),
+        child: Icon(Icons.delete_outline, color: AppColors.of(context).error),
       ),
       confirmDismiss: (_) async {
         final result = await showDialog<bool>(
           context: context,
           builder: (_) => AlertDialog(
-            backgroundColor: AppColors.cardDark,
-            title: const Text('Delete Team',
-                style: TextStyle(color: AppColors.textPrimary)),
+            backgroundColor: AppColors.of(context).cardDark,
+            title: Text('Delete Team',
+                style: TextStyle(color: AppColors.of(context).textPrimary)),
             content: Text('Delete "${team.name}"?',
-                style: const TextStyle(color: AppColors.textSecondary)),
+                style: TextStyle(color: AppColors.of(context).textSecondary)),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: const Text('Cancel',
-                    style: TextStyle(color: AppColors.textSecondary)),
+                child: Text('Cancel',
+                    style: TextStyle(color: AppColors.of(context).textSecondary)),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
-                child: const Text('Delete',
-                    style: TextStyle(color: AppColors.error)),
+                child: Text('Delete',
+                    style: TextStyle(color: AppColors.of(context).error)),
               ),
             ],
           ),
@@ -231,7 +231,7 @@ class _TeamCard extends StatelessWidget {
         onTap: onEdit,
         child: Container(
           padding: const EdgeInsets.all(16),
-          decoration: AppTheme.gradientCard(),
+          decoration: AppTheme.gradientCard(context: context, ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -242,8 +242,8 @@ class _TeamCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(team.name,
-                            style: const TextStyle(
-                                color: AppColors.textPrimary,
+                            style: TextStyle(
+                                color: AppColors.of(context).textPrimary,
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700),
                             maxLines: 1,
@@ -251,8 +251,8 @@ class _TeamCard extends StatelessWidget {
                         const SizedBox(height: 2),
                         Text(
                           '${team.formation}  •  $playerCount players  •  ${_formatDate(team.createdAt)}',
-                          style: const TextStyle(
-                              color: AppColors.textSecondary, fontSize: 12),
+                          style: TextStyle(
+                              color: AppColors.of(context).textSecondary, fontSize: 12),
                         ),
                       ],
                     ),
@@ -261,14 +261,14 @@ class _TeamCard extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withAlpha(26),
+                      color: AppColors.of(context).primary.withAlpha(26),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
-                          color: AppColors.primary.withAlpha(102)),
+                          color: AppColors.of(context).primary.withAlpha(102)),
                     ),
                     child: Text(formatPrice(totalCost),
-                        style: const TextStyle(
-                            color: AppColors.primary,
+                        style: TextStyle(
+                            color: AppColors.of(context).primary,
                             fontSize: 12,
                             fontWeight: FontWeight.w600)),
                   ),
@@ -276,21 +276,21 @@ class _TeamCard extends StatelessWidget {
               ),
               if (captain != null || vc != null) ...[
                 const SizedBox(height: 10),
-                const Divider(height: 1, color: AppColors.divider),
+                Divider(height: 1, color: AppColors.of(context).divider),
                 const SizedBox(height: 10),
                 Row(
                   children: [
                     if (captain != null) ...[
-                      _captainBadge('C', captain.webName, AppColors.warning),
+                      _captainBadge(context, 'C', captain.webName, AppColors.of(context).warning),
                       const SizedBox(width: 12),
                     ],
                     if (vc != null) ...[
-                      _captainBadge('V', vc.webName, AppColors.accent),
+                      _captainBadge(context, 'V', vc.webName, AppColors.of(context).accent),
                       const SizedBox(width: 12),
                     ],
                     const Spacer(),
                     // Mini player avatars
-                    _buildMiniAvatars(team, fplProvider),
+                    _buildMiniAvatars(context, team, fplProvider),
                   ],
                 ),
               ],
@@ -300,11 +300,11 @@ class _TeamCard extends StatelessWidget {
                 children: [
                   TextButton.icon(
                     onPressed: onEdit,
-                    icon: const Icon(Icons.edit,
-                        size: 14, color: AppColors.accent),
-                    label: const Text('Edit',
+                    icon: Icon(Icons.edit,
+                        size: 14, color: AppColors.of(context).accent),
+                    label: Text('Edit',
                         style: TextStyle(
-                            color: AppColors.accent, fontSize: 12)),
+                            color: AppColors.of(context).accent, fontSize: 12)),
                     style: TextButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 4),
@@ -312,11 +312,11 @@ class _TeamCard extends StatelessWidget {
                   ),
                   TextButton.icon(
                     onPressed: onDelete,
-                    icon: const Icon(Icons.delete_outline,
-                        size: 14, color: AppColors.error),
-                    label: const Text('Delete',
+                    icon: Icon(Icons.delete_outline,
+                        size: 14, color: AppColors.of(context).error),
+                    label: Text('Delete',
                         style: TextStyle(
-                            color: AppColors.error, fontSize: 12)),
+                            color: AppColors.of(context).error, fontSize: 12)),
                     style: TextButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 4),
@@ -331,7 +331,7 @@ class _TeamCard extends StatelessWidget {
     );
   }
 
-  Widget _captainBadge(String letter, String name, Color color) {
+  Widget _captainBadge(BuildContext context, String letter, String name, Color color) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -339,10 +339,10 @@ class _TeamCard extends StatelessWidget {
           backgroundColor: color,
           radius: 10,
           child: Text(letter,
-              style: const TextStyle(
+              style: TextStyle(
                   fontSize: 9,
                   fontWeight: FontWeight.w900,
-                  color: AppColors.secondary)),
+                  color: AppColors.of(context).secondary)),
         ),
         const SizedBox(width: 4),
         Text(name,
@@ -352,7 +352,7 @@ class _TeamCard extends StatelessWidget {
     );
   }
 
-  Widget _buildMiniAvatars(UserTeam team, FplProvider fplProvider) {
+  Widget _buildMiniAvatars(BuildContext context, UserTeam team, FplProvider fplProvider) {
     final ids = team.startingPlayerIds.take(5).toList();
     return SizedBox(
       width: ids.length * 18.0 + 8,
@@ -367,8 +367,8 @@ class _TeamCard extends StatelessWidget {
               height: 26,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppColors.cardMedium,
-                border: Border.all(color: AppColors.cardDark, width: 1.5),
+                color: AppColors.of(context).cardMedium,
+                border: Border.all(color: AppColors.of(context).cardDark, width: 1.5),
               ),
               clipBehavior: Clip.antiAlias,
               child: player != null
