@@ -97,7 +97,7 @@ class LoadingCardWidget extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(height: 14, width: 100, color: AppColors.of(context).cardMedium, margin: EdgeInsets.only(bottom: 8)),
+            Container(height: 14, width: 100, color: AppColors.of(context).cardMedium, margin: const EdgeInsets.only(bottom: 8)),
             Container(height: 24, width: 60, color: AppColors.of(context).cardMedium),
             const SizedBox(height: 8),
             Container(height: 12, width: 140, color: AppColors.of(context).cardMedium),

@@ -2,24 +2,24 @@ import 'package:flutter/material.dart';
 
 class ApiConstants {
   static const String baseUrl = 'https://fantasy.premierleague.com/api';
-  static const String bootstrapStatic = '\$baseUrl/bootstrap-static/';
-  static const String fixtures = '\$baseUrl/fixtures/';
-  static String fixturesForGw(int gw) => '\$baseUrl/fixtures/?event=\$gw';
-  static String elementSummary(int id) => '\$baseUrl/element-summary/\$id/';
-  static String liveGw(int gw) => '\$baseUrl/event/\$gw/live/';
-  static String dreamTeam(int gw) => '\$baseUrl/dream-team/\$gw/';
-  static String fplEntry(int entryId) => '\$baseUrl/entry/\$entryId/';
+  static const String bootstrapStatic = '${baseUrl}/bootstrap-static/';
+  static const String fixtures = '${baseUrl}/fixtures/';
+  static String fixturesForGw(int gw) => '$baseUrl/fixtures/?event=$gw';
+  static String elementSummary(int id) => '$baseUrl/element-summary/$id/';
+  static String liveGw(int gw) => '$baseUrl/event/$gw/live/';
+  static String dreamTeam(int gw) => '$baseUrl/dream-team/$gw/';
+  static String fplEntry(int entryId) => '$baseUrl/entry/$entryId/';
   static String fplEntryPicks(int entryId, int gw) =>
-      '\$baseUrl/entry/\$entryId/event/\$gw/picks/';
+      '$baseUrl/entry/$entryId/event/$gw/picks/';
   static String leagueStandings(int leagueId) =>
-      '\$baseUrl/leagues-classic/\$leagueId/standings/';
+      '$baseUrl/leagues-classic/$leagueId/standings/';
   static String playerPhotoUrl(String photo) {
     final code = photo.replaceAll('.jpg', '');
-    return 'https://resources.premierleague.com/premierleague/photos/players/110x140/p\$code.png';
+    return 'https://resources.premierleague.com/premierleague/photos/players/110x140/p$code.png';
   }
 
   static String teamBadgeUrl(int teamCode) =>
-      'https://resources.premierleague.com/premierleague/badges/70/t\$teamCode.png';
+      'https://resources.premierleague.com/premierleague/badges/70/t$teamCode.png';
 }
 
 class PositionConstants {

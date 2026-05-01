@@ -1013,7 +1013,7 @@ class _HistoryTabState extends State<_HistoryTab>
     final maxVal = values.isEmpty
         ? 1.0
         : values.reduce((a, b) => a > b ? a : b);
-    final metricColor = _metricColors[_metricIndex];
+    final metricColor = _metricColors(context)[_metricIndex];
     final metricLabel = _metricLabels[_metricIndex];
     final isDecimal = _metricIndex == 4;
 
@@ -1187,12 +1187,12 @@ class _HistoryTabState extends State<_HistoryTab>
     );
   }
 
-  static const _metricColors = [
+  List<Color> _metricColors(BuildContext context) => [
     AppColors.of(context).primary,
     AppColors.of(context).accent,
-    Color(0xFF34D399),
+    const Color(0xFF34D399),
     AppColors.of(context).warning,
-    Color(0xFFB388FF),
+    const Color(0xFFB388FF),
   ];
 
   Widget _buildHistoryTable() {
