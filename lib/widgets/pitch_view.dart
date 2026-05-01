@@ -482,7 +482,7 @@ class _PitchPlayerCard extends StatelessWidget {
 
     final posColor = player != null
         ? getPositionColor(player.elementType)
-        : AppColors.textSecondary;
+        : AppColors.of(context).textSecondary;
 
     final _CardState state;
     if (isCaptain) {
@@ -511,14 +511,14 @@ class _PitchPlayerCard extends StatelessWidget {
           colors: [Color(0x33FFD700), Color(0x1A150505)],
         );
       case _CardState.viceCaptain:
-        borderColor = AppColors.accent;
+        borderColor = AppColors.of(context).accent;
         cardGradient = null;
       case _CardState.topPerformer:
-        borderColor = AppColors.primary;
+        borderColor = AppColors.of(context).primary;
         cardGradient = LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [AppColors.primary.withAlpha(30), Colors.white.withAlpha(10)],
+          colors: [AppColors.of(context).primary.withAlpha(30), Colors.white.withAlpha(10)],
         );
       case _CardState.good:
         borderColor = const Color(0xFF34D399);
@@ -612,7 +612,7 @@ class _PitchPlayerCard extends StatelessWidget {
               width: cardWidth,
               padding: const EdgeInsets.symmetric(vertical: 3),
               decoration: BoxDecoration(
-                color: _ptsBadgeColor(state, effectivePts),
+                color: _ptsBadgeColor(context, state, effectivePts),
                 borderRadius: const BorderRadius.vertical(
                   bottom: Radius.circular(4),
                 ),
@@ -715,21 +715,21 @@ class _PitchPlayerCard extends StatelessWidget {
     );
   }
 
-  Color _ptsBadgeColor(_CardState state, int pts) {
+  Color _ptsBadgeColor(BuildContext context, _CardState state, int pts) {
     switch (state) {
       case _CardState.captain:
-        return AppColors.accent;
+        return AppColors.of(context).accent;
       case _CardState.viceCaptain:
-        return AppColors.primary;
+        return AppColors.of(context).primary;
       case _CardState.topPerformer:
-        return AppColors.primary;
+        return AppColors.of(context).primary;
       case _CardState.good:
         return const Color(0xFF34D399);
       case _CardState.bench:
-        return AppColors.primary.withAlpha(90);
+        return AppColors.of(context).primary.withAlpha(90);
       case _CardState.regular:
-        return AppColors.primary.withAlpha(160);
+        return AppColors.of(context).primary.withAlpha(160);
     }
-    return AppColors.primary.withAlpha(160);
+    return AppColors.of(context).primary.withAlpha(160);
   }
 }

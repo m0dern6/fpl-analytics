@@ -26,10 +26,10 @@ class FixtureDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.of(context).background,
       appBar: AppBar(
         title: Text(fixture.event != null ? 'Gameweek ${fixture.event}' : 'Fixture'),
-        backgroundColor: AppColors.secondary,
+        backgroundColor: AppColors.of(context).secondary,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -37,13 +37,13 @@ class FixtureDetailScreen extends StatelessWidget {
           children: [
             _buildMatchCard(context),
             const SizedBox(height: 16),
-            _buildDetailsCard(),
+            _buildDetailsCard(context),
             if (fixture.finished && fixture.stats.isNotEmpty) ...[
               const SizedBox(height: 16),
               _buildMatchEventsCard(context),
             ],
             const SizedBox(height: 16),
-            _buildDifficultyCard(),
+            _buildDifficultyCard(context),
           ],
         ),
       ),
@@ -61,14 +61,14 @@ class FixtureDetailScreen extends StatelessWidget {
               margin: const EdgeInsets.only(bottom: 16),
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
               decoration: BoxDecoration(
-                color: AppColors.primary.withAlpha(24),
+                color: AppColors.of(context).primary.withAlpha(24),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: AppColors.primary.withAlpha(80)),
+                border: Border.all(color: AppColors.of(context).primary.withAlpha(80)),
               ),
               child: Text(
                 'Gameweek ${fixture.event}',
-                style: const TextStyle(
-                  color: AppColors.primary,
+                style: TextStyle(
+                  color: AppColors.of(context).primary,
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
                 ),
@@ -76,7 +76,7 @@ class FixtureDetailScreen extends StatelessWidget {
             ),
           Row(
             children: [
-              Expanded(child: _teamColumn(homeTeam, isHome: true)),
+              Expanded(child: _teamColumn(context, homeTeam, isHome: true)),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: fixture.hasResult
@@ -84,24 +84,24 @@ class FixtureDetailScreen extends StatelessWidget {
                         children: [
                           Text(
                             '${fixture.homeTeamScore}',
-                            style: const TextStyle(
-                              color: AppColors.textPrimary,
+                            style: TextStyle(
+                              color: AppColors.of(context).textPrimary,
                               fontSize: 42,
                               fontWeight: FontWeight.w900,
                             ),
                           ),
-                          const Text(
+                          Text(
                             '–',
                             style: TextStyle(
-                              color: AppColors.textSecondary,
+                              color: AppColors.of(context).textSecondary,
                               fontSize: 20,
                               fontWeight: FontWeight.w300,
                             ),
                           ),
                           Text(
                             '${fixture.awayTeamScore}',
-                            style: const TextStyle(
-                              color: AppColors.textPrimary,
+                            style: TextStyle(
+                              color: AppColors.of(context).textPrimary,
                               fontSize: 42,
                               fontWeight: FontWeight.w900,
                             ),
@@ -110,10 +110,10 @@ class FixtureDetailScreen extends StatelessWidget {
                       )
                     : Column(
                         children: [
-                          const Text(
+                          Text(
                             'VS',
                             style: TextStyle(
-                              color: AppColors.textSecondary,
+                              color: AppColors.of(context).textSecondary,
                               fontSize: 18,
                               fontWeight: FontWeight.w700,
                               letterSpacing: 2,
@@ -123,8 +123,8 @@ class FixtureDetailScreen extends StatelessWidget {
                             const SizedBox(height: 6),
                             Text(
                               _extractTime(fixture.kickoffTime!),
-                              style: const TextStyle(
-                                color: AppColors.primary,
+                              style: TextStyle(
+                                color: AppColors.of(context).primary,
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700,
                               ),
@@ -133,7 +133,7 @@ class FixtureDetailScreen extends StatelessWidget {
                         ],
                       ),
               ),
-              Expanded(child: _teamColumn(awayTeam, isHome: false)),
+              Expanded(child: _teamColumn(context, awayTeam, isHome: false)),
             ],
           ).animate().fadeIn(duration: 400.ms),
           if (fixture.finished) ...[
@@ -141,13 +141,13 @@ class FixtureDetailScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
               decoration: BoxDecoration(
-                color: AppColors.textSecondary.withAlpha(20),
+                color: AppColors.of(context).textSecondary.withAlpha(20),
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: const Text(
+              child: Text(
                 'Full Time',
                 style: TextStyle(
-                  color: AppColors.textSecondary,
+                  color: AppColors.of(context).textSecondary,
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                 ),
@@ -158,9 +158,9 @@ class FixtureDetailScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
               decoration: BoxDecoration(
-                color: AppColors.primary.withAlpha(24),
+                color: AppColors.of(context).primary.withAlpha(24),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: AppColors.primary.withAlpha(80)),
+                border: Border.all(color: AppColors.of(context).primary.withAlpha(80)),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -168,16 +168,16 @@ class FixtureDetailScreen extends StatelessWidget {
                   Container(
                     width: 8,
                     height: 8,
-                    decoration: const BoxDecoration(
-                      color: AppColors.primary,
+                    decoration: BoxDecoration(
+                      color: AppColors.of(context).primary,
                       shape: BoxShape.circle,
                     ),
                   ),
                   const SizedBox(width: 6),
-                  const Text(
+                  Text(
                     'Live',
                     style: TextStyle(
-                      color: AppColors.primary,
+                      color: AppColors.of(context).primary,
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                     ),
@@ -191,7 +191,7 @@ class FixtureDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _teamColumn(Team? team, {required bool isHome}) {
+  Widget _teamColumn(BuildContext context, Team? team, {required bool isHome}) {
     return Column(
       children: [
         CachedNetworkImage(
@@ -203,23 +203,23 @@ class FixtureDetailScreen extends StatelessWidget {
             width: 64,
             height: 64,
             decoration: BoxDecoration(
-              color: AppColors.cardMedium,
+              color: AppColors.of(context).cardMedium,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: const Icon(Icons.shield, color: AppColors.textSecondary, size: 32),
+            child: Icon(Icons.shield, color: AppColors.of(context).textSecondary, size: 32),
           ),
           errorWidget: (_, __, ___) => Container(
             width: 64,
             height: 64,
             decoration: BoxDecoration(
-              color: AppColors.cardMedium,
+              color: AppColors.of(context).cardMedium,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Center(
               child: Text(
                 team?.shortName ?? '?',
-                style: const TextStyle(
-                  color: AppColors.primary,
+                style: TextStyle(
+                  color: AppColors.of(context).primary,
                   fontWeight: FontWeight.w700,
                   fontSize: 14,
                 ),
@@ -230,8 +230,8 @@ class FixtureDetailScreen extends StatelessWidget {
         const SizedBox(height: 10),
         Text(
           team?.shortName ?? '?',
-          style: const TextStyle(
-            color: AppColors.textPrimary,
+          style: TextStyle(
+            color: AppColors.of(context).textPrimary,
             fontSize: 16,
             fontWeight: FontWeight.w700,
           ),
@@ -239,7 +239,7 @@ class FixtureDetailScreen extends StatelessWidget {
         ),
         Text(
           team?.name ?? '',
-          style: const TextStyle(color: AppColors.textSecondary, fontSize: 10),
+          style: TextStyle(color: AppColors.of(context).textSecondary, fontSize: 10),
           textAlign: TextAlign.center,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
@@ -249,19 +249,19 @@ class FixtureDetailScreen extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
           decoration: BoxDecoration(
             color: isHome
-                ? AppColors.primary.withAlpha(24)
-                : AppColors.accent.withAlpha(24),
+                ? AppColors.of(context).primary.withAlpha(24)
+                : AppColors.of(context).accent.withAlpha(24),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: isHome
-                  ? AppColors.primary.withAlpha(80)
-                  : AppColors.accent.withAlpha(80),
+                  ? AppColors.of(context).primary.withAlpha(80)
+                  : AppColors.of(context).accent.withAlpha(80),
             ),
           ),
           child: Text(
             isHome ? 'Home' : 'Away',
             style: TextStyle(
-              color: isHome ? AppColors.primary : AppColors.accent,
+              color: isHome ? AppColors.of(context).primary : AppColors.of(context).accent,
               fontSize: 11,
               fontWeight: FontWeight.w600,
             ),
@@ -271,30 +271,30 @@ class FixtureDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailsCard() {
+  Widget _buildDetailsCard(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: AppTheme.gradientCard(),
+      decoration: AppTheme.gradientCard(context: context, ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Match Details',
             style: TextStyle(
-              color: AppColors.textPrimary,
+              color: AppColors.of(context).textPrimary,
               fontSize: 15,
               fontWeight: FontWeight.w700,
             ),
           ),
           const SizedBox(height: 14),
           if (fixture.kickoffTime != null) ...[
-            _detailRow(
+            _detailRow(context, 
               Icons.calendar_today_rounded,
               'Date',
               formatDateTime(fixture.kickoffTime),
             ),
             const SizedBox(height: 10),
-            _detailRow(
+            _detailRow(context, 
               Icons.access_time_rounded,
               'Kick-off',
               _extractTime(fixture.kickoffTime!),
@@ -302,14 +302,14 @@ class FixtureDetailScreen extends StatelessWidget {
             const SizedBox(height: 10),
           ],
           if (fixture.event != null)
-            _detailRow(
+            _detailRow(context, 
               Icons.sports_soccer_rounded,
               'Gameweek',
               'GW${fixture.event}',
             ),
           if (fixture.finished && fixture.minutes != null) ...[
             const SizedBox(height: 10),
-            _detailRow(
+            _detailRow(context, 
               Icons.timer_rounded,
               'Minutes Played',
               '${fixture.minutes}\'',
@@ -320,27 +320,27 @@ class FixtureDetailScreen extends StatelessWidget {
     ).animate().fadeIn(delay: 100.ms);
   }
 
-  Widget _detailRow(IconData icon, String label, String value) {
+  Widget _detailRow(BuildContext context, IconData icon, String label, String value) {
     return Row(
       children: [
         Container(
           padding: const EdgeInsets.all(7),
           decoration: BoxDecoration(
-            color: AppColors.primary.withAlpha(18),
+            color: AppColors.of(context).primary.withAlpha(18),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(icon, color: AppColors.primary, size: 14),
+          child: Icon(icon, color: AppColors.of(context).primary, size: 14),
         ),
         const SizedBox(width: 12),
         Text(
           label,
-          style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
+          style: TextStyle(color: AppColors.of(context).textSecondary, fontSize: 13),
         ),
         const Spacer(),
         Text(
           value,
-          style: const TextStyle(
-            color: AppColors.textPrimary,
+          style: TextStyle(
+            color: AppColors.of(context).textPrimary,
             fontSize: 13,
             fontWeight: FontWeight.w600,
           ),
@@ -356,14 +356,14 @@ class FixtureDetailScreen extends StatelessWidget {
       builder: (context, provider, _) {
         return Container(
           padding: const EdgeInsets.all(16),
-          decoration: AppTheme.gradientCard(),
+          decoration: AppTheme.gradientCard(context: context, ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'Match Events',
                 style: TextStyle(
-                  color: AppColors.textPrimary,
+                  color: AppColors.of(context).textPrimary,
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
                 ),
@@ -416,7 +416,7 @@ class FixtureDetailScreen extends StatelessWidget {
         ),
         ...allEntries.map((entry) =>
             _buildPlayerEventRow(context, provider, entry, info)),
-        const Divider(color: AppColors.divider, height: 16),
+        Divider(color: AppColors.of(context).divider, height: 16),
       ],
     );
   }
@@ -431,7 +431,7 @@ class FixtureDetailScreen extends StatelessWidget {
     final teamName = entry.isHome
         ? (homeTeam?.shortName ?? 'H')
         : (awayTeam?.shortName ?? 'A');
-    final teamColor = entry.isHome ? AppColors.primary : AppColors.accent;
+    final teamColor = entry.isHome ? AppColors.of(context).primary : AppColors.of(context).accent;
 
     return InkWell(
       onTap: player != null
@@ -451,7 +451,7 @@ class FixtureDetailScreen extends StatelessWidget {
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: AppColors.cardMedium,
+                color: AppColors.of(context).cardMedium,
                 shape: BoxShape.circle,
                 border: Border.all(color: teamColor.withAlpha(100)),
               ),
@@ -461,20 +461,20 @@ class FixtureDetailScreen extends StatelessWidget {
                       imageUrl: player.photoUrl,
                       fit: BoxFit.cover,
                       alignment: Alignment.topCenter,
-                      placeholder: (_, __) => const Icon(
+                      placeholder: (_, __) => Icon(
                         Icons.person,
-                        color: AppColors.textSecondary,
+                        color: AppColors.of(context).textSecondary,
                         size: 18,
                       ),
-                      errorWidget: (_, __, ___) => const Icon(
+                      errorWidget: (_, __, ___) => Icon(
                         Icons.person,
-                        color: AppColors.textSecondary,
+                        color: AppColors.of(context).textSecondary,
                         size: 18,
                       ),
                     )
-                  : const Icon(
+                  : Icon(
                       Icons.person,
-                      color: AppColors.textSecondary,
+                      color: AppColors.of(context).textSecondary,
                       size: 18,
                     ),
             ),
@@ -485,8 +485,8 @@ class FixtureDetailScreen extends StatelessWidget {
                 children: [
                   Text(
                     player?.webName ?? 'Player #${entry.stat.element}',
-                    style: const TextStyle(
-                      color: AppColors.textPrimary,
+                    style: TextStyle(
+                      color: AppColors.of(context).textPrimary,
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                     ),
@@ -528,14 +528,14 @@ class FixtureDetailScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                 decoration: BoxDecoration(
-                  color: AppColors.warning.withAlpha(24),
+                  color: AppColors.of(context).warning.withAlpha(24),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: AppColors.warning.withAlpha(80)),
+                  border: Border.all(color: AppColors.of(context).warning.withAlpha(80)),
                 ),
                 child: Text(
                   '${entry.stat.value * info.pointsEach! > 0 ? '+' : ''}${entry.stat.value * info.pointsEach!} pts',
-                  style: const TextStyle(
-                    color: AppColors.warning,
+                  style: TextStyle(
+                    color: AppColors.of(context).warning,
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
                   ),
@@ -559,21 +559,21 @@ class FixtureDetailScreen extends StatelessWidget {
         return _StatMeta(
           label: 'Goals Scored',
           icon: Icons.sports_soccer_rounded,
-          color: AppColors.primary,
+          color: AppColors.of(context).primary,
           pointsEach: 4, // approximate (varies by position)
         );
       case 'assists':
         return _StatMeta(
           label: 'Assists',
           icon: Icons.sports_rounded,
-          color: AppColors.accent,
+          color: AppColors.of(context).accent,
           pointsEach: 3,
         );
       case 'own_goals':
         return _StatMeta(
           label: 'Own Goals',
           icon: Icons.sports_soccer_outlined,
-          color: AppColors.error,
+          color: AppColors.of(context).error,
           pointsEach: -2,
         );
       case 'penalties_saved':
@@ -587,21 +587,21 @@ class FixtureDetailScreen extends StatelessWidget {
         return _StatMeta(
           label: 'Penalties Missed',
           icon: Icons.block_rounded,
-          color: AppColors.error,
+          color: AppColors.of(context).error,
           pointsEach: -2,
         );
       case 'yellow_cards':
         return _StatMeta(
           label: 'Yellow Cards',
           icon: Icons.square_rounded,
-          color: AppColors.warning,
+          color: AppColors.of(context).warning,
           pointsEach: -1,
         );
       case 'red_cards':
         return _StatMeta(
           label: 'Red Cards',
           icon: Icons.square_rounded,
-          color: AppColors.error,
+          color: AppColors.of(context).error,
           pointsEach: -3,
         );
       case 'saves':
@@ -622,7 +622,7 @@ class FixtureDetailScreen extends StatelessWidget {
         return _StatMeta(
           label: 'Bonus Point System',
           icon: Icons.bar_chart_rounded,
-          color: AppColors.textSecondary,
+          color: AppColors.of(context).textSecondary,
           pointsEach: null,
         );
       default:
@@ -630,17 +630,17 @@ class FixtureDetailScreen extends StatelessWidget {
     }
   }
 
-  Widget _buildDifficultyCard() {
+  Widget _buildDifficultyCard(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: AppTheme.gradientCard(),
+      decoration: AppTheme.gradientCard(context: context, ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Fixture Difficulty',
             style: TextStyle(
-              color: AppColors.textPrimary,
+              color: AppColors.of(context).textPrimary,
               fontSize: 15,
               fontWeight: FontWeight.w700,
             ),
@@ -649,7 +649,7 @@ class FixtureDetailScreen extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: _difficultyRow(
+                child: _difficultyRow(context, 
                   homeTeam?.shortName ?? 'Home',
                   fixture.teamHDifficulty,
                   isHome: true,
@@ -657,7 +657,7 @@ class FixtureDetailScreen extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: _difficultyRow(
+                child: _difficultyRow(context, 
                   awayTeam?.shortName ?? 'Away',
                   fixture.teamADifficulty,
                   isHome: false,
@@ -670,19 +670,19 @@ class FixtureDetailScreen extends StatelessWidget {
     ).animate().fadeIn(delay: 200.ms);
   }
 
-  Widget _difficultyRow(String teamName, int difficulty, {required bool isHome}) {
+  Widget _difficultyRow(BuildContext context, String teamName, int difficulty, {required bool isHome}) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.cardMedium,
+        color: AppColors.of(context).cardMedium,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
         children: [
           Text(
             teamName,
-            style: const TextStyle(
-              color: AppColors.textPrimary,
+            style: TextStyle(
+              color: AppColors.of(context).textPrimary,
               fontSize: 13,
               fontWeight: FontWeight.w600,
             ),
@@ -690,15 +690,15 @@ class FixtureDetailScreen extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             isHome ? 'Home' : 'Away',
-            style: const TextStyle(color: AppColors.textSecondary, fontSize: 10),
+            style: TextStyle(color: AppColors.of(context).textSecondary, fontSize: 10),
           ),
           const SizedBox(height: 8),
           DifficultyBadge(difficulty: difficulty, size: 32),
           const SizedBox(height: 4),
           Text(
             getDifficultyLabel(difficulty),
-            style: const TextStyle(
-              color: AppColors.textSecondary,
+            style: TextStyle(
+              color: AppColors.of(context).textSecondary,
               fontSize: 10,
             ),
           ),

@@ -3,9 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'providers/fpl_provider.dart';
 import 'providers/user_teams_provider.dart';
+import 'providers/theme_provider.dart';
 import 'screens/main_navigation_screen.dart';
 import 'utils/app_theme.dart';
-import 'utils/constants.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,12 +13,6 @@ void main() {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
-  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-    statusBarColor: Colors.transparent,
-    statusBarIconBrightness: Brightness.light,
-    systemNavigationBarColor: AppColors.navBar,
-    systemNavigationBarIconBrightness: Brightness.light,
-  ));
   runApp(const FplAnalyticsApp());
 }
 
@@ -31,12 +25,25 @@ class FplAnalyticsApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => FplProvider()),
         ChangeNotifierProvider(create: (_) => UserTeamsProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
       ],
-      child: MaterialApp(
-        title: 'FPL Analytics',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.darkTheme,
-        home: const MainNavigationScreen(),
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, _) {
+          final isDark = themeProvider.isDark;
+          SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+            statusBarColor: Colors.transparent,
+            statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+            systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+          ));
+          return MaterialApp(
+            title: 'FPL Analytics',
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: themeProvider.themeMode,
+            home: const MainNavigationScreen(),
+          );
+        },
       ),
     );
   }

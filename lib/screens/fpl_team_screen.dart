@@ -127,12 +127,12 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.cardDark,
+        backgroundColor: AppColors.of(context).cardDark,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-        title: const Text(
+        title: Text(
           'Change Team ID',
           style: TextStyle(
-            color: AppColors.textPrimary,
+            color: AppColors.of(context).textPrimary,
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -141,9 +141,9 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
+              Text(
                 'Enter your team ID from:\nfantasy.premierleague.com/entry/{id}/...',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                style: TextStyle(color: AppColors.of(context).textSecondary, fontSize: 12),
               ),
               const SizedBox(height: 14),
               TextFormField(
@@ -151,12 +151,12 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
                 keyboardType: TextInputType.number,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 autofocus: true,
-                style: const TextStyle(color: AppColors.textPrimary),
-                decoration: const InputDecoration(
+                style: TextStyle(color: AppColors.of(context).textPrimary),
+                decoration: InputDecoration(
                   hintText: 'e.g. 1234567',
                   prefixIcon: Icon(
                     Icons.tag_rounded,
-                    color: AppColors.textSecondary,
+                    color: AppColors.of(context).textSecondary,
                     size: 18,
                   ),
                 ),
@@ -175,9 +175,9 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text(
+            child: Text(
               'Cancel',
-              style: TextStyle(color: AppColors.textSecondary),
+              style: TextStyle(color: AppColors.of(context).textSecondary),
             ),
           ),
           TextButton(
@@ -189,10 +189,10 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
                 await _fetchTeam(autoLoad: true);
               }
             },
-            child: const Text(
+            child: Text(
               'Load Team',
               style: TextStyle(
-                color: AppColors.primary,
+                color: AppColors.of(context).primary,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -211,33 +211,33 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.of(context).background,
       appBar: AppBar(
         title: const Text('My FPL Team'),
-        backgroundColor: AppColors.secondary,
+        backgroundColor: AppColors.of(context).secondary,
         actions: [
           if (_hasTeamLoaded && _hiddenLeagues.isNotEmpty)
             IconButton(
-              icon: const Icon(
+              icon: Icon(
                 Icons.visibility_rounded,
-                color: AppColors.textSecondary,
+                color: AppColors.of(context).textSecondary,
               ),
               onPressed: _unhideLeagues,
               tooltip: 'Restore hidden leagues',
             ),
           if (_hasTeamLoaded)
             IconButton(
-              icon: const Icon(
+              icon: Icon(
                 Icons.edit_rounded,
-                color: AppColors.textSecondary,
+                color: AppColors.of(context).textSecondary,
               ),
               onPressed: _showEditDialog,
             ),
           if (_hasTeamLoaded)
             IconButton(
-              icon: const Icon(
+              icon: Icon(
                 Icons.refresh_rounded,
-                color: AppColors.textSecondary,
+                color: AppColors.of(context).textSecondary,
               ),
               onPressed: () => _fetchTeam(autoLoad: true),
             ),
@@ -249,8 +249,8 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
 
   Widget _buildBody() {
     if (_loading)
-      return const Center(
-        child: CircularProgressIndicator(color: AppColors.primary),
+      return Center(
+        child: CircularProgressIndicator(color: AppColors.of(context).primary),
       );
     if (!_hasTeamLoaded) return _buildInitialForm();
     return _buildTeamView();
@@ -275,7 +275,7 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
   Widget _buildFormCard() {
     return Container(
       padding: const EdgeInsets.all(20),
-      decoration: AppTheme.gradientCard(),
+      decoration: AppTheme.gradientCard(context: context, ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -284,12 +284,12 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withAlpha(24),
+                  color: AppColors.of(context).primary.withAlpha(24),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.manage_accounts_rounded,
-                  color: AppColors.primary,
+                  color: AppColors.of(context).primary,
                   size: 22,
                 ),
               ),
@@ -298,7 +298,7 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
                 child: Text(
                   'Look up your FPL team',
                   style: TextStyle(
-                    color: AppColors.textPrimary,
+                    color: AppColors.of(context).textPrimary,
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
                   ),
@@ -316,12 +316,12 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
                     controller: _controller,
                     keyboardType: TextInputType.number,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    style: const TextStyle(color: AppColors.textPrimary),
-                    decoration: const InputDecoration(
+                    style: TextStyle(color: AppColors.of(context).textPrimary),
+                    decoration: InputDecoration(
                       hintText: 'e.g. 1234567',
                       prefixIcon: Icon(
                         Icons.tag_rounded,
-                        color: AppColors.textSecondary,
+                        color: AppColors.of(context).textSecondary,
                         size: 18,
                       ),
                     ),
@@ -334,8 +334,8 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
                 const SizedBox(width: 10),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: AppColors.secondary,
+                    backgroundColor: AppColors.of(context).primary,
+                    foregroundColor: AppColors.of(context).secondary,
                     padding: const EdgeInsets.symmetric(
                       horizontal: 20,
                       vertical: 16,
@@ -362,18 +362,18 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.error.withAlpha(20),
+        color: AppColors.of(context).error.withAlpha(20),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.error.withAlpha(80)),
+        border: Border.all(color: AppColors.of(context).error.withAlpha(80)),
       ),
       child: Row(
         children: [
-          const Icon(Icons.error_outline, color: AppColors.error, size: 20),
+          Icon(Icons.error_outline, color: AppColors.of(context).error, size: 20),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
               _error!,
-              style: const TextStyle(color: AppColors.error, fontSize: 13),
+              style: TextStyle(color: AppColors.of(context).error, fontSize: 13),
             ),
           ),
         ],
@@ -417,16 +417,16 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
               children: [
                 Text(
                   gw.name.toUpperCase(),
-                  style: const TextStyle(
-                    color: AppColors.textPrimary,
+                  style: TextStyle(
+                    color: AppColors.of(context).textPrimary,
                     fontSize: 18,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
                 Text(
                   'Deadline: ${formatDateTime(gw.deadlineTime)}',
-                  style: const TextStyle(
-                    color: AppColors.textSecondary,
+                  style: TextStyle(
+                    color: AppColors.of(context).textSecondary,
                     fontSize: 11,
                   ),
                 ),
@@ -436,14 +436,14 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: AppColors.primary.withAlpha(40),
+              color: AppColors.of(context).primary.withAlpha(40),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.primary.withAlpha(100)),
+              border: Border.all(color: AppColors.of(context).primary.withAlpha(100)),
             ),
             child: Text(
               gw.finished ? 'Finished' : (gw.isCurrent ? 'Live' : 'Upcoming'),
-              style: const TextStyle(
-                color: AppColors.primary,
+              style: TextStyle(
+                color: AppColors.of(context).primary,
                 fontSize: 11,
                 fontWeight: FontWeight.w800,
               ),
@@ -480,7 +480,7 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: AppTheme.gradientCard(),
+        decoration: AppTheme.gradientCard(context: context, ),
         child: Column(
           children: [
             Row(
@@ -488,16 +488,16 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
               children: [
                 Text(
                   teamName.toUpperCase(),
-                  style: const TextStyle(
-                    color: AppColors.textPrimary,
+                  style: TextStyle(
+                    color: AppColors.of(context).textPrimary,
                     fontSize: 14,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 1.2,
                   ),
                 ),
-                const Icon(
+                Icon(
                   Icons.arrow_forward_ios_rounded,
-                  color: AppColors.textSecondary,
+                  color: AppColors.of(context).textSecondary,
                   size: 14,
                 ),
               ],
@@ -511,13 +511,13 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
                       _summaryMiniStat(
                         'TOTAL',
                         '$overallPoints',
-                        AppColors.primary,
+                        AppColors.of(context).primary,
                       ),
                       const SizedBox(height: 10),
                       _summaryMiniStat(
                         'RANK',
                         overallRank != null ? _formatRank(overallRank) : '–',
-                        AppColors.accent,
+                        AppColors.of(context).accent,
                       ),
                     ],
                   ),
@@ -586,13 +586,13 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
                       _summaryMiniStat(
                         'AVG',
                         '$avgScore',
-                        AppColors.textPrimary,
+                        AppColors.of(context).textPrimary,
                       ),
                       const SizedBox(height: 10),
                       _summaryMiniStat(
                         'HIGH',
                         '$highScore',
-                        AppColors.textPrimary,
+                        AppColors.of(context).textPrimary,
                       ),
                     ],
                   ),
@@ -600,10 +600,10 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
               ],
             ),
             const SizedBox(height: 12),
-            const Text(
+            Text(
               'Click to view pitch',
               style: TextStyle(
-                color: AppColors.textSecondary,
+                color: AppColors.of(context).textSecondary,
                 fontSize: 10,
                 fontStyle: FontStyle.italic,
               ),
@@ -628,9 +628,9 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
             if (_hiddenLeagues.isNotEmpty)
               TextButton(
                 onPressed: _unhideLeagues,
-                child: const Text(
+                child: Text(
                   'Unhide all',
-                  style: TextStyle(color: AppColors.primary, fontSize: 11),
+                  style: TextStyle(color: AppColors.of(context).primary, fontSize: 11),
                 ),
               ),
           ],
@@ -658,12 +658,12 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
             );
             rankColor = Colors.red;
           } else {
-            rankIcon = const Icon(
+            rankIcon = Icon(
               Icons.remove_rounded,
-              color: AppColors.textSecondary,
+              color: AppColors.of(context).textSecondary,
               size: 14,
             );
-            rankColor = AppColors.textSecondary;
+            rankColor = AppColors.of(context).textSecondary;
           }
 
           return Dismissible(
@@ -674,12 +674,12 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
               padding: const EdgeInsets.only(right: 20),
               margin: const EdgeInsets.only(bottom: 10),
               decoration: BoxDecoration(
-                color: AppColors.error.withAlpha(40),
+                color: AppColors.of(context).error.withAlpha(40),
                 borderRadius: BorderRadius.circular(14),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.visibility_off_rounded,
-                color: AppColors.error,
+                color: AppColors.of(context).error,
               ),
             ),
             onDismissed: (_) => _hideLeague(id),
@@ -700,14 +700,14 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
               child: Container(
                 margin: const EdgeInsets.only(bottom: 10),
                 padding: const EdgeInsets.all(14),
-                decoration: AppTheme.gradientCard(),
+                decoration: AppTheme.gradientCard(context: context, ),
                 child: Row(
                   children: [
                     Expanded(
                       child: Text(
                         l['name'] as String? ?? 'League',
-                        style: const TextStyle(
-                          color: AppColors.textPrimary,
+                        style: TextStyle(
+                          color: AppColors.of(context).textPrimary,
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
                         ),
@@ -721,8 +721,8 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
                       children: [
                         Text(
                           formatNumber(rank),
-                          style: const TextStyle(
-                            color: AppColors.textPrimary,
+                          style: TextStyle(
+                            color: AppColors.of(context).textPrimary,
                             fontSize: 15,
                             fontWeight: FontWeight.w800,
                           ),
@@ -767,8 +767,8 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
         ),
         Text(
           label,
-          style: const TextStyle(
-            color: AppColors.textSecondary,
+          style: TextStyle(
+            color: AppColors.of(context).textSecondary,
             fontSize: 8,
             fontWeight: FontWeight.w700,
             letterSpacing: 0.5,

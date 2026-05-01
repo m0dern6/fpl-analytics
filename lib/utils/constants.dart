@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 class ApiConstants {
   static const String baseUrl = 'https://fantasy.premierleague.com/api';
-  static const String bootstrapStatic = '$baseUrl/bootstrap-static/';
-  static const String fixtures = '$baseUrl/fixtures/';
+  static const String bootstrapStatic = '${baseUrl}/bootstrap-static/';
+  static const String fixtures = '${baseUrl}/fixtures/';
   static String fixturesForGw(int gw) => '$baseUrl/fixtures/?event=$gw';
   static String elementSummary(int id) => '$baseUrl/element-summary/$id/';
   static String liveGw(int gw) => '$baseUrl/event/$gw/live/';
@@ -40,20 +40,20 @@ class PositionConstants {
     4: 'Forward',
   };
   static const Map<int, Color> positionColors = {
-    1: Color(0xFF34D399), // emerald – GK
-    2: Color(0xFF60A5FA), // sky blue – DEF
-    3: Color(0xFFFBBF24), // amber – MID
-    4: Color(0xFFF97316), // orange – FWD
+    1: Color(0xFF34D399),
+    2: Color(0xFF60A5FA),
+    3: Color(0xFFFBBF24),
+    4: Color(0xFFF97316),
   };
 }
 
 class DifficultyConstants {
   static const Map<int, Color> colors = {
-    1: Color(0xFF34D399), // easy
-    2: Color(0xFF86EFAC), // fairly easy
-    3: Color(0xFFFBBF24), // medium
-    4: Color(0xFFFB923C), // hard
-    5: Color(0xFFF87171), // very hard
+    1: Color(0xFF34D399),
+    2: Color(0xFF86EFAC),
+    3: Color(0xFFFBBF24),
+    4: Color(0xFFFB923C),
+    5: Color(0xFFF87171),
   };
   static const Map<int, String> labels = {
     1: 'Very Easy',
@@ -65,30 +65,73 @@ class DifficultyConstants {
 }
 
 class AppColors {
-  // Primary action – vibrant emerald
-  static const Color primary = Color(0xFF00E5A0);
-  // AppBar / deep surface
-  static const Color secondary = Color(0xFF0C0720);
-  // Page background
-  static const Color background = Color(0xFF070C1A);
-  // Card / surface level 1
-  static const Color cardDark = Color(0xFF0F1828);
-  // Card / surface level 2 (elevated)
-  static const Color cardMedium = Color(0xFF172238);
-  // Accent – soft indigo
-  static const Color accent = Color(0xFF7B87FA);
-  // Warning – warm amber
-  static const Color warning = Color(0xFFFBBF24);
-  // Error – soft coral
-  static const Color error = Color(0xFFF87171);
-  // Text
-  static const Color textPrimary = Color(0xFFEDF2FF);
-  static const Color textSecondary = Color(0xFF7A8BAA);
-  // Divider / border
-  static const Color divider = Color(0xFF182540);
-  // Nav bar background
-  static const Color navBar = Color(0xFF090F1F);
-  // Pitch
-  static const Color pitchGreen = Color(0xFF0A3318);
-  static const Color pitchGreenDark = Color(0xFF06200F);
+  final Color primary;
+  final Color secondary;
+  final Color background;
+  final Color cardDark;
+  final Color cardMedium;
+  final Color accent;
+  final Color warning;
+  final Color error;
+  final Color textPrimary;
+  final Color textSecondary;
+  final Color divider;
+  final Color navBar;
+  final Color pitchGreen;
+  final Color pitchGreenDark;
+
+  const AppColors._({
+    required this.primary,
+    required this.secondary,
+    required this.background,
+    required this.cardDark,
+    required this.cardMedium,
+    required this.accent,
+    required this.warning,
+    required this.error,
+    required this.textPrimary,
+    required this.textSecondary,
+    required this.divider,
+    required this.navBar,
+    required this.pitchGreen,
+    required this.pitchGreenDark,
+  });
+
+  static const dark = AppColors._(
+    primary: Color(0xFF00E5A0),
+    secondary: Color(0xFF0C0720),
+    background: Color(0xFF070C1A),
+    cardDark: Color(0xFF0F1828),
+    cardMedium: Color(0xFF172238),
+    accent: Color(0xFF7B87FA),
+    warning: Color(0xFFFBBF24),
+    error: Color(0xFFF87171),
+    textPrimary: Color(0xFFEDF2FF),
+    textSecondary: Color(0xFF7A8BAA),
+    divider: Color(0xFF182540),
+    navBar: Color(0xFF090F1F),
+    pitchGreen: Color(0xFF0A3318),
+    pitchGreenDark: Color(0xFF06200F),
+  );
+
+  static const light = AppColors._(
+    primary: Color(0xFF00C787),
+    secondary: Color(0xFFFFFFFF),
+    background: Color(0xFFF0F4F8),
+    cardDark: Color(0xFFFFFFFF),
+    cardMedium: Color(0xFFE8EEF5),
+    accent: Color(0xFF5B6FE8),
+    warning: Color(0xFFD97706),
+    error: Color(0xFFDC2626),
+    textPrimary: Color(0xFF0F172A),
+    textSecondary: Color(0xFF64748B),
+    divider: Color(0xFFCBD5E1),
+    navBar: Color(0xFFFFFFFF),
+    pitchGreen: Color(0xFF166534),
+    pitchGreenDark: Color(0xFF14532D),
+  );
+
+  static AppColors of(BuildContext context) {
+    return Theme.of(context).brightness == Brightness.dark ? dark : light;
+  }
 }

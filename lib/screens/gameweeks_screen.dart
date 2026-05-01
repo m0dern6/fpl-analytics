@@ -17,10 +17,10 @@ class GameweeksScreen extends StatelessWidget {
     return Consumer<FplProvider>(
       builder: (context, provider, _) {
         return Scaffold(
-          backgroundColor: AppColors.background,
+          backgroundColor: AppColors.of(context).background,
           appBar: AppBar(
             title: const Text('Gameweeks'),
-            backgroundColor: AppColors.secondary,
+            backgroundColor: AppColors.of(context).secondary,
           ),
           body: _GameweeksList(provider: provider),
         );
@@ -74,8 +74,8 @@ class _GameweeksListState extends State<_GameweeksList> {
     });
 
     return RefreshIndicator(
-      color: AppColors.primary,
-      backgroundColor: AppColors.cardDark,
+      color: AppColors.of(context).primary,
+      backgroundColor: AppColors.of(context).cardDark,
       onRefresh: provider.refresh,
       child: ListView.separated(
         controller: _scrollController,
@@ -121,7 +121,7 @@ class _GameweekCard extends StatelessWidget {
         padding: const EdgeInsets.all(14),
         decoration: isHighlighted
             ? AppTheme.purpleGradient()
-            : AppTheme.gradientCard(),
+            : AppTheme.gradientCard(context: context, ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -134,47 +134,47 @@ class _GameweekCard extends StatelessWidget {
                         gw.name,
                         style: TextStyle(
                           color: isHighlighted
-                              ? AppColors.primary
-                              : AppColors.textPrimary,
+                              ? AppColors.of(context).primary
+                              : AppColors.of(context).textPrimary,
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
                       const SizedBox(width: 8),
-                      _statusBadge(gw),
+                      _statusBadge(context, gw),
                     ],
                   ),
                 ),
                 Text(
                   formatDateShort(gw.deadlineTime),
-                  style: const TextStyle(
-                    color: AppColors.textSecondary,
+                  style: TextStyle(
+                    color: AppColors.of(context).textSecondary,
                     fontSize: 12,
                   ),
                 ),
                 const SizedBox(width: 8),
-                const Icon(
+                Icon(
                   Icons.chevron_right,
-                  color: AppColors.textSecondary,
+                  color: AppColors.of(context).textSecondary,
                   size: 18,
                 ),
               ],
             ),
             if (gw.finished || gw.isCurrent) ...[
               const SizedBox(height: 10),
-              const Divider(height: 1, color: AppColors.divider),
+              Divider(height: 1, color: AppColors.of(context).divider),
               const SizedBox(height: 10),
               Row(
                 children: [
                   if (gw.averageEntryScore != null)
-                    _stat('Avg Score', '${gw.averageEntryScore} pts'),
+                    _stat(context, 'Avg Score', '${gw.averageEntryScore} pts'),
                   if (gw.highestScore != null) ...[
                     const SizedBox(width: 20),
-                    _stat('Highest', '${gw.highestScore} pts'),
+                    _stat(context, 'Highest', '${gw.highestScore} pts'),
                   ],
                   if (gw.transfersMade > 0) ...[
                     const SizedBox(width: 20),
-                    _stat('Transfers', _formatCount(gw.transfersMade)),
+                    _stat(context, 'Transfers', _formatCount(gw.transfersMade)),
                   ],
                 ],
               ),
@@ -182,12 +182,12 @@ class _GameweekCard extends StatelessWidget {
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    const Icon(Icons.star, color: AppColors.warning, size: 14),
+                    Icon(Icons.star, color: AppColors.of(context).warning, size: 14),
                     const SizedBox(width: 4),
                     Text(
                       'Top: ${topElementPlayer.webName}',
-                      style: const TextStyle(
-                        color: AppColors.textSecondary,
+                      style: TextStyle(
+                        color: AppColors.of(context).textSecondary,
                         fontSize: 12,
                       ),
                     ),
@@ -198,16 +198,16 @@ class _GameweekCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.swap_horiz,
-                      color: AppColors.primary,
+                      color: AppColors.of(context).primary,
                       size: 14,
                     ),
                     const SizedBox(width: 4),
                     Text(
                       'Most Transferred: ${mostTransferredPlayer.webName}',
-                      style: const TextStyle(
-                        color: AppColors.textSecondary,
+                      style: TextStyle(
+                        color: AppColors.of(context).textSecondary,
                         fontSize: 12,
                       ),
                     ),
@@ -221,20 +221,20 @@ class _GameweekCard extends StatelessWidget {
     );
   }
 
-  Widget _statusBadge(Gameweek gw) {
+  Widget _statusBadge(BuildContext context, Gameweek gw) {
     Color color;
     String label;
     if (gw.isCurrent) {
-      color = AppColors.primary;
+      color = AppColors.of(context).primary;
       label = 'LIVE';
     } else if (gw.isNext) {
-      color = AppColors.accent;
+      color = AppColors.of(context).accent;
       label = 'NEXT';
     } else if (gw.finished) {
-      color = AppColors.textSecondary;
+      color = AppColors.of(context).textSecondary;
       label = 'DONE';
     } else {
-      color = AppColors.warning;
+      color = AppColors.of(context).warning;
       label = 'UPCOMING';
     }
     return Container(
@@ -255,18 +255,18 @@ class _GameweekCard extends StatelessWidget {
     );
   }
 
-  Widget _stat(String label, String value) {
+  Widget _stat(BuildContext context, String label, String value) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: const TextStyle(color: AppColors.textSecondary, fontSize: 10),
+          style: TextStyle(color: AppColors.of(context).textSecondary, fontSize: 10),
         ),
         Text(
           value,
-          style: const TextStyle(
-            color: AppColors.textPrimary,
+          style: TextStyle(
+            color: AppColors.of(context).textPrimary,
             fontSize: 13,
             fontWeight: FontWeight.w600,
           ),

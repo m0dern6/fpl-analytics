@@ -24,21 +24,21 @@ class _BestTeamScreenState extends State<BestTeamScreen> {
     return Consumer<FplProvider>(
       builder: (context, provider, _) {
         return Scaffold(
-          backgroundColor: AppColors.background,
+          backgroundColor: AppColors.of(context).background,
           appBar: AppBar(
             title: const Text('Best Team'),
-            backgroundColor: AppColors.secondary,
+            backgroundColor: AppColors.of(context).secondary,
             actions: [
               PopupMenuButton<String>(
-                icon: const Icon(Icons.tune, color: AppColors.textPrimary),
-                color: AppColors.cardDark,
+                icon: Icon(Icons.tune, color: AppColors.of(context).textPrimary),
+                color: AppColors.of(context).cardDark,
                 onSelected: (f) => setState(() => _formation = f),
                 itemBuilder: (_) => ['4-3-3', '4-4-2', '3-5-2', '5-3-2', '3-4-3']
                     .map((f) => PopupMenuItem(
                           value: f,
                           child: Text(
                             f,
-                            style: TextStyle(color: _formation == f ? AppColors.primary : AppColors.textPrimary),
+                            style: TextStyle(color: _formation == f ? AppColors.of(context).primary : AppColors.of(context).textPrimary),
                           ),
                         ))
                     .toList(),
@@ -55,7 +55,7 @@ class _BestTeamScreenState extends State<BestTeamScreen> {
 
   Widget _buildBody(BuildContext context, FplProvider provider) {
     if (provider.players.isEmpty) {
-      return const Center(child: Text('No data available', style: TextStyle(color: AppColors.textSecondary)));
+      return Center(child: Text('No data available', style: TextStyle(color: AppColors.of(context).textSecondary)));
     }
 
     final bestTeam = provider.getBestTeam();
@@ -107,10 +107,10 @@ class _BestTeamScreenState extends State<BestTeamScreen> {
   Widget _statItem(String label, String value, IconData icon) {
     return Column(
       children: [
-        Icon(icon, color: AppColors.primary, size: 20),
+        Icon(icon, color: AppColors.of(context).primary, size: 20),
         const SizedBox(height: 4),
-        Text(value, style: const TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.w700)),
-        Text(label, style: const TextStyle(color: AppColors.textSecondary, fontSize: 11)),
+        Text(value, style: TextStyle(color: AppColors.of(context).textPrimary, fontSize: 18, fontWeight: FontWeight.w700)),
+        Text(label, style: TextStyle(color: AppColors.of(context).textSecondary, fontSize: 11)),
       ],
     );
   }
@@ -125,7 +125,7 @@ class _BestTeamScreenState extends State<BestTeamScreen> {
           colors: [Color(0xFF1a4a1a), Color(0xFF0d2d0d)],
         ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.primary.withAlpha(51)),
+        border: Border.all(color: AppColors.of(context).primary.withAlpha(51)),
       ),
       child: Column(
         children: [
@@ -183,15 +183,15 @@ class _BestTeamScreenState extends State<BestTeamScreen> {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(12),
-      decoration: AppTheme.gradientCard(),
+      decoration: AppTheme.gradientCard(context: context, ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(Icons.swap_horiz, color: AppColors.textSecondary, size: 16),
+              Icon(Icons.swap_horiz, color: AppColors.of(context).textSecondary, size: 16),
               SizedBox(width: 6),
-              Text('Substitutes', style: TextStyle(color: AppColors.textSecondary, fontSize: 13, fontWeight: FontWeight.w600)),
+              Text('Substitutes', style: TextStyle(color: AppColors.of(context).textSecondary, fontSize: 13, fontWeight: FontWeight.w600)),
             ],
           ),
           const SizedBox(height: 10),
@@ -224,35 +224,35 @@ class _BestTeamScreenState extends State<BestTeamScreen> {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       padding: const EdgeInsets.all(16),
-      decoration: AppTheme.gradientCard(),
+      decoration: AppTheme.gradientCard(context: context, ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(Icons.analytics, color: AppColors.accent, size: 18),
+              Icon(Icons.analytics, color: AppColors.of(context).accent, size: 18),
               SizedBox(width: 8),
-              Text('Smart Selection Algorithm', style: TextStyle(color: AppColors.textPrimary, fontSize: 15, fontWeight: FontWeight.w700)),
+              Text('Smart Selection Algorithm', style: TextStyle(color: AppColors.of(context).textPrimary, fontSize: 15, fontWeight: FontWeight.w700)),
             ],
           ),
           const SizedBox(height: 12),
-          const Text(
+          Text(
             'Players selected using a composite score based on:',
-            style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+            style: TextStyle(color: AppColors.of(context).textSecondary, fontSize: 12),
           ),
           const SizedBox(height: 10),
           Wrap(
             spacing: 8,
             runSpacing: 6,
             children: [
-              _criteriaChip('📈 Recent Form', AppColors.primary),
-              _criteriaChip('⚡ ICT Index', AppColors.warning),
-              _criteriaChip('🎯 Points/Game', AppColors.accent),
+              _criteriaChip('📈 Recent Form', AppColors.of(context).primary),
+              _criteriaChip('⚡ ICT Index', AppColors.of(context).warning),
+              _criteriaChip('🎯 Points/Game', AppColors.of(context).accent),
               _criteriaChip('💰 Value', const Color(0xFF69F0AE)),
               _criteriaChip('🏟 Fixture Difficulty', const Color(0xFFB388FF)),
-              _criteriaChip('🩺 Availability', AppColors.error),
-              _criteriaChip('🔄 Transfer Momentum', AppColors.textSecondary),
-              _criteriaChip('👥 Max 3/Club', AppColors.textSecondary),
+              _criteriaChip('🩺 Availability', AppColors.of(context).error),
+              _criteriaChip('🔄 Transfer Momentum', AppColors.of(context).textSecondary),
+              _criteriaChip('👥 Max 3/Club', AppColors.of(context).textSecondary),
             ],
           ),
         ],
@@ -276,17 +276,17 @@ class _BestTeamScreenState extends State<BestTeamScreen> {
     return Container(
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(16),
-      decoration: AppTheme.gradientCard(),
+      decoration: AppTheme.gradientCard(context: context, ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Chip Advice', style: TextStyle(color: AppColors.textPrimary, fontSize: 15, fontWeight: FontWeight.w700)),
+          Text('Chip Advice', style: TextStyle(color: AppColors.of(context).textPrimary, fontSize: 15, fontWeight: FontWeight.w700)),
           const SizedBox(height: 12),
-          _chipItem('Triple Captain', 'Use on your highest scoring GW captain', Icons.star, AppColors.warning),
+          _chipItem('Triple Captain', 'Use on your highest scoring GW captain', Icons.star, AppColors.of(context).warning),
           const SizedBox(height: 8),
-          _chipItem('Bench Boost', 'Use when all 15 players have good fixtures', Icons.people, AppColors.primary),
+          _chipItem('Bench Boost', 'Use when all 15 players have good fixtures', Icons.people, AppColors.of(context).primary),
           const SizedBox(height: 8),
-          _chipItem('Free Hit', 'Use in a blank or double gameweek', Icons.refresh, AppColors.accent),
+          _chipItem('Free Hit', 'Use in a blank or double gameweek', Icons.refresh, AppColors.of(context).accent),
           const SizedBox(height: 8),
           _chipItem('Wildcard', 'Use to completely rebuild your squad', Icons.shuffle, const Color(0xFFB388FF)),
         ],
@@ -311,7 +311,7 @@ class _BestTeamScreenState extends State<BestTeamScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(name, style: TextStyle(color: color, fontSize: 13, fontWeight: FontWeight.w600)),
-              Text(advice, style: const TextStyle(color: AppColors.textSecondary, fontSize: 11)),
+              Text(advice, style: TextStyle(color: AppColors.of(context).textSecondary, fontSize: 11)),
             ],
           ),
         ),
@@ -338,7 +338,7 @@ class _PitchPlayer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final diffColor = nextFixtureDifficulty != null
-        ? (DifficultyConstants.colors[nextFixtureDifficulty] ?? AppColors.textSecondary)
+        ? (DifficultyConstants.colors[nextFixtureDifficulty] ?? AppColors.of(context).textSecondary)
         : null;
 
     return GestureDetector(
@@ -355,15 +355,15 @@ class _PitchPlayer extends StatelessWidget {
                   height: isSub ? 48 : 56,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: AppColors.cardDark,
+                    color: AppColors.of(context).cardDark,
                     border: Border.all(color: posColor, width: 2),
                   ),
                   clipBehavior: Clip.antiAlias,
                   child: CachedNetworkImage(
                     imageUrl: player.photoUrl,
                     fit: BoxFit.cover,
-                    placeholder: (_, __) => Icon(Icons.person, color: AppColors.textSecondary, size: isSub ? 24 : 28),
-                    errorWidget: (_, __, ___) => Icon(Icons.person, color: AppColors.textSecondary, size: isSub ? 24 : 28),
+                    placeholder: (_, __) => Icon(Icons.person, color: AppColors.of(context).textSecondary, size: isSub ? 24 : 28),
+                    errorWidget: (_, __, ___) => Icon(Icons.person, color: AppColors.of(context).textSecondary, size: isSub ? 24 : 28),
                   ),
                 ),
                 if (diffColor != null)
@@ -376,7 +376,7 @@ class _PitchPlayer extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: diffColor,
                         shape: BoxShape.circle,
-                        border: Border.all(color: AppColors.cardDark, width: 1.5),
+                        border: Border.all(color: AppColors.of(context).cardDark, width: 1.5),
                       ),
                     ),
                   ),
@@ -399,12 +399,12 @@ class _PitchPlayer extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
               decoration: BoxDecoration(
-                color: AppColors.primary.withAlpha(204),
+                color: AppColors.of(context).primary.withAlpha(204),
                 borderRadius: BorderRadius.circular(3),
               ),
               child: Text(
                 player.form,
-                style: const TextStyle(color: AppColors.secondary, fontSize: 10, fontWeight: FontWeight.w800),
+                style: TextStyle(color: AppColors.of(context).secondary, fontSize: 10, fontWeight: FontWeight.w800),
               ),
             ),
           ],

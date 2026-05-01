@@ -36,10 +36,10 @@ class _TeamFixturesScreenState extends State<TeamFixturesScreen> {
         });
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.of(context).background,
       appBar: AppBar(
         title: Text(widget.team.name),
-        backgroundColor: AppColors.secondary,
+        backgroundColor: AppColors.of(context).secondary,
         actions: [
           IconButton(
             tooltip: _showLatestFirst
@@ -79,8 +79,8 @@ class _TeamFixturesScreenState extends State<TeamFixturesScreen> {
                     children: [
                       Text(
                         widget.team.shortName,
-                        style: const TextStyle(
-                          color: AppColors.textPrimary,
+                        style: TextStyle(
+                          color: AppColors.of(context).textPrimary,
                           fontSize: 20,
                           fontWeight: FontWeight.w800,
                         ),
@@ -90,8 +90,8 @@ class _TeamFixturesScreenState extends State<TeamFixturesScreen> {
                         _showLatestFirst
                             ? 'Latest fixtures first'
                             : 'Earliest fixtures first',
-                        style: const TextStyle(
-                          color: AppColors.textSecondary,
+                        style: TextStyle(
+                          color: AppColors.of(context).textSecondary,
                           fontSize: 12,
                         ),
                       ),
@@ -125,7 +125,7 @@ class _TeamFixturesScreenState extends State<TeamFixturesScreen> {
                 ),
                 child: Container(
                   padding: const EdgeInsets.all(14),
-                  decoration: AppTheme.gradientCard(),
+                  decoration: AppTheme.gradientCard(context: context, ),
                   child: Row(
                     children: [
                       Container(
@@ -135,16 +135,16 @@ class _TeamFixturesScreenState extends State<TeamFixturesScreen> {
                         ),
                         decoration: BoxDecoration(
                           color: isHome
-                              ? AppColors.primary.withAlpha(24)
-                              : AppColors.accent.withAlpha(24),
+                              ? AppColors.of(context).primary.withAlpha(24)
+                              : AppColors.of(context).accent.withAlpha(24),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
                           isHome ? 'Home' : 'Away',
                           style: TextStyle(
                             color: isHome
-                                ? AppColors.primary
-                                : AppColors.accent,
+                                ? AppColors.of(context).primary
+                                : AppColors.of(context).accent,
                             fontSize: 10,
                             fontWeight: FontWeight.w700,
                           ),
@@ -170,8 +170,8 @@ class _TeamFixturesScreenState extends State<TeamFixturesScreen> {
                             Expanded(
                               child: Text(
                                 opponent?.name ?? '?',
-                                style: const TextStyle(
-                                  color: AppColors.textPrimary,
+                                style: TextStyle(
+                                  color: AppColors.of(context).textPrimary,
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -187,8 +187,8 @@ class _TeamFixturesScreenState extends State<TeamFixturesScreen> {
                         fixture.kickoffTime != null
                             ? formatDateShort(fixture.kickoffTime)
                             : 'TBD',
-                        style: const TextStyle(
-                          color: AppColors.textSecondary,
+                        style: TextStyle(
+                          color: AppColors.of(context).textSecondary,
                           fontSize: 12,
                         ),
                       ),

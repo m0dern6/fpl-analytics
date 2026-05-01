@@ -24,13 +24,13 @@ class _AiPicksScreenState extends State<AiPicksScreen>
   Map<String, List<Player>>? _result;
 
   static const _tabs = [
-    _TabInfo('Best XI', Icons.star, AppColors.primary, AiPickMode.bestXi),
+    _TabInfo('Best XI', Icons.star, AppColors.of(context).primary, AiPickMode.bestXi),
     _TabInfo('Wildcard', Icons.shuffle, Color(0xFFB388FF), AiPickMode.wildcard),
-    _TabInfo('Free Hit', Icons.refresh, AppColors.accent, AiPickMode.freeHit),
+    _TabInfo('Free Hit', Icons.refresh, AppColors.of(context).accent, AiPickMode.freeHit),
     _TabInfo(
-        'Triple Cap', Icons.star_border, AppColors.warning, AiPickMode.tripleCaptain),
+        'Triple Cap', Icons.star_border, AppColors.of(context).warning, AiPickMode.tripleCaptain),
     _TabInfo(
-        'Bench Boost', Icons.people, AppColors.error, AiPickMode.benchBoost),
+        'Bench Boost', Icons.people, AppColors.of(context).error, AiPickMode.benchBoost),
   ];
 
   @override
@@ -70,19 +70,19 @@ class _AiPicksScreenState extends State<AiPicksScreen>
   Widget build(BuildContext context) {
     return Consumer<FplProvider>(builder: (context, provider, _) {
       return Scaffold(
-        backgroundColor: AppColors.background,
+        backgroundColor: AppColors.of(context).background,
         appBar: AppBar(
-          backgroundColor: AppColors.secondary,
+          backgroundColor: AppColors.of(context).secondary,
           title: Row(
             children: [
               Container(
                 padding: const EdgeInsets.all(7),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withAlpha(24),
+                  color: AppColors.of(context).primary.withAlpha(24),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(Icons.auto_awesome_rounded,
-                    color: AppColors.primary, size: 18),
+                child: Icon(Icons.auto_awesome_rounded,
+                    color: AppColors.of(context).primary, size: 18),
               ),
               const SizedBox(width: 10),
               const Text('AI Smart Picks'),
@@ -108,7 +108,7 @@ class _AiPicksScreenState extends State<AiPicksScreen>
 
   Widget _buildModeSelector() {
     return Container(
-      color: AppColors.secondary,
+      color: AppColors.of(context).secondary,
       child: SizedBox(
         height: 52,
         child: ListView.separated(
@@ -132,7 +132,7 @@ class _AiPicksScreenState extends State<AiPicksScreen>
                 decoration: BoxDecoration(
                   color: isSelected
                       ? tab.color.withAlpha(28)
-                      : AppColors.cardMedium,
+                      : AppColors.of(context).cardMedium,
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(
                     color: isSelected
@@ -147,7 +147,7 @@ class _AiPicksScreenState extends State<AiPicksScreen>
                     Icon(tab.icon,
                         color: isSelected
                             ? tab.color
-                            : AppColors.textSecondary,
+                            : AppColors.of(context).textSecondary,
                         size: 14),
                     const SizedBox(width: 5),
                     Text(
@@ -155,7 +155,7 @@ class _AiPicksScreenState extends State<AiPicksScreen>
                       style: TextStyle(
                         color: isSelected
                             ? tab.color
-                            : AppColors.textSecondary,
+                            : AppColors.of(context).textSecondary,
                         fontSize: 12,
                         fontWeight: isSelected
                             ? FontWeight.w700
@@ -178,9 +178,9 @@ class _AiPicksScreenState extends State<AiPicksScreen>
       return _buildAnalysingView();
     }
     if (_result == null || provider.players.isEmpty) {
-      return const Center(
+      return Center(
           child: Text('No data available',
-              style: TextStyle(color: AppColors.textSecondary)));
+              style: TextStyle(color: AppColors.of(context).textSecondary)));
     }
     return _buildResultView(context, provider, _result!, _computedMode);
   }
@@ -194,29 +194,29 @@ class _AiPicksScreenState extends State<AiPicksScreen>
             width: 72,
             height: 72,
             decoration: BoxDecoration(
-              color: AppColors.primary.withAlpha(18),
+              color: AppColors.of(context).primary.withAlpha(18),
               shape: BoxShape.circle,
               border:
-                  Border.all(color: AppColors.primary.withAlpha(60), width: 1.5),
+                  Border.all(color: AppColors.of(context).primary.withAlpha(60), width: 1.5),
             ),
-            child: const Icon(Icons.auto_awesome_rounded,
-                color: AppColors.primary, size: 36),
+            child: Icon(Icons.auto_awesome_rounded,
+                color: AppColors.of(context).primary, size: 36),
           ),
           const SizedBox(height: 20),
-          const Text(
+          Text(
             'Analysing players…',
             style: TextStyle(
-                color: AppColors.textPrimary,
+                color: AppColors.of(context).textPrimary,
                 fontSize: 17,
                 fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 8),
-          const Padding(
+          Padding(
             padding: EdgeInsets.symmetric(horizontal: 40),
             child: Text(
               'Using form, xG, ICT, fixtures & transfer\ntrends to build the best team.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+              style: TextStyle(color: AppColors.of(context).textSecondary, fontSize: 13),
             ),
           ),
           const SizedBox(height: 28),
@@ -225,8 +225,8 @@ class _AiPicksScreenState extends State<AiPicksScreen>
             child: ClipRRect(
               borderRadius: BorderRadius.circular(4),
               child: const LinearProgressIndicator(
-                color: AppColors.primary,
-                backgroundColor: AppColors.cardMedium,
+                color: AppColors.of(context).primary,
+                backgroundColor: AppColors.of(context).cardMedium,
                 minHeight: 3,
               ),
             ),
@@ -252,8 +252,8 @@ class _AiPicksScreenState extends State<AiPicksScreen>
     final fwds = starting.where((p) => p.elementType == 4).toList();
 
     return RefreshIndicator(
-      color: AppColors.primary,
-      backgroundColor: AppColors.cardDark,
+      color: AppColors.of(context).primary,
+      backgroundColor: AppColors.of(context).cardDark,
       onRefresh: () => _analyse(mode),
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
@@ -298,8 +298,8 @@ class _AiPicksScreenState extends State<AiPicksScreen>
                         fontWeight: FontWeight.w700)),
                 const SizedBox(height: 2),
                 Text(info.desc,
-                    style: const TextStyle(
-                        color: AppColors.textSecondary, fontSize: 11)),
+                    style: TextStyle(
+                        color: AppColors.of(context).textSecondary, fontSize: 11)),
               ],
             ),
           ),
@@ -329,18 +329,18 @@ class _AiPicksScreenState extends State<AiPicksScreen>
   Widget _statItem(String label, String value, IconData icon) {
     return Column(
       children: [
-        Icon(icon, color: AppColors.primary, size: 18),
+        Icon(icon, color: AppColors.of(context).primary, size: 18),
         const SizedBox(height: 3),
         Text(value,
-            style: const TextStyle(
-                color: AppColors.textPrimary,
+            style: TextStyle(
+                color: AppColors.of(context).textPrimary,
                 fontSize: 14,
                 fontWeight: FontWeight.w700),
             maxLines: 1,
             overflow: TextOverflow.ellipsis),
         Text(label,
             style:
-                const TextStyle(color: AppColors.textSecondary, fontSize: 10)),
+                TextStyle(color: AppColors.of(context).textSecondary, fontSize: 10)),
       ],
     );
   }
@@ -364,7 +364,7 @@ class _AiPicksScreenState extends State<AiPicksScreen>
           colors: [Color(0xFF1a4a1a), Color(0xFF0d2d0d)],
         ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.primary.withAlpha(51)),
+        border: Border.all(color: AppColors.of(context).primary.withAlpha(51)),
       ),
       child: Column(
         children: [
@@ -433,17 +433,17 @@ class _AiPicksScreenState extends State<AiPicksScreen>
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
       padding: const EdgeInsets.all(12),
-      decoration: AppTheme.gradientCard(),
+      decoration: AppTheme.gradientCard(context: context, ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(Icons.swap_horiz, color: AppColors.textSecondary, size: 16),
+              Icon(Icons.swap_horiz, color: AppColors.of(context).textSecondary, size: 16),
               SizedBox(width: 6),
               Text('Substitutes',
                   style: TextStyle(
-                      color: AppColors.textSecondary,
+                      color: AppColors.of(context).textSecondary,
                       fontSize: 13,
                       fontWeight: FontWeight.w600)),
             ],
@@ -481,18 +481,18 @@ class _AiPicksScreenState extends State<AiPicksScreen>
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
       padding: const EdgeInsets.all(14),
-      decoration: AppTheme.gradientCard(
+      decoration: AppTheme.gradientCard(context: context, 
           colors: [const Color(0xFF1a2a3a), const Color(0xFF0d1a2a)]),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(Icons.lightbulb_outline, color: AppColors.warning, size: 16),
+              Icon(Icons.lightbulb_outline, color: AppColors.of(context).warning, size: 16),
               SizedBox(width: 6),
               Text('Captain Pick Rationale',
                   style: TextStyle(
-                      color: AppColors.textPrimary,
+                      color: AppColors.of(context).textPrimary,
                       fontSize: 13,
                       fontWeight: FontWeight.w700)),
             ],
@@ -511,7 +511,7 @@ class _AiPicksScreenState extends State<AiPicksScreen>
   Widget _rationaleRow(Player player, String role, FplProvider provider) {
     final diff = provider.getNextFixtureDifficulty(player.teamId);
     final diffColor =
-        DifficultyConstants.colors[diff] ?? AppColors.textSecondary;
+        DifficultyConstants.colors[diff] ?? AppColors.of(context).textSecondary;
     final team = provider.getTeamById(player.teamId);
     return Row(
       children: [
@@ -520,7 +520,7 @@ class _AiPicksScreenState extends State<AiPicksScreen>
           height: 38,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: AppColors.cardMedium,
+            color: AppColors.of(context).cardMedium,
             border: Border.all(
                 color: getPositionColor(player.elementType), width: 1.5),
           ),
@@ -528,10 +528,10 @@ class _AiPicksScreenState extends State<AiPicksScreen>
           child: CachedNetworkImage(
             imageUrl: player.photoUrl,
             fit: BoxFit.cover,
-            placeholder: (_, __) => const Icon(Icons.person,
-                color: AppColors.textSecondary, size: 18),
-            errorWidget: (_, __, ___) => const Icon(Icons.person,
-                color: AppColors.textSecondary, size: 18),
+            placeholder: (_, __) => Icon(Icons.person,
+                color: AppColors.of(context).textSecondary, size: 18),
+            errorWidget: (_, __, ___) => Icon(Icons.person,
+                color: AppColors.of(context).textSecondary, size: 18),
           ),
         ),
         const SizedBox(width: 10),
@@ -540,14 +540,14 @@ class _AiPicksScreenState extends State<AiPicksScreen>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(player.webName,
-                  style: const TextStyle(
-                      color: AppColors.textPrimary,
+                  style: TextStyle(
+                      color: AppColors.of(context).textPrimary,
                       fontSize: 13,
                       fontWeight: FontWeight.w600)),
               Text(
                   '${team?.shortName ?? ''} • Form ${player.form} • ${formatPrice(player.nowCost)}',
-                  style: const TextStyle(
-                      color: AppColors.textSecondary, fontSize: 11)),
+                  style: TextStyle(
+                      color: AppColors.of(context).textSecondary, fontSize: 11)),
             ],
           ),
         ),
@@ -555,8 +555,8 @@ class _AiPicksScreenState extends State<AiPicksScreen>
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Text(role,
-                style: const TextStyle(
-                    color: AppColors.warning,
+                style: TextStyle(
+                    color: AppColors.of(context).warning,
                     fontSize: 11,
                     fontWeight: FontWeight.w600)),
             Row(
@@ -583,25 +583,25 @@ class _AiPicksScreenState extends State<AiPicksScreen>
       BuildContext context, List<Player> players, FplProvider provider) {
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-      decoration: AppTheme.gradientCard(),
+      decoration: AppTheme.gradientCard(context: context, ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
+          Padding(
             padding: EdgeInsets.fromLTRB(14, 12, 14, 8),
             child: Row(
               children: [
-                Icon(Icons.analytics, color: AppColors.accent, size: 16),
+                Icon(Icons.analytics, color: AppColors.of(context).accent, size: 16),
                 SizedBox(width: 6),
                 Text('Player Stats',
                     style: TextStyle(
-                        color: AppColors.textPrimary,
+                        color: AppColors.of(context).textPrimary,
                         fontSize: 13,
                         fontWeight: FontWeight.w700)),
               ],
             ),
           ),
-          const Divider(height: 1, color: AppColors.divider),
+          Divider(height: 1, color: AppColors.of(context).divider),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
             child: Row(
@@ -610,37 +610,37 @@ class _AiPicksScreenState extends State<AiPicksScreen>
                     flex: 3,
                     child: Text('Player',
                         style: TextStyle(
-                            color: AppColors.textSecondary, fontSize: 11))),
+                            color: AppColors.of(context).textSecondary, fontSize: 11))),
                 Expanded(
                     child: Text('Form',
                         style: TextStyle(
-                            color: AppColors.textSecondary, fontSize: 11),
+                            color: AppColors.of(context).textSecondary, fontSize: 11),
                         textAlign: TextAlign.center)),
                 Expanded(
                     child: Text('xG',
                         style: TextStyle(
-                            color: AppColors.textSecondary, fontSize: 11),
+                            color: AppColors.of(context).textSecondary, fontSize: 11),
                         textAlign: TextAlign.center)),
                 Expanded(
                     child: Text('ICT',
                         style: TextStyle(
-                            color: AppColors.textSecondary, fontSize: 11),
+                            color: AppColors.of(context).textSecondary, fontSize: 11),
                         textAlign: TextAlign.center)),
                 Expanded(
                     child: Text('FDR',
                         style: TextStyle(
-                            color: AppColors.textSecondary, fontSize: 11),
+                            color: AppColors.of(context).textSecondary, fontSize: 11),
                         textAlign: TextAlign.center)),
               ],
             ),
           ),
-          const Divider(height: 1, color: AppColors.divider),
+          Divider(height: 1, color: AppColors.of(context).divider),
           ...players.asMap().entries.map((e) {
             final p = e.value;
             final team = provider.getTeamById(p.teamId);
             final diff = provider.getNextFixtureDifficulty(p.teamId);
             final diffColor =
-                DifficultyConstants.colors[diff] ?? AppColors.textSecondary;
+                DifficultyConstants.colors[diff] ?? AppColors.of(context).textSecondary;
             final posColor = getPositionColor(p.elementType);
             return InkWell(
               onTap: () => Navigator.push(context,
@@ -667,15 +667,15 @@ class _AiPicksScreenState extends State<AiPicksScreen>
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(p.webName,
-                                    style: const TextStyle(
-                                        color: AppColors.textPrimary,
+                                    style: TextStyle(
+                                        color: AppColors.of(context).textPrimary,
                                         fontSize: 12,
                                         fontWeight: FontWeight.w600),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis),
                                 Text(team?.shortName ?? '',
-                                    style: const TextStyle(
-                                        color: AppColors.textSecondary,
+                                    style: TextStyle(
+                                        color: AppColors.of(context).textSecondary,
                                         fontSize: 10)),
                               ],
                             ),
@@ -685,8 +685,8 @@ class _AiPicksScreenState extends State<AiPicksScreen>
                     ),
                     Expanded(
                       child: Text(p.form,
-                          style: const TextStyle(
-                              color: AppColors.accent,
+                          style: TextStyle(
+                              color: AppColors.of(context).accent,
                               fontSize: 12,
                               fontWeight: FontWeight.w600),
                           textAlign: TextAlign.center),
@@ -695,16 +695,16 @@ class _AiPicksScreenState extends State<AiPicksScreen>
                       child: Text(
                           (double.tryParse(p.expectedGoalsStr) ?? 0)
                               .toStringAsFixed(1),
-                          style: const TextStyle(
-                              color: AppColors.primary, fontSize: 12),
+                          style: TextStyle(
+                              color: AppColors.of(context).primary, fontSize: 12),
                           textAlign: TextAlign.center),
                     ),
                     Expanded(
                       child: Text(
                           (double.tryParse(p.ictIndex) ?? 0)
                               .toStringAsFixed(0),
-                          style: const TextStyle(
-                              color: AppColors.warning, fontSize: 12),
+                          style: TextStyle(
+                              color: AppColors.of(context).warning, fontSize: 12),
                           textAlign: TextAlign.center),
                     ),
                     Expanded(
@@ -748,7 +748,7 @@ class _AiPicksScreenState extends State<AiPicksScreen>
       case AiPickMode.freeHit:
         return const _ModeInfo(
           icon: Icons.refresh,
-          color: AppColors.accent,
+          color: AppColors.of(context).accent,
           title: 'Free Hit Team',
           desc:
               'Unlimited budget – picks the absolute best 15 players for this '
@@ -757,7 +757,7 @@ class _AiPicksScreenState extends State<AiPicksScreen>
       case AiPickMode.tripleCaptain:
         return const _ModeInfo(
           icon: Icons.star_border,
-          color: AppColors.warning,
+          color: AppColors.of(context).warning,
           title: 'Triple Captain Suggestion',
           desc:
               'Identifies the player with the highest ceiling for this week. '
@@ -766,7 +766,7 @@ class _AiPicksScreenState extends State<AiPicksScreen>
       case AiPickMode.benchBoost:
         return const _ModeInfo(
           icon: Icons.people,
-          color: AppColors.error,
+          color: AppColors.of(context).error,
           title: 'Bench Boost Team',
           desc:
               'All 15 players optimised for maximum expected points. '
@@ -775,7 +775,7 @@ class _AiPicksScreenState extends State<AiPicksScreen>
       default:
         return const _ModeInfo(
           icon: Icons.auto_awesome,
-          color: AppColors.primary,
+          color: AppColors.of(context).primary,
           title: 'AI Best XI',
           desc:
               'Smart algorithm using form, xG, xA, ICT index, fixture '
@@ -832,7 +832,7 @@ class _AiPitchPlayer extends StatelessWidget {
   Widget build(BuildContext context) {
     final diffColor = nextFixtureDifficulty != null
         ? (DifficultyConstants.colors[nextFixtureDifficulty] ??
-            AppColors.textSecondary)
+            AppColors.of(context).textSecondary)
         : null;
     final size = isSub ? 46.0 : 54.0;
 
@@ -849,7 +849,7 @@ class _AiPitchPlayer extends StatelessWidget {
                 height: size,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AppColors.cardDark,
+                  color: AppColors.of(context).cardDark,
                   border: Border.all(color: posColor, width: 2),
                 ),
                 clipBehavior: Clip.antiAlias,
@@ -857,9 +857,9 @@ class _AiPitchPlayer extends StatelessWidget {
                   imageUrl: player.photoUrl,
                   fit: BoxFit.cover,
                   placeholder: (_, __) => Icon(Icons.person,
-                      color: AppColors.textSecondary, size: size * 0.5),
+                      color: AppColors.of(context).textSecondary, size: size * 0.5),
                   errorWidget: (_, __, ___) => Icon(Icons.person,
-                      color: AppColors.textSecondary, size: size * 0.5),
+                      color: AppColors.of(context).textSecondary, size: size * 0.5),
                 ),
               ),
               if (diffColor != null)
@@ -873,7 +873,7 @@ class _AiPitchPlayer extends StatelessWidget {
                       color: diffColor,
                       shape: BoxShape.circle,
                       border:
-                          Border.all(color: AppColors.cardDark, width: 1.5),
+                          Border.all(color: AppColors.of(context).cardDark, width: 1.5),
                     ),
                     child: Center(
                       child: Text(
@@ -893,14 +893,14 @@ class _AiPitchPlayer extends StatelessWidget {
                   child: Container(
                     width: 16,
                     height: 16,
-                    decoration: const BoxDecoration(
-                        color: AppColors.warning, shape: BoxShape.circle),
-                    child: const Center(
+                    decoration: BoxDecoration(
+                        color: AppColors.of(context).warning, shape: BoxShape.circle),
+                    child: Center(
                         child: Text('C',
                             style: TextStyle(
                                 fontSize: 9,
                                 fontWeight: FontWeight.w900,
-                                color: AppColors.secondary))),
+                                color: AppColors.of(context).secondary))),
                   ),
                 ),
               if (isViceCaptain)
@@ -910,14 +910,14 @@ class _AiPitchPlayer extends StatelessWidget {
                   child: Container(
                     width: 16,
                     height: 16,
-                    decoration: const BoxDecoration(
-                        color: AppColors.accent, shape: BoxShape.circle),
-                    child: const Center(
+                    decoration: BoxDecoration(
+                        color: AppColors.of(context).accent, shape: BoxShape.circle),
+                    child: Center(
                         child: Text('V',
                             style: TextStyle(
                                 fontSize: 9,
                                 fontWeight: FontWeight.w900,
-                                color: AppColors.secondary))),
+                                color: AppColors.of(context).secondary))),
                   ),
                 ),
             ],
@@ -944,13 +944,13 @@ class _AiPitchPlayer extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
             decoration: BoxDecoration(
-              color: AppColors.primary.withAlpha(204),
+              color: AppColors.of(context).primary.withAlpha(204),
               borderRadius: BorderRadius.circular(3),
             ),
             child: Text(
               player.form,
-              style: const TextStyle(
-                  color: AppColors.secondary,
+              style: TextStyle(
+                  color: AppColors.of(context).secondary,
                   fontSize: 9,
                   fontWeight: FontWeight.w800),
             ),

@@ -38,10 +38,10 @@ class _StatsLeadersScreenState extends State<StatsLeadersScreen>
     return Consumer<FplProvider>(
       builder: (context, provider, _) {
         return Scaffold(
-          backgroundColor: AppColors.background,
+          backgroundColor: AppColors.of(context).background,
           appBar: AppBar(
             title: const Text('Stats Leaders'),
-            backgroundColor: AppColors.secondary,
+            backgroundColor: AppColors.of(context).secondary,
             bottom: TabBar(
               controller: _tabController,
               isScrollable: true,
@@ -65,7 +65,7 @@ class _StatsLeadersScreenState extends State<StatsLeadersScreen>
                       provider: provider,
                       valueGetter: (p) => p.goals.toDouble(),
                       valueFormatter: (v) => v.toInt().toString(),
-                      color: AppColors.primary,
+                      color: AppColors.of(context).primary,
                       label: 'Goals',
                     ),
                     _LeadersList(
@@ -73,7 +73,7 @@ class _StatsLeadersScreenState extends State<StatsLeadersScreen>
                       provider: provider,
                       valueGetter: (p) => p.assists.toDouble(),
                       valueFormatter: (v) => v.toInt().toString(),
-                      color: AppColors.accent,
+                      color: AppColors.of(context).accent,
                       label: 'Assists',
                     ),
                     _LeadersList(
@@ -89,7 +89,7 @@ class _StatsLeadersScreenState extends State<StatsLeadersScreen>
                       provider: provider,
                       valueGetter: (p) => p.bonus.toDouble(),
                       valueFormatter: (v) => v.toInt().toString(),
-                      color: AppColors.warning,
+                      color: AppColors.of(context).warning,
                       label: 'Bonus Points',
                     ),
                     _LeadersList(
@@ -151,7 +151,7 @@ class _BubbleTabState extends State<_BubbleTab> {
               children: labels.entries.map((e) {
                 final isSel = _posFilter == e.key;
                 final col = e.key == 0
-                    ? AppColors.primary
+                    ? AppColors.of(context).primary
                     : PositionConstants.positionColors[e.key]!;
                 return GestureDetector(
                   onTap: () => setState(() => _posFilter = e.key),
@@ -163,7 +163,7 @@ class _BubbleTabState extends State<_BubbleTab> {
                       vertical: 7,
                     ),
                     decoration: BoxDecoration(
-                      color: isSel ? col.withAlpha(30) : AppColors.cardMedium,
+                      color: isSel ? col.withAlpha(30) : AppColors.of(context).cardMedium,
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
                         color: isSel ? col : Colors.transparent,
@@ -172,7 +172,7 @@ class _BubbleTabState extends State<_BubbleTab> {
                     child: Text(
                       e.value,
                       style: TextStyle(
-                        color: isSel ? col : AppColors.textSecondary,
+                        color: isSel ? col : AppColors.of(context).textSecondary,
                         fontSize: 12,
                         fontWeight: isSel ? FontWeight.w700 : FontWeight.w400,
                       ),
@@ -185,14 +185,14 @@ class _BubbleTabState extends State<_BubbleTab> {
           const SizedBox(height: 16),
           Container(
             padding: const EdgeInsets.all(16),
-            decoration: AppTheme.gradientCard(),
+            decoration: AppTheme.gradientCard(context: context, ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Bar height = total points  ·  Colour = position',
                   style: TextStyle(
-                    color: AppColors.textSecondary,
+                    color: AppColors.of(context).textSecondary,
                     fontSize: 11,
                   ),
                 ),
@@ -208,7 +208,7 @@ class _BubbleTabState extends State<_BubbleTab> {
                         final color =
                             PositionConstants.positionColors[player
                                 .elementType] ??
-                            AppColors.primary;
+                            AppColors.of(context).primary;
                         return BarChartGroupData(
                           x: entry.key,
                           barRods: [
@@ -234,8 +234,8 @@ class _BubbleTabState extends State<_BubbleTab> {
                             reservedSize: 30,
                             getTitlesWidget: (v, _) => Text(
                               v.toInt().toString(),
-                              style: const TextStyle(
-                                color: AppColors.textSecondary,
+                              style: TextStyle(
+                                color: AppColors.of(context).textSecondary,
                                 fontSize: 9,
                               ),
                             ),
@@ -258,8 +258,8 @@ class _BubbleTabState extends State<_BubbleTab> {
                                   shortName.length > 6
                                       ? shortName.substring(0, 6)
                                       : shortName,
-                                  style: const TextStyle(
-                                    color: AppColors.textSecondary,
+                                  style: TextStyle(
+                                    color: AppColors.of(context).textSecondary,
                                     fontSize: 8,
                                   ),
                                 ),
@@ -277,11 +277,11 @@ class _BubbleTabState extends State<_BubbleTab> {
                       gridData: FlGridData(
                         drawVerticalLine: true,
                         getDrawingHorizontalLine: (_) => const FlLine(
-                          color: AppColors.divider,
+                          color: AppColors.of(context).divider,
                           strokeWidth: 0.5,
                         ),
                         getDrawingVerticalLine: (_) => const FlLine(
-                          color: AppColors.divider,
+                          color: AppColors.of(context).divider,
                           strokeWidth: 0.5,
                         ),
                       ),
@@ -308,8 +308,8 @@ class _BubbleTabState extends State<_BubbleTab> {
                         const SizedBox(width: 4),
                         Text(
                           PositionConstants.positionFullNames[e.key] ?? '',
-                          style: const TextStyle(
-                            color: AppColors.textSecondary,
+                          style: TextStyle(
+                            color: AppColors.of(context).textSecondary,
                             fontSize: 11,
                           ),
                         ),
@@ -348,10 +348,10 @@ class _LeadersList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (players.isEmpty) {
-      return const Center(
+      return Center(
         child: Text(
           'No data',
-          style: TextStyle(color: AppColors.textSecondary),
+          style: TextStyle(color: AppColors.of(context).textSecondary),
         ),
       );
     }
@@ -362,7 +362,7 @@ class _LeadersList extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          _buildBarChart(maxVal),
+          _buildBarChart(context, maxVal),
           const SizedBox(height: 20),
           _buildLeadersList(context),
         ],
@@ -370,11 +370,11 @@ class _LeadersList extends StatelessWidget {
     );
   }
 
-  Widget _buildBarChart(double maxVal) {
+  Widget _buildBarChart(BuildContext context, double maxVal) {
     if (maxVal == 0) return const SizedBox.shrink();
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: AppTheme.gradientCard(),
+      decoration: AppTheme.gradientCard(context: context, ),
       child: SizedBox(
         height: 200,
         child: BarChart(
@@ -407,8 +407,8 @@ class _LeadersList extends StatelessWidget {
                   reservedSize: 28,
                   getTitlesWidget: (v, _) => Text(
                     valueFormatter(v),
-                    style: const TextStyle(
-                      color: AppColors.textSecondary,
+                    style: TextStyle(
+                      color: AppColors.of(context).textSecondary,
                       fontSize: 9,
                     ),
                   ),
@@ -435,8 +435,8 @@ class _LeadersList extends StatelessWidget {
                                   .length
                                   .clamp(0, 6),
                             ),
-                        style: const TextStyle(
-                          color: AppColors.textSecondary,
+                        style: TextStyle(
+                          color: AppColors.of(context).textSecondary,
                           fontSize: 8,
                         ),
                       ),
@@ -454,7 +454,7 @@ class _LeadersList extends StatelessWidget {
             gridData: FlGridData(
               drawVerticalLine: false,
               getDrawingHorizontalLine: (_) =>
-                  const FlLine(color: AppColors.divider, strokeWidth: 0.5),
+                  FlLine(color: AppColors.of(context).divider, strokeWidth: 0.5),
             ),
             borderData: FlBorderData(show: false),
           ),
@@ -465,7 +465,7 @@ class _LeadersList extends StatelessWidget {
 
   Widget _buildLeadersList(BuildContext context) {
     return Container(
-      decoration: AppTheme.gradientCard(),
+      decoration: AppTheme.gradientCard(context: context, ),
       child: Column(
         children: players.asMap().entries.map((entry) {
           final i = entry.key;
@@ -486,7 +486,7 @@ class _LeadersList extends StatelessWidget {
               decoration: BoxDecoration(
                 border: Border(
                   bottom: BorderSide(
-                    color: AppColors.divider,
+                    color: AppColors.of(context).divider,
                     width: i < players.length - 1 ? 1 : 0,
                   ),
                 ),
@@ -498,7 +498,7 @@ class _LeadersList extends StatelessWidget {
                     child: Text(
                       '${i + 1}',
                       style: TextStyle(
-                        color: i == 0 ? color : AppColors.textSecondary,
+                        color: i == 0 ? color : AppColors.of(context).textSecondary,
                         fontWeight: i == 0 ? FontWeight.w700 : FontWeight.w400,
                         fontSize: 14,
                       ),
@@ -511,21 +511,21 @@ class _LeadersList extends StatelessWidget {
                     height: 36,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: AppColors.cardMedium,
+                      color: AppColors.of(context).cardMedium,
                       border: Border.all(color: posColor, width: 1.5),
                     ),
                     clipBehavior: Clip.antiAlias,
                     child: CachedNetworkImage(
                       imageUrl: player.photoUrl,
                       fit: BoxFit.cover,
-                      placeholder: (_, __) => const Icon(
+                      placeholder: (_, __) => Icon(
                         Icons.person,
-                        color: AppColors.textSecondary,
+                        color: AppColors.of(context).textSecondary,
                         size: 18,
                       ),
-                      errorWidget: (_, __, ___) => const Icon(
+                      errorWidget: (_, __, ___) => Icon(
                         Icons.person,
-                        color: AppColors.textSecondary,
+                        color: AppColors.of(context).textSecondary,
                         size: 18,
                       ),
                     ),
@@ -537,16 +537,16 @@ class _LeadersList extends StatelessWidget {
                       children: [
                         Text(
                           player.webName,
-                          style: const TextStyle(
-                            color: AppColors.textPrimary,
+                          style: TextStyle(
+                            color: AppColors.of(context).textPrimary,
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                         Text(
                           '${team?.shortName ?? ''} · ${getPositionShort(player.elementType)} · ${formatPrice(player.nowCost)}',
-                          style: const TextStyle(
-                            color: AppColors.textSecondary,
+                          style: TextStyle(
+                            color: AppColors.of(context).textSecondary,
                             fontSize: 11,
                           ),
                         ),
@@ -566,8 +566,8 @@ class _LeadersList extends StatelessWidget {
                       ),
                       Text(
                         label,
-                        style: const TextStyle(
-                          color: AppColors.textSecondary,
+                        style: TextStyle(
+                          color: AppColors.of(context).textSecondary,
                           fontSize: 10,
                         ),
                       ),

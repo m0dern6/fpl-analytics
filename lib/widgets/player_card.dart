@@ -28,20 +28,20 @@ class PlayerCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: compact
-          ? _buildCompact(posColor, posShort)
-          : _buildFull(posColor, posShort),
+          ? _buildCompact(context, posColor, posShort)
+          : _buildFull(context, posColor, posShort),
     );
   }
 
   // ── Compact (e.g. leaderboard rows) ──────────────────────────────────────
 
-  Widget _buildCompact(Color posColor, String posShort) {
+  Widget _buildCompact(BuildContext context, Color posColor, String posShort) {
     return IntrinsicHeight(
       child: Container(
         decoration: BoxDecoration(
-          color: AppColors.cardDark,
+          color: AppColors.of(context).cardDark,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.divider, width: 1),
+          border: Border.all(color: AppColors.of(context).divider, width: 1),
         ),
         child: Row(
           children: [
@@ -59,7 +59,7 @@ class PlayerCard extends StatelessWidget {
             const SizedBox(width: 10),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8),
-              child: _buildPhoto(size: 38),
+              child: _buildPhoto(context, size: 38),
             ),
             const SizedBox(width: 10),
             Expanded(
@@ -71,8 +71,8 @@ class PlayerCard extends StatelessWidget {
                   children: [
                     Text(
                       player.webName,
-                      style: const TextStyle(
-                        color: AppColors.textPrimary,
+                      style: TextStyle(
+                        color: AppColors.of(context).textPrimary,
                         fontWeight: FontWeight.w600,
                         fontSize: 13,
                       ),
@@ -86,8 +86,8 @@ class PlayerCard extends StatelessWidget {
                         const SizedBox(width: 5),
                         Text(
                           team?.shortName ?? '',
-                          style: const TextStyle(
-                              color: AppColors.textSecondary, fontSize: 11),
+                          style: TextStyle(
+                              color: AppColors.of(context).textSecondary, fontSize: 11),
                         ),
                       ],
                     ),
@@ -103,16 +103,16 @@ class PlayerCard extends StatelessWidget {
                 children: [
                   Text(
                     '${player.totalPoints}',
-                    style: const TextStyle(
-                      color: AppColors.primary,
+                    style: TextStyle(
+                      color: AppColors.of(context).primary,
                       fontWeight: FontWeight.w700,
                       fontSize: 16,
                     ),
                   ),
                   Text(
                     formatPrice(player.nowCost),
-                    style: const TextStyle(
-                        color: AppColors.textSecondary, fontSize: 11),
+                    style: TextStyle(
+                        color: AppColors.of(context).textSecondary, fontSize: 11),
                   ),
                 ],
               ),
@@ -125,13 +125,13 @@ class PlayerCard extends StatelessWidget {
 
   // ── Full card ─────────────────────────────────────────────────────────────
 
-  Widget _buildFull(Color posColor, String posShort) {
+  Widget _buildFull(BuildContext context, Color posColor, String posShort) {
     return IntrinsicHeight(
       child: Container(
         decoration: BoxDecoration(
-          color: AppColors.cardDark,
+          color: AppColors.of(context).cardDark,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppColors.divider, width: 1),
+          border: Border.all(color: AppColors.of(context).divider, width: 1),
         ),
         child: Row(
           children: [
@@ -147,7 +147,7 @@ class PlayerCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
-            _buildPhoto(size: 54),
+            _buildPhoto(context, size: 54),
             const SizedBox(width: 12),
             // Main content
             Expanded(
@@ -161,8 +161,8 @@ class PlayerCard extends StatelessWidget {
                         Expanded(
                           child: Text(
                             player.webName,
-                            style: const TextStyle(
-                              color: AppColors.textPrimary,
+                            style: TextStyle(
+                              color: AppColors.of(context).textPrimary,
                               fontWeight: FontWeight.w700,
                               fontSize: 15,
                             ),
@@ -174,7 +174,7 @@ class PlayerCard extends StatelessWidget {
                           Padding(
                             padding: const EdgeInsets.only(left: 4),
                             child: Icon(Icons.warning_amber_rounded,
-                                color: AppColors.warning, size: 15),
+                                color: AppColors.of(context).warning, size: 15),
                           ),
                       ],
                     ),
@@ -185,23 +185,23 @@ class PlayerCard extends StatelessWidget {
                         const SizedBox(width: 6),
                         Text(
                           team?.name ?? '',
-                          style: const TextStyle(
-                              color: AppColors.textSecondary, fontSize: 12),
+                          style: TextStyle(
+                              color: AppColors.of(context).textSecondary, fontSize: 12),
                         ),
                       ],
                     ),
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        _miniStat('Form', formatForm(player.form), AppColors.accent),
+                        _miniStat(context, 'Form', formatForm(player.form), AppColors.of(context).accent),
                         const SizedBox(width: 14),
-                        _miniStat('ICT',
+                        _miniStat(context, 'ICT',
                             formatDouble(player.ictIndex, decimals: 1),
-                            AppColors.warning),
+                            AppColors.of(context).warning),
                         const SizedBox(width: 14),
-                        _miniStat('Sel%',
+                        _miniStat(context, 'Sel%',
                             formatPercent(player.selectedByPercent),
-                            AppColors.textSecondary),
+                            AppColors.of(context).textSecondary),
                       ],
                     ),
                   ],
@@ -219,15 +219,15 @@ class PlayerCard extends StatelessWidget {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withAlpha(22),
+                      color: AppColors.of(context).primary.withAlpha(22),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                          color: AppColors.primary.withAlpha(70), width: 1),
+                          color: AppColors.of(context).primary.withAlpha(70), width: 1),
                     ),
                     child: Text(
                       '${player.totalPoints}',
-                      style: const TextStyle(
-                        color: AppColors.primary,
+                      style: TextStyle(
+                        color: AppColors.of(context).primary,
                         fontWeight: FontWeight.w800,
                         fontSize: 18,
                         letterSpacing: -0.5,
@@ -237,14 +237,14 @@ class PlayerCard extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     formatPrice(player.nowCost),
-                    style: const TextStyle(
-                        color: AppColors.textSecondary, fontSize: 12),
+                    style: TextStyle(
+                        color: AppColors.of(context).textSecondary, fontSize: 12),
                   ),
                   const SizedBox(height: 1),
-                  const Text(
+                  Text(
                     'pts',
                     style:
-                        TextStyle(color: AppColors.textSecondary, fontSize: 10),
+                        TextStyle(color: AppColors.of(context).textSecondary, fontSize: 10),
                   ),
                 ],
               ),
@@ -257,25 +257,25 @@ class PlayerCard extends StatelessWidget {
 
   // ── Shared sub-widgets ────────────────────────────────────────────────────
 
-  Widget _buildPhoto({required double size}) {
+  Widget _buildPhoto(BuildContext context, {required double size}) {
     return Stack(
       children: [
         Container(
           width: size,
           height: size,
           decoration: BoxDecoration(
-            color: AppColors.cardMedium,
+            color: AppColors.of(context).cardMedium,
             shape: BoxShape.circle,
-            border: Border.all(color: AppColors.divider),
+            border: Border.all(color: AppColors.of(context).divider),
           ),
           clipBehavior: Clip.antiAlias,
           child: CachedNetworkImage(
             imageUrl: player.photoUrl,
             fit: BoxFit.cover,
             placeholder: (_, __) => Icon(Icons.person,
-                color: AppColors.textSecondary, size: size * 0.55),
+                color: AppColors.of(context).textSecondary, size: size * 0.55),
             errorWidget: (_, __, ___) => Icon(Icons.person,
-                color: AppColors.textSecondary, size: size * 0.55),
+                color: AppColors.of(context).textSecondary, size: size * 0.55),
           ),
         ),
         if (player.chanceOfPlayingNextRound != null &&
@@ -288,10 +288,10 @@ class PlayerCard extends StatelessWidget {
               height: size * 0.34,
               decoration: BoxDecoration(
                 color: player.chanceOfPlayingNextRound! < 50
-                    ? AppColors.error
-                    : AppColors.warning,
+                    ? AppColors.of(context).error
+                    : AppColors.of(context).warning,
                 shape: BoxShape.circle,
-                border: Border.all(color: AppColors.cardDark, width: 1.5),
+                border: Border.all(color: AppColors.of(context).cardDark, width: 1.5),
               ),
               child: Center(
                 child: Text(
@@ -325,13 +325,13 @@ class PlayerCard extends StatelessWidget {
     );
   }
 
-  Widget _miniStat(String label, String value, Color valueColor) {
+  Widget _miniStat(BuildContext context, String label, String value, Color valueColor) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label,
-            style: const TextStyle(
-                color: AppColors.textSecondary,
+            style: TextStyle(
+                color: AppColors.of(context).textSecondary,
                 fontSize: 9,
                 fontWeight: FontWeight.w500)),
         const SizedBox(height: 1),

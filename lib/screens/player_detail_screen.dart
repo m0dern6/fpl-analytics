@@ -64,13 +64,13 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen>
   Widget build(BuildContext context) {
     final team = context.read<FplProvider>().getTeamById(widget.player.teamId);
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.of(context).background,
       body: NestedScrollView(
         headerSliverBuilder: (ctx, innerBoxIsScrolled) => [
           SliverAppBar(
             expandedHeight: 300,
             pinned: true,
-            backgroundColor: AppColors.secondary,
+            backgroundColor: AppColors.of(context).secondary,
             flexibleSpace: FlexibleSpaceBar(background: _buildHeroHeader(team)),
             bottom: TabBar(
               controller: _tabController,
@@ -78,7 +78,7 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen>
               labelPadding: const EdgeInsets.symmetric(vertical: 12),
               indicatorSize: TabBarIndicatorSize.label,
               indicatorWeight: 3,
-              indicatorColor: AppColors.primary,
+              indicatorColor: AppColors.of(context).primary,
               dividerColor: Colors.white10,
               tabs: const [
                 Tab(text: 'Overview'),
@@ -124,11 +124,11 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen>
     final pos = getPositionShort(widget.player.elementType);
     final posColor = getPositionColor(widget.player.elementType);
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [AppColors.secondary, Color(0xFF5a0060)],
+          colors: [AppColors.of(context).secondary, Color(0xFF5a0060)],
         ),
       ),
       child: SafeArea(
@@ -140,22 +140,22 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen>
                 width: 100,
                 height: 120,
                 decoration: BoxDecoration(
-                  color: AppColors.cardDark,
+                  color: AppColors.of(context).cardDark,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.primary.withAlpha(77)),
+                  border: Border.all(color: AppColors.of(context).primary.withAlpha(77)),
                 ),
                 clipBehavior: Clip.antiAlias,
                 child: CachedNetworkImage(
                   imageUrl: widget.player.photoUrl,
                   fit: BoxFit.cover,
-                  placeholder: (_, __) => const Icon(
+                  placeholder: (_, __) => Icon(
                     Icons.person,
-                    color: AppColors.textSecondary,
+                    color: AppColors.of(context).textSecondary,
                     size: 48,
                   ),
-                  errorWidget: (_, __, ___) => const Icon(
+                  errorWidget: (_, __, ___) => Icon(
                     Icons.person,
-                    color: AppColors.textSecondary,
+                    color: AppColors.of(context).textSecondary,
                     size: 48,
                   ),
                 ),
@@ -168,16 +168,16 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen>
                   children: [
                     Text(
                       widget.player.webName,
-                      style: const TextStyle(
-                        color: AppColors.textPrimary,
+                      style: TextStyle(
+                        color: AppColors.of(context).textPrimary,
                         fontSize: 22,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
                     Text(
                       '${widget.player.firstName} ${widget.player.secondName}',
-                      style: const TextStyle(
-                        color: AppColors.textSecondary,
+                      style: TextStyle(
+                        color: AppColors.of(context).textSecondary,
                         fontSize: 13,
                       ),
                     ),
@@ -206,8 +206,8 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen>
                         const SizedBox(width: 8),
                         Text(
                           team?.name ?? '',
-                          style: const TextStyle(
-                            color: AppColors.textSecondary,
+                          style: TextStyle(
+                            color: AppColors.of(context).textSecondary,
                             fontSize: 13,
                           ),
                         ),
@@ -231,17 +231,17 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen>
                         padding: const EdgeInsets.only(top: 6),
                         child: Row(
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.info_outline,
-                              color: AppColors.warning,
+                              color: AppColors.of(context).warning,
                               size: 14,
                             ),
                             const SizedBox(width: 4),
                             Expanded(
                               child: Text(
                                 widget.player.news,
-                                style: const TextStyle(
-                                  color: AppColors.warning,
+                                style: TextStyle(
+                                  color: AppColors.of(context).warning,
                                   fontSize: 11,
                                 ),
                                 maxLines: 2,
@@ -267,15 +267,15 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen>
       children: [
         Text(
           value,
-          style: const TextStyle(
-            color: AppColors.primary,
+          style: TextStyle(
+            color: AppColors.of(context).primary,
             fontSize: 15,
             fontWeight: FontWeight.w700,
           ),
         ),
         Text(
           label,
-          style: const TextStyle(color: AppColors.textSecondary, fontSize: 10),
+          style: TextStyle(color: AppColors.of(context).textSecondary, fontSize: 10),
         ),
       ],
     );
@@ -339,16 +339,16 @@ class _OverviewTab extends StatelessWidget {
                         if (player.chanceOfPlayingNextRound != null)
                           Text(
                             'Chance of playing next GW: ${player.chanceOfPlayingNextRound}%',
-                            style: const TextStyle(
-                              color: AppColors.textSecondary,
+                            style: TextStyle(
+                              color: AppColors.of(context).textSecondary,
                               fontSize: 11,
                             ),
                           ),
                         if (player.news.isNotEmpty)
                           Text(
                             player.news,
-                            style: const TextStyle(
-                              color: AppColors.textSecondary,
+                            style: TextStyle(
+                              color: AppColors.of(context).textSecondary,
                               fontSize: 11,
                             ),
                             maxLines: 2,
@@ -360,31 +360,31 @@ class _OverviewTab extends StatelessWidget {
                 ],
               ),
             ),
-          _buildStatsGrid(),
+          _buildStatsGrid(context),
           const SizedBox(height: 20),
-          _buildExpectedStatsSection(),
+          _buildExpectedStatsSection(context),
           const SizedBox(height: 20),
-          _buildIctSection(),
+          _buildIctSection(context),
           const SizedBox(height: 20),
-          _buildTransferSection(),
+          _buildTransferSection(context),
         ],
       ),
     );
   }
 
-  Widget _buildStatsGrid() {
+  Widget _buildStatsGrid(BuildContext context) {
     final stats = [
       _StatItem(
         'Total Points',
         '${player.totalPoints}',
         Icons.star,
-        AppColors.primary,
+        AppColors.of(context).primary,
       ),
       _StatItem(
         'Form',
         formatForm(player.form),
         Icons.trending_up,
-        AppColors.accent,
+        AppColors.of(context).accent,
       ),
       _StatItem(
         'Price',
@@ -402,9 +402,9 @@ class _OverviewTab extends StatelessWidget {
         'Goals',
         '${player.goals}',
         Icons.sports_soccer,
-        AppColors.primary,
+        AppColors.of(context).primary,
       ),
-      _StatItem('Assists', '${player.assists}', Icons.sports, AppColors.accent),
+      _StatItem('Assists', '${player.assists}', Icons.sports, AppColors.of(context).accent),
       _StatItem(
         'Clean Sheets',
         '${player.cleanSheets}',
@@ -415,27 +415,27 @@ class _OverviewTab extends StatelessWidget {
         'Bonus Pts',
         '${player.bonus}',
         Icons.add_circle,
-        AppColors.warning,
+        AppColors.of(context).warning,
       ),
       _StatItem(
         'Minutes',
         '${player.minutes}',
         Icons.timer,
-        AppColors.textSecondary,
+        AppColors.of(context).textSecondary,
       ),
       _StatItem(
         'Goals Conc.',
         '${player.goalsConceded}',
         Icons.sports_soccer_outlined,
-        AppColors.error,
+        AppColors.of(context).error,
       ),
       _StatItem(
         'Yellow Cards',
         '${player.yellowCards}',
         Icons.square,
-        AppColors.warning,
+        AppColors.of(context).warning,
       ),
-      _StatItem('Saves', '${player.saves}', Icons.back_hand, AppColors.accent),
+      _StatItem('Saves', '${player.saves}', Icons.back_hand, AppColors.of(context).accent),
     ];
 
     return GridView.count(
@@ -449,7 +449,7 @@ class _OverviewTab extends StatelessWidget {
           .map(
             (s) => Container(
               padding: const EdgeInsets.all(10),
-              decoration: AppTheme.gradientCard(),
+              decoration: AppTheme.gradientCard(context: context, ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -468,8 +468,8 @@ class _OverviewTab extends StatelessWidget {
                       ),
                       Text(
                         s.label,
-                        style: const TextStyle(
-                          color: AppColors.textSecondary,
+                        style: TextStyle(
+                          color: AppColors.of(context).textSecondary,
                           fontSize: 10,
                         ),
                         maxLines: 1,
@@ -485,7 +485,7 @@ class _OverviewTab extends StatelessWidget {
     );
   }
 
-  Widget _buildIctSection() {
+  Widget _buildIctSection(BuildContext context) {
     final ict = double.tryParse(player.ictIndex) ?? 0;
     final influence = double.tryParse(player.influence) ?? 0;
     final creativity = double.tryParse(player.creativity) ?? 0;
@@ -493,16 +493,16 @@ class _OverviewTab extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: AppTheme.gradientCard(),
+      decoration: AppTheme.gradientCard(context: context, ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Text(
+              Text(
                 'ICT Index',
                 style: TextStyle(
-                  color: AppColors.textPrimary,
+                  color: AppColors.of(context).textPrimary,
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
                 ),
@@ -513,33 +513,33 @@ class _OverviewTab extends StatelessWidget {
                     'ICT = Influence + Creativity + Threat\n'
                     'A composite FPL score rating a player\'s\n'
                     'impact on a match.',
-                child: const Icon(
+                child: Icon(
                   Icons.info_outline,
-                  color: AppColors.textSecondary,
+                  color: AppColors.of(context).textSecondary,
                   size: 14,
                 ),
               ),
             ],
           ),
           const SizedBox(height: 4),
-          const Text(
+          Text(
             'Influence: ball involvement • Creativity: chance creation • Threat: goal threat',
-            style: TextStyle(color: AppColors.textSecondary, fontSize: 10),
+            style: TextStyle(color: AppColors.of(context).textSecondary, fontSize: 10),
           ),
           const SizedBox(height: 14),
-          _ictBar('ICT Index', ict, 200, AppColors.primary),
+          _ictBar(context, 'ICT Index', ict, 200, AppColors.of(context).primary),
           const SizedBox(height: 10),
-          _ictBar('Influence', influence, 200, AppColors.accent),
+          _ictBar(context, 'Influence', influence, 200, AppColors.of(context).accent),
           const SizedBox(height: 10),
-          _ictBar('Creativity', creativity, 200, const Color(0xFFB388FF)),
+          _ictBar(context, 'Creativity', creativity, 200, const Color(0xFFB388FF)),
           const SizedBox(height: 10),
-          _ictBar('Threat', threat, 200, AppColors.warning),
+          _ictBar(context, 'Threat', threat, 200, AppColors.of(context).warning),
         ],
       ),
     );
   }
 
-  Widget _buildExpectedStatsSection() {
+  Widget _buildExpectedStatsSection(BuildContext context) {
     final xg = double.tryParse(player.expectedGoalsStr) ?? 0;
     final xa = double.tryParse(player.expectedAssistsStr) ?? 0;
     final ppg = double.tryParse(player.pointsPerGame) ?? 0;
@@ -547,14 +547,14 @@ class _OverviewTab extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: AppTheme.gradientCard(),
+      decoration: AppTheme.gradientCard(context: context, ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Expected Stats & Value',
             style: TextStyle(
-              color: AppColors.textPrimary,
+              color: AppColors.of(context).textPrimary,
               fontSize: 15,
               fontWeight: FontWeight.w700,
             ),
@@ -563,19 +563,19 @@ class _OverviewTab extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: _expectedStatTile(
+                child: _expectedStatTile(context, 
                   'Expected Goals\n(xG)',
                   xg.toStringAsFixed(2),
-                  AppColors.primary,
+                  AppColors.of(context).primary,
                   'How many goals a player\nwas statistically expected to score',
                 ),
               ),
               const SizedBox(width: 10),
               Expanded(
-                child: _expectedStatTile(
+                child: _expectedStatTile(context, 
                   'Expected Assists\n(xA)',
                   xa.toStringAsFixed(2),
-                  AppColors.accent,
+                  AppColors.of(context).accent,
                   'How many assists a player\nwas expected to provide',
                 ),
               ),
@@ -585,16 +585,16 @@ class _OverviewTab extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: _expectedStatTile(
+                child: _expectedStatTile(context, 
                   'Points Per Game\n(PPG)',
                   ppg.toStringAsFixed(1),
-                  AppColors.warning,
+                  AppColors.of(context).warning,
                   'Average points scored per\ngameweek this season',
                 ),
               ),
               const SizedBox(width: 10),
               Expanded(
-                child: _expectedStatTile(
+                child: _expectedStatTile(context, 
                   'Value\n(pts per £m)',
                   vsn.toStringAsFixed(1),
                   const Color(0xFF69F0AE),
@@ -608,7 +608,7 @@ class _OverviewTab extends StatelessWidget {
     );
   }
 
-  Widget _expectedStatTile(
+  Widget _expectedStatTile(BuildContext context, 
     String label,
     String value,
     Color color,
@@ -637,8 +637,8 @@ class _OverviewTab extends StatelessWidget {
             const SizedBox(height: 2),
             Text(
               label,
-              style: const TextStyle(
-                color: AppColors.textSecondary,
+              style: TextStyle(
+                color: AppColors.of(context).textSecondary,
                 fontSize: 10,
               ),
               maxLines: 2,
@@ -649,7 +649,7 @@ class _OverviewTab extends StatelessWidget {
     );
   }
 
-  Widget _ictBar(String label, double value, double maxVal, Color color) {
+  Widget _ictBar(BuildContext context, String label, double value, double maxVal, Color color) {
     final pct = (value / maxVal).clamp(0.0, 1.0);
     return Row(
       children: [
@@ -657,8 +657,8 @@ class _OverviewTab extends StatelessWidget {
           width: 80,
           child: Text(
             label,
-            style: const TextStyle(
-              color: AppColors.textSecondary,
+            style: TextStyle(
+              color: AppColors.of(context).textSecondary,
               fontSize: 12,
             ),
           ),
@@ -669,7 +669,7 @@ class _OverviewTab extends StatelessWidget {
               Container(
                 height: 8,
                 decoration: BoxDecoration(
-                  color: AppColors.cardMedium,
+                  color: AppColors.of(context).cardMedium,
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),
@@ -703,17 +703,17 @@ class _OverviewTab extends StatelessWidget {
     );
   }
 
-  Widget _buildTransferSection() {
+  Widget _buildTransferSection(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: AppTheme.gradientCard(),
+      decoration: AppTheme.gradientCard(context: context, ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Transfer Activity',
             style: TextStyle(
-              color: AppColors.textPrimary,
+              color: AppColors.of(context).textPrimary,
               fontSize: 15,
               fontWeight: FontWeight.w700,
             ),
@@ -722,19 +722,19 @@ class _OverviewTab extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: _transferStat(
+                child: _transferStat(context, 
                   'In (Season)',
                   _formatCount(player.transfersIn),
                   Icons.arrow_upward,
-                  AppColors.primary,
+                  AppColors.of(context).primary,
                 ),
               ),
               Expanded(
-                child: _transferStat(
+                child: _transferStat(context, 
                   'Out (Season)',
                   _formatCount(player.transfersOut),
                   Icons.arrow_downward,
-                  AppColors.error,
+                  AppColors.of(context).error,
                 ),
               ),
             ],
@@ -743,19 +743,19 @@ class _OverviewTab extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: _transferStat(
+                child: _transferStat(context, 
                   'In (GW)',
                   _formatCount(player.transfersInEvent),
                   Icons.arrow_upward,
-                  AppColors.primary,
+                  AppColors.of(context).primary,
                 ),
               ),
               Expanded(
-                child: _transferStat(
+                child: _transferStat(context, 
                   'Out (GW)',
                   _formatCount(player.transfersOutEvent),
                   Icons.arrow_downward,
-                  AppColors.error,
+                  AppColors.of(context).error,
                 ),
               ),
             ],
@@ -771,7 +771,7 @@ class _OverviewTab extends StatelessWidget {
     return '$n';
   }
 
-  Widget _transferStat(String label, String value, IconData icon, Color color) {
+  Widget _transferStat(BuildContext context, String label, String value, IconData icon, Color color) {
     return Row(
       children: [
         Icon(icon, color: color, size: 20),
@@ -789,8 +789,8 @@ class _OverviewTab extends StatelessWidget {
             ),
             Text(
               label,
-              style: const TextStyle(
-                color: AppColors.textSecondary,
+              style: TextStyle(
+                color: AppColors.of(context).textSecondary,
                 fontSize: 11,
               ),
             ),
@@ -875,15 +875,15 @@ class _HistoryTabState extends State<_HistoryTab>
   @override
   Widget build(BuildContext context) {
     if (widget.summary == null) {
-      return const Center(
-        child: CircularProgressIndicator(color: AppColors.primary),
+      return Center(
+        child: CircularProgressIndicator(color: AppColors.of(context).primary),
       );
     }
     if (widget.summary!.history.isEmpty) {
-      return const Center(
+      return Center(
         child: Text(
           'No history available',
-          style: TextStyle(color: AppColors.textSecondary),
+          style: TextStyle(color: AppColors.of(context).textSecondary),
         ),
       );
     }
@@ -917,10 +917,10 @@ class _HistoryTabState extends State<_HistoryTab>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Gameweek Range',
           style: TextStyle(
-            color: AppColors.textSecondary,
+            color: AppColors.of(context).textSecondary,
             fontSize: 11,
             fontWeight: FontWeight.w600,
           ),
@@ -945,14 +945,14 @@ class _HistoryTabState extends State<_HistoryTab>
                   ),
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? AppColors.primary.withAlpha(30)
+                        ? AppColors.of(context).primary.withAlpha(30)
                         : isAvail
-                        ? AppColors.cardMedium
-                        : AppColors.cardMedium.withAlpha(80),
+                        ? AppColors.of(context).cardMedium
+                        : AppColors.of(context).cardMedium.withAlpha(80),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
                       color: isSelected
-                          ? AppColors.primary
+                          ? AppColors.of(context).primary
                           : Colors.transparent,
                     ),
                   ),
@@ -960,10 +960,10 @@ class _HistoryTabState extends State<_HistoryTab>
                     'Last $r',
                     style: TextStyle(
                       color: isSelected
-                          ? AppColors.primary
+                          ? AppColors.of(context).primary
                           : isAvail
-                          ? AppColors.textSecondary
-                          : AppColors.textSecondary.withAlpha(100),
+                          ? AppColors.of(context).textSecondary
+                          : AppColors.of(context).textSecondary.withAlpha(100),
                       fontSize: 11,
                       fontWeight: isSelected
                           ? FontWeight.w700
@@ -982,7 +982,7 @@ class _HistoryTabState extends State<_HistoryTab>
   Widget _buildMetricTabs() {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.cardMedium,
+        color: AppColors.of(context).cardMedium,
         borderRadius: BorderRadius.circular(10),
       ),
       child: TabBar(
@@ -990,14 +990,14 @@ class _HistoryTabState extends State<_HistoryTab>
         isScrollable: true,
         padding: const EdgeInsets.all(4),
         indicator: BoxDecoration(
-          color: AppColors.primary.withAlpha(30),
+          color: AppColors.of(context).primary.withAlpha(30),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: AppColors.primary.withAlpha(80)),
+          border: Border.all(color: AppColors.of(context).primary.withAlpha(80)),
         ),
         labelPadding: const EdgeInsets.symmetric(horizontal: 16),
         tabAlignment: TabAlignment.start,
-        labelColor: AppColors.primary,
-        unselectedLabelColor: AppColors.textSecondary,
+        labelColor: AppColors.of(context).primary,
+        unselectedLabelColor: AppColors.of(context).textSecondary,
         labelStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
         unselectedLabelStyle: const TextStyle(fontSize: 11),
         dividerColor: Colors.transparent,
@@ -1013,7 +1013,7 @@ class _HistoryTabState extends State<_HistoryTab>
     final maxVal = values.isEmpty
         ? 1.0
         : values.reduce((a, b) => a > b ? a : b);
-    final metricColor = _metricColors[_metricIndex];
+    final metricColor = _metricColors(context)[_metricIndex];
     final metricLabel = _metricLabels[_metricIndex];
     final isDecimal = _metricIndex == 4;
 
@@ -1023,7 +1023,7 @@ class _HistoryTabState extends State<_HistoryTab>
 
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: AppTheme.gradientCard(),
+      decoration: AppTheme.gradientCard(context: context, ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1040,8 +1040,8 @@ class _HistoryTabState extends State<_HistoryTab>
               const SizedBox(width: 6),
               Text(
                 '$metricLabel (Last $_gwRange GW)',
-                style: const TextStyle(
-                  color: AppColors.textPrimary,
+                style: TextStyle(
+                  color: AppColors.of(context).textPrimary,
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                 ),
@@ -1067,7 +1067,7 @@ class _HistoryTabState extends State<_HistoryTab>
                             radius: 4,
                             color: metricColor,
                             strokeWidth: 2,
-                            strokeColor: AppColors.cardDark,
+                            strokeColor: AppColors.of(context).cardDark,
                           ),
                     ),
                     belowBarData: BarAreaData(
@@ -1080,7 +1080,7 @@ class _HistoryTabState extends State<_HistoryTab>
                 lineTouchData: LineTouchData(
                   enabled: true,
                   touchTooltipData: LineTouchTooltipData(
-                    getTooltipColor: (_) => AppColors.cardDark,
+                    getTooltipColor: (_) => AppColors.of(context).cardDark,
                     getTooltipItems: (touchedSpots) {
                       return touchedSpots.map((s) {
                         final idx = s.x.toInt();
@@ -1106,8 +1106,8 @@ class _HistoryTabState extends State<_HistoryTab>
                       reservedSize: 36,
                       getTitlesWidget: (v, _) => Text(
                         v.toStringAsFixed(isDecimal ? 1 : 0),
-                        style: const TextStyle(
-                          color: AppColors.textSecondary,
+                        style: TextStyle(
+                          color: AppColors.of(context).textSecondary,
                           fontSize: 9,
                         ),
                       ),
@@ -1126,8 +1126,8 @@ class _HistoryTabState extends State<_HistoryTab>
                           padding: const EdgeInsets.only(top: 4),
                           child: Text(
                             'GW${history[idx].round}',
-                            style: const TextStyle(
-                              color: AppColors.textSecondary,
+                            style: TextStyle(
+                              color: AppColors.of(context).textSecondary,
                               fontSize: 8,
                             ),
                           ),
@@ -1169,13 +1169,13 @@ class _HistoryTabState extends State<_HistoryTab>
                   verticalInterval: 1,
                   horizontalInterval: maxVal > 0 ? maxVal / 4 : 1,
                   getDrawingHorizontalLine: (_) =>
-                      const FlLine(color: AppColors.divider, strokeWidth: 0.8),
+                      FlLine(color: AppColors.of(context).divider, strokeWidth: 0.8),
                   getDrawingVerticalLine: (_) =>
-                      const FlLine(color: AppColors.divider, strokeWidth: 0.5),
+                      FlLine(color: AppColors.of(context).divider, strokeWidth: 0.5),
                 ),
                 borderData: FlBorderData(
                   show: true,
-                  border: Border.all(color: AppColors.divider, width: 0.5),
+                  border: Border.all(color: AppColors.of(context).divider, width: 0.5),
                 ),
                 minY: 0,
                 maxY: maxVal * 1.35 < 1 ? 2 : maxVal * 1.35,
@@ -1187,32 +1187,32 @@ class _HistoryTabState extends State<_HistoryTab>
     );
   }
 
-  static const _metricColors = [
-    AppColors.primary,
-    AppColors.accent,
-    Color(0xFF34D399),
-    AppColors.warning,
-    Color(0xFFB388FF),
+  List<Color> _metricColors(BuildContext context) => [
+    AppColors.of(context).primary,
+    AppColors.of(context).accent,
+    const Color(0xFF34D399),
+    AppColors.of(context).warning,
+    const Color(0xFFB388FF),
   ];
 
   Widget _buildHistoryTable() {
     return Container(
-      decoration: AppTheme.gradientCard(),
+      decoration: AppTheme.gradientCard(context: context, ),
       child: Column(
         children: [
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            decoration: const BoxDecoration(
-              border: Border(bottom: BorderSide(color: AppColors.divider)),
+            decoration: BoxDecoration(
+              border: Border(bottom: BorderSide(color: AppColors.of(context).divider)),
             ),
-            child: const Row(
+            child: Row(
               children: [
                 SizedBox(
                   width: 36,
                   child: Text(
                     'GW',
                     style: TextStyle(
-                      color: AppColors.textSecondary,
+                      color: AppColors.of(context).textSecondary,
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
                     ),
@@ -1222,7 +1222,7 @@ class _HistoryTabState extends State<_HistoryTab>
                   child: Text(
                     'Opp',
                     style: TextStyle(
-                      color: AppColors.textSecondary,
+                      color: AppColors.of(context).textSecondary,
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
                     ),
@@ -1233,7 +1233,7 @@ class _HistoryTabState extends State<_HistoryTab>
                   child: Text(
                     'Min',
                     style: TextStyle(
-                      color: AppColors.textSecondary,
+                      color: AppColors.of(context).textSecondary,
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
                     ),
@@ -1245,7 +1245,7 @@ class _HistoryTabState extends State<_HistoryTab>
                   child: Text(
                     'G',
                     style: TextStyle(
-                      color: AppColors.textSecondary,
+                      color: AppColors.of(context).textSecondary,
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
                     ),
@@ -1257,7 +1257,7 @@ class _HistoryTabState extends State<_HistoryTab>
                   child: Text(
                     'A',
                     style: TextStyle(
-                      color: AppColors.textSecondary,
+                      color: AppColors.of(context).textSecondary,
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
                     ),
@@ -1269,7 +1269,7 @@ class _HistoryTabState extends State<_HistoryTab>
                   child: Text(
                     'Pts',
                     style: TextStyle(
-                      color: AppColors.primary,
+                      color: AppColors.of(context).primary,
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
                     ),
@@ -1282,9 +1282,9 @@ class _HistoryTabState extends State<_HistoryTab>
           ...widget.summary!.history.reversed.map(
             (h) => Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 border: Border(
-                  bottom: BorderSide(color: AppColors.divider, width: 0.5),
+                  bottom: BorderSide(color: AppColors.of(context).divider, width: 0.5),
                 ),
               ),
               child: Row(
@@ -1293,8 +1293,8 @@ class _HistoryTabState extends State<_HistoryTab>
                     width: 36,
                     child: Text(
                       '${h.round}',
-                      style: const TextStyle(
-                        color: AppColors.textSecondary,
+                      style: TextStyle(
+                        color: AppColors.of(context).textSecondary,
                         fontSize: 12,
                       ),
                     ),
@@ -1304,8 +1304,8 @@ class _HistoryTabState extends State<_HistoryTab>
                     width: 32,
                     child: Text(
                       '${h.minutes}',
-                      style: const TextStyle(
-                        color: AppColors.textSecondary,
+                      style: TextStyle(
+                        color: AppColors.of(context).textSecondary,
                         fontSize: 12,
                       ),
                       textAlign: TextAlign.center,
@@ -1315,8 +1315,8 @@ class _HistoryTabState extends State<_HistoryTab>
                     width: 28,
                     child: Text(
                       '${h.goalsScored}',
-                      style: const TextStyle(
-                        color: AppColors.textPrimary,
+                      style: TextStyle(
+                        color: AppColors.of(context).textPrimary,
                         fontSize: 12,
                       ),
                       textAlign: TextAlign.center,
@@ -1326,8 +1326,8 @@ class _HistoryTabState extends State<_HistoryTab>
                     width: 28,
                     child: Text(
                       '${h.assists}',
-                      style: const TextStyle(
-                        color: AppColors.textPrimary,
+                      style: TextStyle(
+                        color: AppColors.of(context).textPrimary,
                         fontSize: 12,
                       ),
                       textAlign: TextAlign.center,
@@ -1339,10 +1339,10 @@ class _HistoryTabState extends State<_HistoryTab>
                       '${h.totalPoints}',
                       style: TextStyle(
                         color: h.totalPoints >= 8
-                            ? AppColors.primary
+                            ? AppColors.of(context).primary
                             : h.totalPoints >= 6
-                            ? AppColors.accent
-                            : AppColors.textPrimary,
+                            ? AppColors.of(context).accent
+                            : AppColors.of(context).textPrimary,
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
                       ),
@@ -1360,7 +1360,7 @@ class _HistoryTabState extends State<_HistoryTab>
 
   Widget _buildOpponentCell(PlayerHistory h) {
     final opp = widget.provider.getTeamById(h.opponentTeam);
-    final badgeColor = h.wasHome ? AppColors.primary : AppColors.accent;
+    final badgeColor = h.wasHome ? AppColors.of(context).primary : AppColors.of(context).accent;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -1394,7 +1394,7 @@ class _HistoryTabState extends State<_HistoryTab>
         Flexible(
           child: Text(
             opp?.shortName ?? '${h.opponentTeam}',
-            style: const TextStyle(color: AppColors.textPrimary, fontSize: 12),
+            style: TextStyle(color: AppColors.of(context).textPrimary, fontSize: 12),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -1420,15 +1420,15 @@ class _FixturesTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (summary == null) {
-      return const Center(
-        child: CircularProgressIndicator(color: AppColors.primary),
+      return Center(
+        child: CircularProgressIndicator(color: AppColors.of(context).primary),
       );
     }
     if (summary!.fixtures.isEmpty) {
-      return const Center(
+      return Center(
         child: Text(
           'No upcoming fixtures',
-          style: TextStyle(color: AppColors.textSecondary),
+          style: TextStyle(color: AppColors.of(context).textSecondary),
         ),
       );
     }
@@ -1445,19 +1445,19 @@ class _FixturesTab extends StatelessWidget {
         final opponent = provider.getTeamById(opponentId);
         return Container(
           padding: const EdgeInsets.all(14),
-          decoration: AppTheme.gradientCard(),
+          decoration: AppTheme.gradientCard(context: context, ),
           child: Row(
             children: [
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AppColors.cardMedium,
+                  color: AppColors.of(context).cardMedium,
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
                   'GW${fixture.event}',
-                  style: const TextStyle(
-                    color: AppColors.textSecondary,
+                  style: TextStyle(
+                    color: AppColors.of(context).textSecondary,
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
                   ),
@@ -1482,8 +1482,8 @@ class _FixturesTab extends StatelessWidget {
                     ],
                     Text(
                       opponent?.shortName ?? '?',
-                      style: const TextStyle(
-                        color: AppColors.textPrimary,
+                      style: TextStyle(
+                        color: AppColors.of(context).textPrimary,
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                       ),
@@ -1495,15 +1495,15 @@ class _FixturesTab extends StatelessWidget {
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.cardMedium,
+                        color: AppColors.of(context).cardMedium,
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
                         isHome ? 'Home' : 'Away',
                         style: TextStyle(
                           color: isHome
-                              ? AppColors.primary
-                              : AppColors.textSecondary,
+                              ? AppColors.of(context).primary
+                              : AppColors.of(context).textSecondary,
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
                         ),
@@ -1514,8 +1514,8 @@ class _FixturesTab extends StatelessWidget {
               ),
               Text(
                 formatDateShort(fixture.kickoffTime),
-                style: const TextStyle(
-                  color: AppColors.textSecondary,
+                style: TextStyle(
+                  color: AppColors.of(context).textSecondary,
                   fontSize: 12,
                 ),
               ),

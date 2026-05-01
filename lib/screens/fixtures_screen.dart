@@ -73,10 +73,10 @@ class _FixturesScreenState extends State<FixturesScreen>
           });
         }
         return Scaffold(
-          backgroundColor: AppColors.background,
+          backgroundColor: AppColors.of(context).background,
           appBar: AppBar(
             title: const Text('Fixtures'),
-            backgroundColor: AppColors.secondary,
+            backgroundColor: AppColors.of(context).secondary,
             bottom: TabBar(
               controller: _tabController,
               isScrollable: true,
@@ -100,8 +100,8 @@ class _FixturesScreenState extends State<FixturesScreen>
                           Container(
                             width: 6,
                             height: 6,
-                            decoration: const BoxDecoration(
-                              color: AppColors.primary,
+                            decoration: BoxDecoration(
+                              color: AppColors.of(context).primary,
                               shape: BoxShape.circle,
                             ),
                           ),
@@ -110,8 +110,8 @@ class _FixturesScreenState extends State<FixturesScreen>
                           Container(
                             width: 6,
                             height: 6,
-                            decoration: const BoxDecoration(
-                              color: AppColors.accent,
+                            decoration: BoxDecoration(
+                              color: AppColors.of(context).accent,
                               shape: BoxShape.circle,
                             ),
                           ),
@@ -153,15 +153,15 @@ class _GwFixturesList extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
+            Icon(
               Icons.sports_soccer,
-              color: AppColors.textSecondary,
+              color: AppColors.of(context).textSecondary,
               size: 48,
             ),
             const SizedBox(height: 12),
             Text(
               'GW$gwId fixtures not available yet',
-              style: const TextStyle(color: AppColors.textSecondary),
+              style: TextStyle(color: AppColors.of(context).textSecondary),
             ),
           ],
         ),
@@ -202,13 +202,13 @@ class _FixtureCard extends StatelessWidget {
       ),
       child: Container(
         padding: const EdgeInsets.all(14),
-        decoration: AppTheme.gradientCard(),
+        decoration: AppTheme.gradientCard(context: context, ),
         child: Column(
           children: [
             Row(
               children: [
                 Expanded(
-                  child: _teamDisplay(home, fixture.teamHDifficulty, true),
+                  child: _teamDisplay(context, home, fixture.teamHDifficulty, true),
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(
@@ -216,15 +216,15 @@ class _FixtureCard extends StatelessWidget {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.cardMedium,
+                    color: AppColors.of(context).cardMedium,
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: AppColors.divider),
+                    border: Border.all(color: AppColors.of(context).divider),
                   ),
                   child: fixture.hasResult
                       ? Text(
                           '${fixture.homeTeamScore} - ${fixture.awayTeamScore}',
-                          style: const TextStyle(
-                            color: AppColors.textPrimary,
+                          style: TextStyle(
+                            color: AppColors.of(context).textPrimary,
                             fontWeight: FontWeight.w800,
                             fontSize: 16,
                           ),
@@ -235,8 +235,8 @@ class _FixtureCard extends StatelessWidget {
                               fixture.kickoffTime != null
                                   ? formatDateShort(fixture.kickoffTime)
                                   : 'TBC',
-                              style: const TextStyle(
-                                color: AppColors.textPrimary,
+                              style: TextStyle(
+                                color: AppColors.of(context).textPrimary,
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -245,8 +245,8 @@ class _FixtureCard extends StatelessWidget {
                               fixture.kickoffTime != null
                                   ? _extractTime(fixture.kickoffTime!)
                                   : '',
-                              style: const TextStyle(
-                                color: AppColors.textSecondary,
+                              style: TextStyle(
+                                color: AppColors.of(context).textSecondary,
                                 fontSize: 11,
                               ),
                             ),
@@ -254,7 +254,7 @@ class _FixtureCard extends StatelessWidget {
                         ),
                 ),
                 Expanded(
-                  child: _teamDisplay(away, fixture.teamADifficulty, false),
+                  child: _teamDisplay(context, away, fixture.teamADifficulty, false),
                 ),
               ],
             ),
@@ -263,16 +263,16 @@ class _FixtureCard extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.access_time,
-                    color: AppColors.textSecondary,
+                    color: AppColors.of(context).textSecondary,
                     size: 12,
                   ),
                   const SizedBox(width: 4),
                   Text(
                     formatDateTime(fixture.kickoffTime),
-                    style: const TextStyle(
-                      color: AppColors.textSecondary,
+                    style: TextStyle(
+                      color: AppColors.of(context).textSecondary,
                       fontSize: 11,
                     ),
                   ),
@@ -285,7 +285,7 @@ class _FixtureCard extends StatelessWidget {
     );
   }
 
-  Widget _teamDisplay(Team? team, int difficulty, bool isHome) {
+  Widget _teamDisplay(BuildContext context, Team? team, int difficulty, bool isHome) {
     final badge = CachedNetworkImage(
       imageUrl: team?.badgeUrl ?? '',
       width: 32,
@@ -305,8 +305,8 @@ class _FixtureCard extends StatelessWidget {
               ? [
                   Text(
                     team?.shortName ?? '?',
-                    style: const TextStyle(
-                      color: AppColors.textPrimary,
+                    style: TextStyle(
+                      color: AppColors.of(context).textPrimary,
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
                     ),
@@ -319,8 +319,8 @@ class _FixtureCard extends StatelessWidget {
                   const SizedBox(width: 6),
                   Text(
                     team?.shortName ?? '?',
-                    style: const TextStyle(
-                      color: AppColors.textPrimary,
+                    style: TextStyle(
+                      color: AppColors.of(context).textPrimary,
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
                     ),
@@ -337,8 +337,8 @@ class _FixtureCard extends StatelessWidget {
             const SizedBox(width: 4),
             Text(
               isHome ? 'H' : 'A',
-              style: const TextStyle(
-                color: AppColors.textSecondary,
+              style: TextStyle(
+                color: AppColors.of(context).textSecondary,
                 fontSize: 10,
               ),
             ),

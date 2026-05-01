@@ -35,10 +35,10 @@ class _CompareScreenState extends State<CompareScreen> {
     return Consumer<FplProvider>(
       builder: (context, provider, _) {
         return Scaffold(
-          backgroundColor: AppColors.background,
+          backgroundColor: AppColors.of(context).background,
           appBar: AppBar(
             title: const Text('Compare Players'),
-            backgroundColor: AppColors.secondary,
+            backgroundColor: AppColors.of(context).secondary,
           ),
           body: SingleChildScrollView(
             padding: const EdgeInsets.all(16),
@@ -62,10 +62,10 @@ class _CompareScreenState extends State<CompareScreen> {
                       margin: const EdgeInsets.symmetric(horizontal: 8),
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: AppColors.cardMedium,
+                        color: AppColors.of(context).cardMedium,
                         shape: BoxShape.circle,
                       ),
-                      child: const Text('VS', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w700, fontSize: 12)),
+                      child: Text('VS', style: TextStyle(color: AppColors.of(context).primary, fontWeight: FontWeight.w700, fontSize: 12)),
                     ),
                     Expanded(
                       child: _buildPlayerSelector(
@@ -86,12 +86,12 @@ class _CompareScreenState extends State<CompareScreen> {
                   _buildComparison(context, provider, _playerA!, _playerB!),
                 ] else ...[
                   const SizedBox(height: 40),
-                  const Center(
+                  Center(
                     child: Column(
                       children: [
-                        Icon(Icons.compare_arrows, color: AppColors.textSecondary, size: 64),
+                        Icon(Icons.compare_arrows, color: AppColors.of(context).textSecondary, size: 64),
                         SizedBox(height: 12),
-                        Text('Select two players to compare', style: TextStyle(color: AppColors.textSecondary, fontSize: 16)),
+                        Text('Select two players to compare', style: TextStyle(color: AppColors.of(context).textSecondary, fontSize: 16)),
                       ],
                     ),
                   ),
@@ -129,7 +129,7 @@ class _CompareScreenState extends State<CompareScreen> {
             ),
             child: Container(
               padding: const EdgeInsets.all(10),
-              decoration: AppTheme.gradientCard(),
+              decoration: AppTheme.gradientCard(context: context, ),
               child: Column(
                 children: [
                   Container(
@@ -137,7 +137,7 @@ class _CompareScreenState extends State<CompareScreen> {
                     height: 48,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: AppColors.cardMedium,
+                      color: AppColors.of(context).cardMedium,
                       border: Border.all(
                         color: getPositionColor(selected.elementType),
                         width: 2,
@@ -147,23 +147,23 @@ class _CompareScreenState extends State<CompareScreen> {
                     child: CachedNetworkImage(
                       imageUrl: selected.photoUrl,
                       fit: BoxFit.cover,
-                      placeholder: (_, __) => const Icon(Icons.person,
-                          color: AppColors.textSecondary, size: 24),
-                      errorWidget: (_, __, ___) => const Icon(Icons.person,
-                          color: AppColors.textSecondary, size: 24),
+                      placeholder: (_, __) => Icon(Icons.person,
+                          color: AppColors.of(context).textSecondary, size: 24),
+                      errorWidget: (_, __, ___) => Icon(Icons.person,
+                          color: AppColors.of(context).textSecondary, size: 24),
                     ),
                   ),
                   const SizedBox(height: 6),
                   Text(
                     selected.webName,
-                    style: const TextStyle(color: AppColors.primary, fontSize: 13, fontWeight: FontWeight.w700),
+                    style: TextStyle(color: AppColors.of(context).primary, fontSize: 13, fontWeight: FontWeight.w700),
                     textAlign: TextAlign.center,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   Text(
                     provider.getTeamById(selected.teamId)?.shortName ?? '',
-                    style: const TextStyle(color: AppColors.textSecondary, fontSize: 11),
+                    style: TextStyle(color: AppColors.of(context).textSecondary, fontSize: 11),
                   ),
                   const SizedBox(height: 4),
                   GestureDetector(
@@ -175,7 +175,7 @@ class _CompareScreenState extends State<CompareScreen> {
                       controller.clear();
                       onQueryChanged('');
                     },
-                    child: const Icon(Icons.close, color: AppColors.error, size: 16),
+                    child: Icon(Icons.close, color: AppColors.of(context).error, size: 16),
                   ),
                 ],
               ),
@@ -185,7 +185,7 @@ class _CompareScreenState extends State<CompareScreen> {
           TextField(
             controller: controller,
             onChanged: onQueryChanged,
-            style: const TextStyle(color: AppColors.textPrimary, fontSize: 13),
+            style: TextStyle(color: AppColors.of(context).textPrimary, fontSize: 13),
             decoration: InputDecoration(
               hintText: label,
               hintStyle: const TextStyle(fontSize: 12),
@@ -197,9 +197,9 @@ class _CompareScreenState extends State<CompareScreen> {
           const SizedBox(height: 4),
           Container(
             decoration: BoxDecoration(
-              color: AppColors.cardDark,
+              color: AppColors.of(context).cardDark,
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: AppColors.divider),
+              border: Border.all(color: AppColors.of(context).divider),
             ),
             child: Column(
               children: results.map((p) => InkWell(
@@ -213,9 +213,9 @@ class _CompareScreenState extends State<CompareScreen> {
                   child: Row(
                     children: [
                       Expanded(
-                        child: Text(p.webName, style: const TextStyle(color: AppColors.textPrimary, fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
+                        child: Text(p.webName, style: TextStyle(color: AppColors.of(context).textPrimary, fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
                       ),
-                      Text(formatPrice(p.nowCost), style: const TextStyle(color: AppColors.textSecondary, fontSize: 11)),
+                      Text(formatPrice(p.nowCost), style: TextStyle(color: AppColors.of(context).textSecondary, fontSize: 11)),
                     ],
                   ),
                 ),
@@ -240,17 +240,17 @@ class _CompareScreenState extends State<CompareScreen> {
   Widget _buildRadarChart(Player a, Player b) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: AppTheme.gradientCard(),
+      decoration: AppTheme.gradientCard(context: context, ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('ICT Comparison', style: TextStyle(color: AppColors.textPrimary, fontSize: 14, fontWeight: FontWeight.w600)),
+          Text('ICT Comparison', style: TextStyle(color: AppColors.of(context).textPrimary, fontSize: 14, fontWeight: FontWeight.w600)),
           const SizedBox(height: 12),
           Row(
             children: [
-              _legendDot(AppColors.primary, a.webName),
+              _legendDot(AppColors.of(context).primary, a.webName),
               const SizedBox(width: 16),
-              _legendDot(AppColors.accent, b.webName),
+              _legendDot(AppColors.of(context).accent, b.webName),
             ],
           ),
           const SizedBox(height: 16),
@@ -284,13 +284,13 @@ class _CompareScreenState extends State<CompareScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(color: AppColors.textSecondary, fontSize: 11)),
+        Text(label, style: TextStyle(color: AppColors.of(context).textSecondary, fontSize: 11)),
         const SizedBox(height: 4),
         Row(
           children: [
             SizedBox(
               width: 40,
-              child: Text(valA.toStringAsFixed(1), style: const TextStyle(color: AppColors.primary, fontSize: 11), textAlign: TextAlign.right),
+              child: Text(valA.toStringAsFixed(1), style: TextStyle(color: AppColors.of(context).primary, fontSize: 11), textAlign: TextAlign.right),
             ),
             const SizedBox(width: 6),
             Expanded(
@@ -300,10 +300,10 @@ class _CompareScreenState extends State<CompareScreen> {
                   height: 10,
                   child: Stack(
                     children: [
-                      Container(color: AppColors.cardMedium),
+                      Container(color: AppColors.of(context).cardMedium),
                       FractionallySizedBox(
                         widthFactor: (valA / max).clamp(0.0, 1.0),
-                        child: Container(color: AppColors.primary.withAlpha(153)),
+                        child: Container(color: AppColors.of(context).primary.withAlpha(153)),
                       ),
                     ],
                   ),
@@ -318,10 +318,10 @@ class _CompareScreenState extends State<CompareScreen> {
                   height: 10,
                   child: Stack(
                     children: [
-                      Container(color: AppColors.cardMedium),
+                      Container(color: AppColors.of(context).cardMedium),
                       FractionallySizedBox(
                         widthFactor: (valB / max).clamp(0.0, 1.0),
-                        child: Container(color: AppColors.accent.withAlpha(153)),
+                        child: Container(color: AppColors.of(context).accent.withAlpha(153)),
                       ),
                     ],
                   ),
@@ -331,7 +331,7 @@ class _CompareScreenState extends State<CompareScreen> {
             const SizedBox(width: 6),
             SizedBox(
               width: 40,
-              child: Text(valB.toStringAsFixed(1), style: const TextStyle(color: AppColors.accent, fontSize: 11)),
+              child: Text(valB.toStringAsFixed(1), style: TextStyle(color: AppColors.of(context).accent, fontSize: 11)),
             ),
           ],
         ),
@@ -354,22 +354,22 @@ class _CompareScreenState extends State<CompareScreen> {
     ];
 
     return Container(
-      decoration: AppTheme.gradientCard(),
+      decoration: AppTheme.gradientCard(context: context, ),
       child: Column(
         children: [
           Padding(
             padding: const EdgeInsets.all(12),
             child: Row(
               children: [
-                Expanded(child: Text(a.webName, style: const TextStyle(color: AppColors.primary, fontSize: 13, fontWeight: FontWeight.w600), textAlign: TextAlign.left, maxLines: 1, overflow: TextOverflow.ellipsis)),
+                Expanded(child: Text(a.webName, style: TextStyle(color: AppColors.of(context).primary, fontSize: 13, fontWeight: FontWeight.w600), textAlign: TextAlign.left, maxLines: 1, overflow: TextOverflow.ellipsis)),
                 const SizedBox(width: 8),
-                Flexible(flex: 0, child: Text('Stat', style: const TextStyle(color: AppColors.textSecondary, fontSize: 12), textAlign: TextAlign.center)),
+                Flexible(flex: 0, child: Text('Stat', style: TextStyle(color: AppColors.of(context).textSecondary, fontSize: 12), textAlign: TextAlign.center)),
                 const SizedBox(width: 8),
-                Expanded(child: Text(b.webName, style: const TextStyle(color: AppColors.accent, fontSize: 13, fontWeight: FontWeight.w600), textAlign: TextAlign.right, maxLines: 1, overflow: TextOverflow.ellipsis)),
+                Expanded(child: Text(b.webName, style: TextStyle(color: AppColors.of(context).accent, fontSize: 13, fontWeight: FontWeight.w600), textAlign: TextAlign.right, maxLines: 1, overflow: TextOverflow.ellipsis)),
               ],
             ),
           ),
-          const Divider(height: 1, color: AppColors.divider),
+          Divider(height: 1, color: AppColors.of(context).divider),
           ...stats.map((s) {
             final (label, valA, valB) = s;
             final numA = double.tryParse(valA.replaceAll(RegExp(r'[£%m]'), '')) ?? 0;
@@ -378,14 +378,14 @@ class _CompareScreenState extends State<CompareScreen> {
             final bWins = numB > numA;
             return Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: AppColors.divider, width: 0.5))),
+              decoration: BoxDecoration(border: Border(bottom: BorderSide(color: AppColors.of(context).divider, width: 0.5))),
               child: Row(
                 children: [
                   Expanded(
                     child: Text(
                       valA,
                       style: TextStyle(
-                        color: aWins ? AppColors.primary : AppColors.textPrimary,
+                        color: aWins ? AppColors.of(context).primary : AppColors.of(context).textPrimary,
                         fontSize: 13,
                         fontWeight: aWins ? FontWeight.w700 : FontWeight.w400,
                       ),
@@ -394,14 +394,14 @@ class _CompareScreenState extends State<CompareScreen> {
                   const SizedBox(width: 8),
                   Flexible(
                     flex: 0,
-                    child: Text(label, style: const TextStyle(color: AppColors.textSecondary, fontSize: 10), textAlign: TextAlign.center),
+                    child: Text(label, style: TextStyle(color: AppColors.of(context).textSecondary, fontSize: 10), textAlign: TextAlign.center),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       valB,
                       style: TextStyle(
-                        color: bWins ? AppColors.accent : AppColors.textPrimary,
+                        color: bWins ? AppColors.of(context).accent : AppColors.of(context).textPrimary,
                         fontSize: 13,
                         fontWeight: bWins ? FontWeight.w700 : FontWeight.w400,
                       ),

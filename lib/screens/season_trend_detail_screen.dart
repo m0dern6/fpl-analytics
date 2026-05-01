@@ -27,15 +27,15 @@ class SeasonTrendDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     if (dataPoints.isEmpty) {
       return Scaffold(
-        backgroundColor: AppColors.background,
+        backgroundColor: AppColors.of(context).background,
         appBar: AppBar(
           title: Text(title),
-          backgroundColor: AppColors.secondary,
+          backgroundColor: AppColors.of(context).secondary,
         ),
-        body: const Center(
+        body: Center(
           child: Text(
             'No data available',
-            style: TextStyle(color: AppColors.textSecondary),
+            style: TextStyle(color: AppColors.of(context).textSecondary),
           ),
         ),
       );
@@ -51,52 +51,52 @@ class SeasonTrendDetailScreen extends StatelessWidget {
     }).toList();
 
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(title: Text(title), backgroundColor: AppColors.secondary),
+      backgroundColor: AppColors.of(context).background,
+      appBar: AppBar(title: Text(title), backgroundColor: AppColors.of(context).secondary),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildSummaryRow(maxVal, minVal, avgVal),
+            _buildSummaryRow(context, maxVal, minVal, avgVal),
             const SizedBox(height: 16),
             _buildChart(context, spots, maxVal),
             const SizedBox(height: 16),
-            _buildTable(),
+            _buildTable(context),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildSummaryRow(double maxVal, double minVal, double avgVal) {
+  Widget _buildSummaryRow(BuildContext context, double maxVal, double minVal, double avgVal) {
     return Row(
       children: [
         Expanded(
-          child: _summaryTile(
+          child: _summaryTile(context, 
             'Highest',
             valueFormatter(maxVal),
-            AppColors.primary,
+            AppColors.of(context).primary,
           ),
         ),
         const SizedBox(width: 10),
-        Expanded(child: _summaryTile('Average', valueFormatter(avgVal), color)),
+        Expanded(child: _summaryTile(context, 'Average', valueFormatter(avgVal), color)),
         const SizedBox(width: 10),
         Expanded(
-          child: _summaryTile(
+          child: _summaryTile(context, 
             'Lowest',
             valueFormatter(minVal),
-            AppColors.textSecondary,
+            AppColors.of(context).textSecondary,
           ),
         ),
       ],
     ).animate().fadeIn(duration: 400.ms);
   }
 
-  Widget _summaryTile(String label, String value, Color tileColor) {
+  Widget _summaryTile(BuildContext context, String label, String value, Color tileColor) {
     return Container(
       padding: const EdgeInsets.all(14),
-      decoration: AppTheme.gradientCard(),
+      decoration: AppTheme.gradientCard(context: context, ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -111,8 +111,8 @@ class SeasonTrendDetailScreen extends StatelessWidget {
           const SizedBox(height: 2),
           Text(
             label,
-            style: const TextStyle(
-              color: AppColors.textSecondary,
+            style: TextStyle(
+              color: AppColors.of(context).textSecondary,
               fontSize: 11,
             ),
           ),
@@ -124,7 +124,7 @@ class SeasonTrendDetailScreen extends StatelessWidget {
   Widget _buildChart(BuildContext context, List<FlSpot> spots, double maxVal) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: AppTheme.gradientCard(),
+      decoration: AppTheme.gradientCard(context: context, ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -141,8 +141,8 @@ class SeasonTrendDetailScreen extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 subtitle,
-                style: const TextStyle(
-                  color: AppColors.textPrimary,
+                style: TextStyle(
+                  color: AppColors.of(context).textPrimary,
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                 ),
@@ -168,7 +168,7 @@ class SeasonTrendDetailScreen extends StatelessWidget {
                             radius: 3.5,
                             color: color,
                             strokeWidth: 1.5,
-                            strokeColor: AppColors.cardDark,
+                            strokeColor: AppColors.of(context).cardDark,
                           ),
                     ),
                     belowBarData: BarAreaData(
@@ -184,8 +184,8 @@ class SeasonTrendDetailScreen extends StatelessWidget {
                       reservedSize: 44,
                       getTitlesWidget: (v, _) => Text(
                         valueFormatter(v),
-                        style: const TextStyle(
-                          color: AppColors.textSecondary,
+                        style: TextStyle(
+                          color: AppColors.of(context).textSecondary,
                           fontSize: 9,
                         ),
                       ),
@@ -207,8 +207,8 @@ class SeasonTrendDetailScreen extends StatelessWidget {
                           padding: const EdgeInsets.only(top: 4),
                           child: Text(
                             'GW${dataPoints[idx].gwId}',
-                            style: const TextStyle(
-                              color: AppColors.textSecondary,
+                            style: TextStyle(
+                              color: AppColors.of(context).textSecondary,
                               fontSize: 8,
                             ),
                           ),
@@ -226,16 +226,16 @@ class SeasonTrendDetailScreen extends StatelessWidget {
                 gridData: FlGridData(
                   drawVerticalLine: true,
                   getDrawingHorizontalLine: (_) =>
-                      const FlLine(color: AppColors.divider, strokeWidth: 0.5),
+                      FlLine(color: AppColors.of(context).divider, strokeWidth: 0.5),
                   getDrawingVerticalLine: (_) =>
-                      const FlLine(color: AppColors.divider, strokeWidth: 0.5),
+                      FlLine(color: AppColors.of(context).divider, strokeWidth: 0.5),
                 ),
                 borderData: FlBorderData(show: false),
                 minY: 0,
                 maxY: maxVal * 1.2,
                 lineTouchData: LineTouchData(
                   touchTooltipData: LineTouchTooltipData(
-                    getTooltipColor: (_) => AppColors.cardDark,
+                    getTooltipColor: (_) => AppColors.of(context).cardDark,
                     getTooltipItems: (touchedSpots) {
                       return touchedSpots.map((s) {
                         final idx = s.x.toInt();
@@ -262,15 +262,15 @@ class SeasonTrendDetailScreen extends StatelessWidget {
     ).animate().fadeIn(delay: 100.ms);
   }
 
-  Widget _buildTable() {
+  Widget _buildTable(BuildContext context) {
     return Container(
-      decoration: AppTheme.gradientCard(),
+      decoration: AppTheme.gradientCard(context: context, ),
       child: Column(
         children: [
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            decoration: const BoxDecoration(
-              border: Border(bottom: BorderSide(color: AppColors.divider)),
+            decoration: BoxDecoration(
+              border: Border(bottom: BorderSide(color: AppColors.of(context).divider)),
             ),
             child: Row(
               children: const [
@@ -279,7 +279,7 @@ class SeasonTrendDetailScreen extends StatelessWidget {
                   child: Text(
                     'GW',
                     style: TextStyle(
-                      color: AppColors.textSecondary,
+                      color: AppColors.of(context).textSecondary,
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                     ),
@@ -289,7 +289,7 @@ class SeasonTrendDetailScreen extends StatelessWidget {
                   child: Text(
                     'Value',
                     style: TextStyle(
-                      color: AppColors.textSecondary,
+                      color: AppColors.of(context).textSecondary,
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                     ),
@@ -302,9 +302,9 @@ class SeasonTrendDetailScreen extends StatelessWidget {
           ...dataPoints.reversed.map(
             (dp) => Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 border: Border(
-                  bottom: BorderSide(color: AppColors.divider, width: 0.5),
+                  bottom: BorderSide(color: AppColors.of(context).divider, width: 0.5),
                 ),
               ),
               child: Row(
@@ -313,8 +313,8 @@ class SeasonTrendDetailScreen extends StatelessWidget {
                     width: 60,
                     child: Text(
                       'GW${dp.gwId}',
-                      style: const TextStyle(
-                        color: AppColors.textSecondary,
+                      style: TextStyle(
+                        color: AppColors.of(context).textSecondary,
                         fontSize: 13,
                       ),
                     ),
@@ -358,7 +358,7 @@ class SeasonTrendScreenFactory {
       title: 'GW Avg Score',
       subtitle: 'Average manager score per gameweek',
       dataPoints: points,
-      color: AppColors.primary,
+      color: AppColors.of(context).primary,
       icon: Icons.show_chart_rounded,
       valueFormatter: (v) => '${v.toInt()} pts',
     );
@@ -373,7 +373,7 @@ class SeasonTrendScreenFactory {
       title: 'GW High Score',
       subtitle: 'Highest manager score per gameweek',
       dataPoints: points,
-      color: AppColors.warning,
+      color: AppColors.of(context).warning,
       icon: Icons.emoji_events_rounded,
       valueFormatter: (v) => '${v.toInt()} pts',
     );
@@ -387,7 +387,7 @@ class SeasonTrendScreenFactory {
       title: 'Transfers / GW',
       subtitle: 'Total transfers made per gameweek',
       dataPoints: points,
-      color: AppColors.accent,
+      color: AppColors.of(context).accent,
       icon: Icons.swap_horiz_rounded,
       valueFormatter: (v) => v >= 1000
           ? '${(v / 1000).toStringAsFixed(0)}k'
