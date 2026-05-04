@@ -269,8 +269,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             onPressed: () {
               if (widget.isModal) {
                 Navigator.pop(context);
+              } else {
+                context.read<FplEntryProvider>().skipOnboarding();
               }
-              // Simply skip — app will work in browse mode
             },
             child: Text(
               'Browse without linking',

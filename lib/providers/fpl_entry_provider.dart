@@ -20,6 +20,8 @@ class FplEntryProvider extends ChangeNotifier {
 
   bool _isLoading = false;
   bool _isStreamerMode = false;
+  bool _initDone = false;
+  bool _skippedOnboarding = false;
   String? _error;
   DateTime? _lastUpdated;
 
@@ -36,6 +38,8 @@ class FplEntryProvider extends ChangeNotifier {
   List<EntryTransfer> get transfers => _transfers;
   bool get isLoading => _isLoading;
   bool get hasEntry => _entryId != null && _entry != null;
+  bool get initDone => _initDone;
+  bool get skippedOnboarding => _skippedOnboarding;
   String? get error => _error;
   DateTime? get lastUpdated => _lastUpdated;
   bool get isStreamerMode => _isStreamerMode;
@@ -49,6 +53,7 @@ class FplEntryProvider extends ChangeNotifier {
     if (savedId != null) {
       await loadEntry(savedId);
     }
+    _initDone = true;
     notifyListeners();
   }
 
@@ -311,6 +316,11 @@ class FplEntryProvider extends ChangeNotifier {
     _picksCache = {};
     _error = null;
     _storage.clearEntryId();
+    notifyListeners();
+  }
+
+  void skipOnboarding() {
+    _skippedOnboarding = true;
     notifyListeners();
   }
 
