@@ -11,12 +11,14 @@ class LeagueDetailScreen extends StatefulWidget {
   final int leagueId;
   final String leagueName;
   final int? userEntryId;
+  final bool isH2H;
 
   const LeagueDetailScreen({
     super.key,
     required this.leagueId,
-    required this.leagueName,
+    this.leagueName = '',
     this.userEntryId,
+    this.isH2H = false,
   });
 
   @override

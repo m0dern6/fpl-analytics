@@ -794,7 +794,7 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
       if (!isBench || activeChip == 'bboost') {
         final playerId = pick['element'] as int;
         final live = provider.getLiveStatsForPlayer(playerId);
-        final rawPts = live?['total_points'] as int? ?? 0;
+        final rawPts = live?.totalPoints ?? 0;
         final multiplier = pick['multiplier'] as int? ?? 1;
         total += (rawPts * multiplier);
       }

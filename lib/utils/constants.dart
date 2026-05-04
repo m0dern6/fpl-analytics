@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 class ApiConstants {
   static const String baseUrl = 'https://fantasy.premierleague.com/api';
-  static const String bootstrapStatic = '${baseUrl}/bootstrap-static/';
-  static const String fixtures = '${baseUrl}/fixtures/';
+  static const String bootstrapStatic = '$baseUrl/bootstrap-static/';
+  static const String fixtures = '$baseUrl/fixtures/';
   static String fixturesForGw(int gw) => '$baseUrl/fixtures/?event=$gw';
   static String elementSummary(int id) => '$baseUrl/element-summary/$id/';
   static String liveGw(int gw) => '$baseUrl/event/$gw/live/';
@@ -11,8 +11,12 @@ class ApiConstants {
   static String fplEntry(int entryId) => '$baseUrl/entry/$entryId/';
   static String fplEntryPicks(int entryId, int gw) =>
       '$baseUrl/entry/$entryId/event/$gw/picks/';
-  static String leagueStandings(int leagueId) =>
-      '$baseUrl/leagues-classic/$leagueId/standings/';
+  static String fplEntryHistory(int entryId) => '$baseUrl/entry/$entryId/history/';
+  static String fplEntryTransfers(int entryId) => '$baseUrl/entry/$entryId/transfers/';
+  static String leagueStandings(int leagueId, {int page = 1}) =>
+      '$baseUrl/leagues-classic/$leagueId/standings/?page_standings=$page';
+  static String h2hLeagueStandings(int leagueId, {int page = 1}) =>
+      '$baseUrl/leagues-h2h/$leagueId/standings/?page_standings=$page';
   static String playerPhotoUrl(String photo) {
     final code = photo.replaceAll('.jpg', '');
     return 'https://resources.premierleague.com/premierleague/photos/players/110x140/p$code.png';

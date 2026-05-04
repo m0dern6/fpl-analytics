@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'providers/fpl_provider.dart';
+import 'providers/fpl_entry_provider.dart';
 import 'providers/user_teams_provider.dart';
 import 'providers/theme_provider.dart';
 import 'screens/main_navigation_screen.dart';
@@ -24,6 +25,7 @@ class FplAnalyticsApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => FplProvider()),
+        ChangeNotifierProvider(create: (_) => FplEntryProvider()),
         ChangeNotifierProvider(create: (_) => UserTeamsProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
       ],

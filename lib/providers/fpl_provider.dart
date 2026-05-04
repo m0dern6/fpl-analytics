@@ -5,7 +5,9 @@ import '../models/gameweek.dart';
 import '../models/fixture.dart';
 import '../models/player_history.dart';
 import '../models/element_type.dart';
+import '../models/entry.dart';
 import '../services/fpl_service.dart';
+import '../services/local_storage_service.dart';
 
 class FplProvider extends ChangeNotifier {
   final FplService _service = FplService();
@@ -16,16 +18,17 @@ class FplProvider extends ChangeNotifier {
   List<Fixture> _fixtures = [];
   List<ElementType> _elementTypes = [];
   Map<int, PlayerSummary> _playerSummaries = {};
-  Map<int, Map<String, dynamic>> _liveData = {};
+  Map<int, LiveElementStats> _liveData = {};
   Map<int, List<Player>> _dreamTeams = {};
   Map<int, Map<int, int>> _dreamTeamPoints = {}; // gw -> { playerId: gwPoints }
-  Map<int, Map<int, Map<String, dynamic>>> _managerTeams = {}; // gw -> { entryId: picks }
+  Map<int, Map<int, EntryGwPicks>> _managerTeams = {}; // gw -> { entryId: picks }
   final Set<int> _dreamTeamLoadingGws = {};
 
   bool _isLoading = false;
   bool _isLoadingFixtures = false;
   String? _error;
   Gameweek? _currentGameweek;
+  DateTime? _offlineCachedAt;
 
   List<Player> get players => _players;
   List<Team> get teams => _teams;
@@ -36,6 +39,7 @@ class FplProvider extends ChangeNotifier {
   bool get isLoadingFixtures => _isLoadingFixtures;
   String? get error => _error;
   Gameweek? get currentGameweek => _currentGameweek;
+  DateTime? get offlineCachedAt => _offlineCachedAt;
 
   Future<void> loadAllData({bool forceRefresh = false}) async {
     _isLoading = true;
@@ -56,6 +60,9 @@ class FplProvider extends ChangeNotifier {
           orElse: () => _gameweeks.last,
         ),
       );
+
+      // Store offline timestamp if data came from cache
+      _offlineCachedAt = bootstrapData['offlineCachedAt'] as DateTime?;
 
       await _loadFixtures();
     } catch (e) {
@@ -100,7 +107,7 @@ class FplProvider extends ChangeNotifier {
     } catch (_) {}
   }
 
-  Map<String, dynamic>? getLiveStatsForPlayer(int playerId) {
+  LiveElementStats? getLiveStatsForPlayer(int playerId) {
     return _liveData[playerId];
   }
 
@@ -147,7 +154,7 @@ class FplProvider extends ChangeNotifier {
     } catch (_) {}
   }
 
-  Map<String, dynamic>? getManagerTeam(int entryId, int gw) =>
+  EntryGwPicks? getManagerTeam(int entryId, int gw) =>
       _managerTeams[gw]?[entryId];
 
   Team? getTeamById(int teamId) {

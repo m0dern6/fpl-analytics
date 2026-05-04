@@ -123,7 +123,7 @@ class FplPitchScreen extends StatelessWidget {
 
     final player = provider.getPlayerById(playerId);
     final live = provider.getLiveStatsForPlayer(playerId);
-    final rawPts = live?['total_points'] as int? ?? 0;
+    final rawPts = live?.totalPoints ?? 0;
 
     int effectivePts = rawPts;
     if (!isBench) {
