@@ -21,7 +21,13 @@ class FplService {
 
   static const Duration _cacheDuration = Duration(minutes: 5);
 
-  Future<Map<String, dynamic>> fetchBootstrapData({bool forceRefresh = false}) async {
+  Future<Map<String, dynamic>> fetchBootstrapData({
+    bool forceRefresh = false,
+  }) async {
+    if (forceRefresh) {
+      clearCache();
+    }
+
     if (!forceRefresh &&
         _bootstrapCache != null &&
         _bootstrapCacheTime != null &&
@@ -29,10 +35,17 @@ class FplService {
       return _bootstrapCache!;
     }
 
-    final response = await http.get(
-      Uri.parse(ApiConstants.bootstrapStatic),
-      headers: {'User-Agent': 'FPL Analytics App'},
-    ).timeout(const Duration(seconds: 30));
+    final response = await http
+        .get(
+          Uri.parse(ApiConstants.bootstrapStatic),
+          headers: {
+            'Accept': 'application/json',
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache',
+            'User-Agent': 'FPL Analytics App',
+          },
+        )
+        .timeout(const Duration(seconds: 30));
 
     if (response.statusCode != 200) {
       throw Exception('Failed to load bootstrap data: ${response.statusCode}');
@@ -69,38 +82,48 @@ class FplService {
   }
 
   Future<List<Fixture>> fetchAllFixtures() async {
-    final response = await http.get(
-      Uri.parse(ApiConstants.fixtures),
-      headers: {'User-Agent': 'FPL Analytics App'},
-    ).timeout(const Duration(seconds: 30));
+    final response = await http
+        .get(
+          Uri.parse(ApiConstants.fixtures),
+          headers: {'User-Agent': 'FPL Analytics App'},
+        )
+        .timeout(const Duration(seconds: 30));
 
     if (response.statusCode != 200) {
       throw Exception('Failed to load fixtures: ${response.statusCode}');
     }
 
     final data = json.decode(response.body) as List<dynamic>;
-    return data.map((e) => Fixture.fromJson(e as Map<String, dynamic>)).toList();
+    return data
+        .map((e) => Fixture.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   Future<List<Fixture>> fetchFixturesForGameweek(int gw) async {
-    final response = await http.get(
-      Uri.parse(ApiConstants.fixturesForGw(gw)),
-      headers: {'User-Agent': 'FPL Analytics App'},
-    ).timeout(const Duration(seconds: 30));
+    final response = await http
+        .get(
+          Uri.parse(ApiConstants.fixturesForGw(gw)),
+          headers: {'User-Agent': 'FPL Analytics App'},
+        )
+        .timeout(const Duration(seconds: 30));
 
     if (response.statusCode != 200) {
       throw Exception('Failed to load GW$gw fixtures: ${response.statusCode}');
     }
 
     final data = json.decode(response.body) as List<dynamic>;
-    return data.map((e) => Fixture.fromJson(e as Map<String, dynamic>)).toList();
+    return data
+        .map((e) => Fixture.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   Future<PlayerSummary> fetchPlayerSummary(int playerId) async {
-    final response = await http.get(
-      Uri.parse(ApiConstants.elementSummary(playerId)),
-      headers: {'User-Agent': 'FPL Analytics App'},
-    ).timeout(const Duration(seconds: 30));
+    final response = await http
+        .get(
+          Uri.parse(ApiConstants.elementSummary(playerId)),
+          headers: {'User-Agent': 'FPL Analytics App'},
+        )
+        .timeout(const Duration(seconds: 30));
 
     if (response.statusCode != 200) {
       throw Exception('Failed to load player summary: ${response.statusCode}');
@@ -111,10 +134,12 @@ class FplService {
   }
 
   Future<Map<int, Map<String, dynamic>>> fetchLiveGameweekData(int gw) async {
-    final response = await http.get(
-      Uri.parse(ApiConstants.liveGw(gw)),
-      headers: {'User-Agent': 'FPL Analytics App'},
-    ).timeout(const Duration(seconds: 30));
+    final response = await http
+        .get(
+          Uri.parse(ApiConstants.liveGw(gw)),
+          headers: {'User-Agent': 'FPL Analytics App'},
+        )
+        .timeout(const Duration(seconds: 30));
 
     if (response.statusCode != 200) {
       throw Exception('Failed to load live GW data: ${response.statusCode}');
@@ -132,10 +157,12 @@ class FplService {
   }
 
   Future<Map<int, int>> fetchDreamTeam(int gw) async {
-    final response = await http.get(
-      Uri.parse(ApiConstants.dreamTeam(gw)),
-      headers: {'User-Agent': 'FPL Analytics App'},
-    ).timeout(const Duration(seconds: 30));
+    final response = await http
+        .get(
+          Uri.parse(ApiConstants.dreamTeam(gw)),
+          headers: {'User-Agent': 'FPL Analytics App'},
+        )
+        .timeout(const Duration(seconds: 30));
 
     if (response.statusCode != 200) {
       throw Exception('Failed to load dream team: ${response.statusCode}');
@@ -155,10 +182,12 @@ class FplService {
   Future<Map<String, dynamic>> fetchFplEntry(int entryId) async {
     if (_entryCache.containsKey(entryId)) return _entryCache[entryId]!;
 
-    final response = await http.get(
-      Uri.parse(ApiConstants.fplEntry(entryId)),
-      headers: {'User-Agent': 'FPL Analytics App'},
-    ).timeout(const Duration(seconds: 30));
+    final response = await http
+        .get(
+          Uri.parse(ApiConstants.fplEntry(entryId)),
+          headers: {'User-Agent': 'FPL Analytics App'},
+        )
+        .timeout(const Duration(seconds: 30));
 
     if (response.statusCode != 200) {
       throw Exception('Failed to load FPL entry: ${response.statusCode}');
@@ -173,10 +202,12 @@ class FplService {
     final cacheKey = '${entryId}_$gw';
     if (_picksCache.containsKey(cacheKey)) return _picksCache[cacheKey]!;
 
-    final response = await http.get(
-      Uri.parse(ApiConstants.fplEntryPicks(entryId, gw)),
-      headers: {'User-Agent': 'FPL Analytics App'},
-    ).timeout(const Duration(seconds: 30));
+    final response = await http
+        .get(
+          Uri.parse(ApiConstants.fplEntryPicks(entryId, gw)),
+          headers: {'User-Agent': 'FPL Analytics App'},
+        )
+        .timeout(const Duration(seconds: 30));
 
     if (response.statusCode != 200) {
       throw Exception('Failed to load entry picks: ${response.statusCode}');
@@ -188,13 +219,17 @@ class FplService {
   }
 
   Future<Map<String, dynamic>> fetchLeagueStandings(int leagueId) async {
-    final response = await http.get(
-      Uri.parse(ApiConstants.leagueStandings(leagueId)),
-      headers: {'User-Agent': 'FPL Analytics App'},
-    ).timeout(const Duration(seconds: 30));
+    final response = await http
+        .get(
+          Uri.parse(ApiConstants.leagueStandings(leagueId)),
+          headers: {'User-Agent': 'FPL Analytics App'},
+        )
+        .timeout(const Duration(seconds: 30));
 
     if (response.statusCode != 200) {
-      throw Exception('Failed to load league standings: ${response.statusCode}');
+      throw Exception(
+        'Failed to load league standings: ${response.statusCode}',
+      );
     }
 
     return json.decode(response.body) as Map<String, dynamic>;
@@ -203,5 +238,7 @@ class FplService {
   void clearCache() {
     _bootstrapCache = null;
     _bootstrapCacheTime = null;
+    _entryCache.clear();
+    _picksCache.clear();
   }
 }

@@ -83,8 +83,7 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
     super.dispose();
   }
 
-  int get _spent =>
-      _slots.fold(0, (sum, p) => sum + (p?.nowCost ?? 0));
+  int get _spent => _slots.fold(0, (sum, p) => sum + (p?.nowCost ?? 0));
 
   int get _remaining => _kBudget - _spent;
 
@@ -136,7 +135,8 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
   // Sub Out: move a starting outfield player to bench
   void _subOut(int startingSlotIndex) {
     final player = _slots[startingSlotIndex];
-    if (player == null || startingSlotIndex < 1 || startingSlotIndex > 10) return;
+    if (player == null || startingSlotIndex < 1 || startingSlotIndex > 10)
+      return;
 
     // Find empty bench outfield slot
     final emptyBenchSlot = _nextBenchSlot(player.elementType);
@@ -145,7 +145,8 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
         _slots[emptyBenchSlot] = player;
         _slots[startingSlotIndex] = null;
         if (_captainIdx == startingSlotIndex) _captainIdx = emptyBenchSlot;
-        if (_viceCaptainIdx == startingSlotIndex) _viceCaptainIdx = emptyBenchSlot;
+        if (_viceCaptainIdx == startingSlotIndex)
+          _viceCaptainIdx = emptyBenchSlot;
       });
     } else {
       // All bench outfield slots full – ask which bench player to swap with
@@ -181,10 +182,14 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
     setState(() {
       _slots[0] = benchGk;
       _slots[11] = startGk;
-      if (_captainIdx == 0) _captainIdx = 11;
-      else if (_captainIdx == 11) _captainIdx = 0;
-      if (_viceCaptainIdx == 0) _viceCaptainIdx = 11;
-      else if (_viceCaptainIdx == 11) _viceCaptainIdx = 0;
+      if (_captainIdx == 0)
+        _captainIdx = 11;
+      else if (_captainIdx == 11)
+        _captainIdx = 0;
+      if (_viceCaptainIdx == 0)
+        _viceCaptainIdx = 11;
+      else if (_viceCaptainIdx == 11)
+        _viceCaptainIdx = 0;
     });
   }
 
@@ -194,7 +199,10 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
     // If benchToClear=false: from is bench, pick starting outfield slot to swap with
     final swapSlots = benchToClear
         ? [12, 13, 14].where((i) => _slots[i] != null).toList()
-        : List.generate(10, (i) => i + 1).where((i) => _slots[i] != null).toList();
+        : List.generate(
+            10,
+            (i) => i + 1,
+          ).where((i) => _slots[i] != null).toList();
 
     showModalBottomSheet(
       context: context,
@@ -211,7 +219,8 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
             children: [
               Center(
                 child: Container(
-                  width: 36, height: 4,
+                  width: 36,
+                  height: 4,
                   decoration: BoxDecoration(
                     color: AppColors.of(context).divider,
                     borderRadius: BorderRadius.circular(2),
@@ -220,8 +229,14 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
               ),
               const SizedBox(height: 16),
               Text(
-                benchToClear ? 'Swap ${fromPlayer.webName} with bench player:' : 'Swap ${fromPlayer.webName} with starting player:',
-                style: TextStyle(color: AppColors.of(context).textPrimary, fontSize: 15, fontWeight: FontWeight.w600),
+                benchToClear
+                    ? 'Swap ${fromPlayer.webName} with bench player:'
+                    : 'Swap ${fromPlayer.webName} with starting player:',
+                style: TextStyle(
+                  color: AppColors.of(context).textPrimary,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               const SizedBox(height: 12),
               ...swapSlots.map((toSlot) {
@@ -233,8 +248,13 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
                     backgroundColor: AppColors.of(context).cardMedium,
                     backgroundImage: NetworkImage(toPlayer.photoUrl),
                   ),
-                  title: Text(toPlayer.webName,
-                      style: TextStyle(color: AppColors.of(context).textPrimary, fontSize: 14)),
+                  title: Text(
+                    toPlayer.webName,
+                    style: TextStyle(
+                      color: AppColors.of(context).textPrimary,
+                      fontSize: 14,
+                    ),
+                  ),
                   subtitle: Text(
                     '${PositionConstants.positionNames[toPlayer.elementType] ?? ''} · ${formatPrice(toPlayer.nowCost)}',
                     style: TextStyle(color: posColor, fontSize: 12),
@@ -244,10 +264,14 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
                     setState(() {
                       _slots[toSlot] = fromPlayer;
                       _slots[fromSlot] = toPlayer;
-                      if (_captainIdx == fromSlot) _captainIdx = toSlot;
-                      else if (_captainIdx == toSlot) _captainIdx = fromSlot;
-                      if (_viceCaptainIdx == fromSlot) _viceCaptainIdx = toSlot;
-                      else if (_viceCaptainIdx == toSlot) _viceCaptainIdx = fromSlot;
+                      if (_captainIdx == fromSlot)
+                        _captainIdx = toSlot;
+                      else if (_captainIdx == toSlot)
+                        _captainIdx = fromSlot;
+                      if (_viceCaptainIdx == fromSlot)
+                        _viceCaptainIdx = toSlot;
+                      else if (_viceCaptainIdx == toSlot)
+                        _viceCaptainIdx = fromSlot;
                     });
                   },
                 );
@@ -259,15 +283,15 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
     );
   }
 
-  void _showPlayerPicker(
-      int slotIndex, int position, FplProvider fplProvider) {
+  void _showPlayerPicker(int slotIndex, int position, FplProvider fplProvider) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => _PlayerPickerSheet(
         position: position,
-        remaining: _remaining +
+        remaining:
+            _remaining +
             (_slots[slotIndex]?.nowCost ?? 0), // free up current player cost
         pickedIds: _pickedIds
           ..remove(_slots[slotIndex]?.id), // allow re-picking same slot
@@ -349,27 +373,37 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
     if (name.isEmpty) {
       _nameController.text = 'My Team';
     }
-    final filledSlots =
-        _slots.asMap().entries.where((e) => e.value != null).toList();
+    final filledSlots = _slots
+        .asMap()
+        .entries
+        .where((e) => e.value != null)
+        .toList();
     if (filledSlots.length < 11) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Please fill all 11 starting positions first.'),
-        backgroundColor: AppColors.of(context).error,
-      ));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Please fill all 11 starting positions first.'),
+          backgroundColor: AppColors.of(context).error,
+        ),
+      );
       return;
     }
 
     setState(() => _isSaving = true);
     try {
-      final slots = _slots.asMap().entries.map((e) {
-        final p = e.value;
-        if (p == null) return null;
-        return UserTeamSlot(
-          playerId: p.id,
-          isStarting: e.key < 11,
-          slotIndex: e.key,
-        );
-      }).whereType<UserTeamSlot>().toList();
+      final slots = _slots
+          .asMap()
+          .entries
+          .map((e) {
+            final p = e.value;
+            if (p == null) return null;
+            return UserTeamSlot(
+              playerId: p.id,
+              isStarting: e.key < 11,
+              slotIndex: e.key,
+            );
+          })
+          .whereType<UserTeamSlot>()
+          .toList();
 
       final captainId = _captainIdx != null
           ? (_slots[_captainIdx!]?.id ?? 0)
@@ -398,10 +432,12 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
       }
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Team "${team.name}" saved!'),
-          backgroundColor: AppColors.of(context).primary.withAlpha(200),
-        ));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Team "${team.name}" saved!'),
+            backgroundColor: AppColors.of(context).primary.withAlpha(200),
+          ),
+        );
         Navigator.pop(context);
       }
     } finally {
@@ -411,72 +447,85 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<FplProvider>(builder: (context, fplProvider, _) {
-      return Scaffold(
-        backgroundColor: AppColors.of(context).background,
-        appBar: AppBar(
-          backgroundColor: AppColors.of(context).secondary,
-          title: SizedBox(
-            height: 40,
-            child: TextField(
-              controller: _nameController,
-              style: TextStyle(
+    return Consumer<FplProvider>(
+      builder: (context, fplProvider, _) {
+        return Scaffold(
+          backgroundColor: AppColors.of(context).background,
+          appBar: AppBar(
+            backgroundColor: AppColors.of(context).secondary,
+            title: SizedBox(
+              height: 40,
+              child: TextField(
+                controller: _nameController,
+                style: TextStyle(
                   color: AppColors.of(context).textPrimary,
                   fontSize: 16,
-                  fontWeight: FontWeight.w700),
-              decoration: const InputDecoration(
-                hintText: 'Team Name',
-                border: InputBorder.none,
-                filled: false,
-              ),
-            ),
-          ),
-          actions: [
-            // Formation badge (auto-computed, read-only)
-            Container(
-              margin: const EdgeInsets.only(right: 8),
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: AppColors.of(context).primary.withAlpha(25),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: AppColors.of(context).primary.withAlpha(80)),
-              ),
-              child: Text(
-                _autoFormation,
-                style: TextStyle(
-                    color: AppColors.of(context).primary,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700),
-              ),
-            ),
-            TextButton(
-              onPressed: _isSaving ? null : _saveTeam,
-              child: _isSaving
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2))
-                  : Text('Save',
-                      style: TextStyle(
-                          color: AppColors.of(context).primary,
-                          fontWeight: FontWeight.w700)),
-            ),
-          ],
-        ),
-        body: fplProvider.isLoading
-            ? const LoadingListWidget()
-            : SingleChildScrollView(
-                child: Column(
-                  children: [
-                    _buildBudgetBar(),
-                    _buildPitch(fplProvider),
-                    _buildBench(fplProvider),
-                    const SizedBox(height: 24),
-                  ],
+                  fontWeight: FontWeight.w700,
+                ),
+                decoration: const InputDecoration(
+                  hintText: 'Team Name',
+                  border: InputBorder.none,
+                  filled: false,
                 ),
               ),
-      );
-    });
+            ),
+            actions: [
+              // Formation badge (auto-computed, read-only)
+              Container(
+                margin: const EdgeInsets.only(right: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.of(context).primary.withAlpha(25),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: AppColors.of(context).primary.withAlpha(80),
+                  ),
+                ),
+                child: Text(
+                  _autoFormation,
+                  style: TextStyle(
+                    color: AppColors.of(context).primary,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: _isSaving ? null : _saveTeam,
+                child: _isSaving
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Text(
+                        'Save',
+                        style: TextStyle(
+                          color: AppColors.of(context).primary,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+              ),
+            ],
+          ),
+          body: fplProvider.isLoading
+              ? const LoadingListWidget()
+              : SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      _buildBudgetBar(),
+                      _buildPitch(fplProvider),
+                      _buildBench(fplProvider),
+                      const SizedBox(height: 24),
+                    ],
+                  ),
+                ),
+        );
+      },
+    );
   }
 
   Widget _buildBudgetBar() {
@@ -484,8 +533,8 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
     final color = _remaining < 0
         ? AppColors.of(context).error
         : _remaining < 50
-            ? AppColors.of(context).warning
-            : AppColors.of(context).primary;
+        ? AppColors.of(context).warning
+        : AppColors.of(context).primary;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: AppTheme.purpleGradient(borderRadius: BorderRadius.zero),
@@ -498,14 +547,21 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Budget Remaining',
-                        style: TextStyle(
-                            color: AppColors.of(context).textSecondary, fontSize: 11)),
-                    Text(formatPrice(_remaining),
-                        style: TextStyle(
-                            color: color,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700)),
+                    Text(
+                      'Budget Remaining',
+                      style: TextStyle(
+                        color: AppColors.of(context).textSecondary,
+                        fontSize: 11,
+                      ),
+                    ),
+                    Text(
+                      formatPrice(_remaining),
+                      style: TextStyle(
+                        color: color,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 6),
@@ -525,14 +581,21 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text('Spent',
-                  style: TextStyle(
-                      color: AppColors.of(context).textSecondary, fontSize: 11)),
-              Text(formatPrice(_spent),
-                  style: TextStyle(
-                      color: AppColors.of(context).textPrimary,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600)),
+              Text(
+                'Spent',
+                style: TextStyle(
+                  color: AppColors.of(context).textSecondary,
+                  fontSize: 11,
+                ),
+              ),
+              Text(
+                formatPrice(_spent),
+                style: TextStyle(
+                  color: AppColors.of(context).textPrimary,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ],
           ),
         ],
@@ -570,7 +633,10 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [AppColors.of(context).pitchGreen, AppColors.of(context).pitchGreenDark],
+          colors: [
+            AppColors.of(context).pitchGreen,
+            AppColors.of(context).pitchGreenDark,
+          ],
         ),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppColors.of(context).primary.withAlpha(40)),
@@ -579,15 +645,33 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
         children: [
           const SizedBox(height: 14),
           if (fwdSlots.isNotEmpty)
-            _buildPitchRow(fwdSlots, fplProvider, PositionConstants.positionColors[4]!),
-          if (fwdSlots.isNotEmpty && midSlots.isNotEmpty) const SizedBox(height: 10),
+            _buildPitchRow(
+              fwdSlots,
+              fplProvider,
+              PositionConstants.positionColors[4]!,
+            ),
+          if (fwdSlots.isNotEmpty && midSlots.isNotEmpty)
+            const SizedBox(height: 10),
           if (midSlots.isNotEmpty)
-            _buildPitchRow(midSlots, fplProvider, PositionConstants.positionColors[3]!),
-          if (midSlots.isNotEmpty && defSlots.isNotEmpty) const SizedBox(height: 10),
+            _buildPitchRow(
+              midSlots,
+              fplProvider,
+              PositionConstants.positionColors[3]!,
+            ),
+          if (midSlots.isNotEmpty && defSlots.isNotEmpty)
+            const SizedBox(height: 10),
           if (defSlots.isNotEmpty)
-            _buildPitchRow(defSlots, fplProvider, PositionConstants.positionColors[2]!),
+            _buildPitchRow(
+              defSlots,
+              fplProvider,
+              PositionConstants.positionColors[2]!,
+            ),
           if (defSlots.isNotEmpty) const SizedBox(height: 10),
-          _buildPitchRow([0], fplProvider, PositionConstants.positionColors[1]!),
+          _buildPitchRow(
+            [0],
+            fplProvider,
+            PositionConstants.positionColors[1]!,
+          ),
           const SizedBox(height: 14),
           // Dividing line
           Container(
@@ -606,13 +690,18 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
                 children: [
-                  Icon(Icons.add_circle_outline,
-                      color: AppColors.of(context).textSecondary, size: 14),
+                  Icon(
+                    Icons.add_circle_outline,
+                    color: AppColors.of(context).textSecondary,
+                    size: 14,
+                  ),
                   const SizedBox(width: 6),
                   Text(
                     'Tap a slot to add a player  •  ${emptyOutfieldSlots.length} outfield slot${emptyOutfieldSlots.length == 1 ? '' : 's'} remaining',
                     style: TextStyle(
-                        color: AppColors.of(context).textSecondary, fontSize: 11),
+                      color: AppColors.of(context).textSecondary,
+                      fontSize: 11,
+                    ),
                   ),
                 ],
               ),
@@ -627,75 +716,90 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
   }
 
   Widget _buildPitchRow(
-      List<int> slotIndices, FplProvider fplProvider, Color posColor) {
-    return LayoutBuilder(builder: (context, constraints) {
-      final itemWidth =
-          (constraints.maxWidth / slotIndices.length).clamp(60.0, 84.0);
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: slotIndices.map((idx) {
-          final player = _slots[idx];
-          return SizedBox(
-            width: itemWidth,
-            child: _BuilderSlot(
-              player: player,
-              posColor: posColor,
-              posLabel: player == null
-                  ? (idx == 0 ? 'GK' : 'ADD')
-                  : (PositionConstants.positionNames[player.elementType] ?? ''),
-              isCaptain: _captainIdx == idx,
-              isViceCaptain: _viceCaptainIdx == idx,
-              isStartingOutfield: idx >= 1 && idx <= 10,
-              onTap: () => _onSlotTap(idx, fplProvider),
-              onLongPress: () => _onSlotLongPress(idx),
-            ),
-          );
-        }).toList(),
-      );
-    });
+    List<int> slotIndices,
+    FplProvider fplProvider,
+    Color posColor,
+  ) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final itemWidth = (constraints.maxWidth / slotIndices.length).clamp(
+          60.0,
+          84.0,
+        );
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: slotIndices.map((idx) {
+            final player = _slots[idx];
+            return SizedBox(
+              width: itemWidth,
+              child: _BuilderSlot(
+                player: player,
+                posColor: posColor,
+                posLabel: player == null
+                    ? (idx == 0 ? 'GK' : 'ADD')
+                    : (PositionConstants.positionNames[player.elementType] ??
+                          ''),
+                isCaptain: _captainIdx == idx,
+                isViceCaptain: _viceCaptainIdx == idx,
+                isStartingOutfield: idx >= 1 && idx <= 10,
+                onTap: () => _onSlotTap(idx, fplProvider),
+                onLongPress: () => _onSlotLongPress(idx),
+              ),
+            );
+          }).toList(),
+        );
+      },
+    );
   }
 
-  Widget _buildEmptyOutfieldRow(
-      List<int> emptySlots, FplProvider fplProvider) {
-    return LayoutBuilder(builder: (context, constraints) {
-      final count = emptySlots.length.clamp(1, 5);
-      final itemWidth = (constraints.maxWidth / count).clamp(60.0, 84.0);
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: emptySlots.take(5).map((idx) {
-          return SizedBox(
-            width: itemWidth,
-            child: _BuilderSlot(
-              player: null,
-              posColor: AppColors.of(context).textSecondary,
-              posLabel: 'ADD',
-              onTap: () => _onSlotTap(idx, fplProvider),
-              onLongPress: () {},
-            ),
-          );
-        }).toList(),
-      );
-    });
+  Widget _buildEmptyOutfieldRow(List<int> emptySlots, FplProvider fplProvider) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final count = emptySlots.length.clamp(1, 5);
+        final itemWidth = (constraints.maxWidth / count).clamp(60.0, 84.0);
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: emptySlots.take(5).map((idx) {
+            return SizedBox(
+              width: itemWidth,
+              child: _BuilderSlot(
+                player: null,
+                posColor: AppColors.of(context).textSecondary,
+                posLabel: 'ADD',
+                onTap: () => _onSlotTap(idx, fplProvider),
+                onLongPress: () {},
+              ),
+            );
+          }).toList(),
+        );
+      },
+    );
   }
 
   Widget _buildBench(FplProvider fplProvider) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 12),
       padding: const EdgeInsets.all(14),
-      decoration: AppTheme.glassCard(context: context, ),
+      decoration: AppTheme.glassCard(context: context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(Icons.swap_vert_rounded,
-                  color: AppColors.of(context).textSecondary, size: 16),
+              Icon(
+                Icons.swap_vert_rounded,
+                color: AppColors.of(context).textSecondary,
+                size: 16,
+              ),
               const SizedBox(width: 6),
-              Text('Substitutes',
-                  style: TextStyle(
-                      color: AppColors.of(context).textSecondary,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600)),
+              Text(
+                'Substitutes',
+                style: TextStyle(
+                  color: AppColors.of(context).textSecondary,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
               const Spacer(),
               // GK sub button
               if (_slots[0] != null || _slots[11] != null)
@@ -703,24 +807,33 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
                   onTap: _subGk,
                   child: Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 3),
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.of(context).primary.withAlpha(25),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                          color: AppColors.of(context).primary.withAlpha(80)),
+                        color: AppColors.of(context).primary.withAlpha(80),
+                      ),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.swap_vert_rounded,
-                            color: AppColors.of(context).primary, size: 12),
+                        Icon(
+                          Icons.swap_vert_rounded,
+                          color: AppColors.of(context).primary,
+                          size: 12,
+                        ),
                         SizedBox(width: 3),
-                        Text('GK Swap',
-                            style: TextStyle(
-                                color: AppColors.of(context).primary,
-                                fontSize: 10,
-                                fontWeight: FontWeight.w600)),
+                        Text(
+                          'GK Swap',
+                          style: TextStyle(
+                            color: AppColors.of(context).primary,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -728,35 +841,37 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
             ],
           ),
           const SizedBox(height: 12),
-          LayoutBuilder(builder: (context, constraints) {
-            final itemWidth = (constraints.maxWidth / 4).clamp(60.0, 84.0);
-            return Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [11, 12, 13, 14].map((idx) {
-                final player = _slots[idx];
-                return SizedBox(
-                  width: itemWidth,
-                  child: _BuilderSlot(
-                    player: player,
-                    posColor: player != null
-                        ? getPositionColor(player.elementType)
-                        : AppColors.of(context).textSecondary,
-                    posLabel: idx == 11
-                        ? 'GK'
-                        : (player != null
-                            ? (PositionConstants
-                                    .positionNames[player.elementType] ??
-                                'OUT')
-                            : 'OUT'),
-                    isSub: true,
-                    isBenchOutfield: idx >= 12,
-                    onTap: () => _onSlotTap(idx, fplProvider),
-                    onLongPress: () => _onSlotLongPress(idx),
-                  ),
-                );
-              }).toList(),
-            );
-          }),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final itemWidth = (constraints.maxWidth / 4).clamp(60.0, 84.0);
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [11, 12, 13, 14].map((idx) {
+                  final player = _slots[idx];
+                  return SizedBox(
+                    width: itemWidth,
+                    child: _BuilderSlot(
+                      player: player,
+                      posColor: player != null
+                          ? getPositionColor(player.elementType)
+                          : AppColors.of(context).textSecondary,
+                      posLabel: idx == 11
+                          ? 'GK'
+                          : (player != null
+                                ? (PositionConstants.positionNames[player
+                                          .elementType] ??
+                                      'OUT')
+                                : 'OUT'),
+                      isSub: true,
+                      isBenchOutfield: idx >= 12,
+                      onTap: () => _onSlotTap(idx, fplProvider),
+                      onLongPress: () => _onSlotLongPress(idx),
+                    ),
+                  );
+                }).toList(),
+              );
+            },
+          ),
         ],
       ),
     );
@@ -820,15 +935,22 @@ class _BuilderSlot extends StatelessWidget {
                     ? CachedNetworkImage(
                         imageUrl: player!.photoUrl,
                         fit: BoxFit.cover,
-                        placeholder: (_, __) => Icon(Icons.person,
-                            color: AppColors.of(context).textSecondary,
-                            size: size * 0.5),
-                        errorWidget: (_, __, ___) => Icon(Icons.person,
-                            color: AppColors.of(context).textSecondary,
-                            size: size * 0.5),
+                        placeholder: (_, __) => Icon(
+                          Icons.person,
+                          color: AppColors.of(context).textSecondary,
+                          size: size * 0.5,
+                        ),
+                        errorWidget: (_, __, ___) => Icon(
+                          Icons.person,
+                          color: AppColors.of(context).textSecondary,
+                          size: size * 0.5,
+                        ),
                       )
-                    : Icon(Icons.add,
-                        color: posColor.withAlpha(180), size: size * 0.45),
+                    : Icon(
+                        Icons.add,
+                        color: posColor.withAlpha(180),
+                        size: size * 0.45,
+                      ),
               ),
               if (isCaptain)
                 Positioned(
@@ -838,13 +960,19 @@ class _BuilderSlot extends StatelessWidget {
                     width: 16,
                     height: 16,
                     decoration: BoxDecoration(
-                        color: AppColors.of(context).warning, shape: BoxShape.circle),
+                      color: AppColors.of(context).warning,
+                      shape: BoxShape.circle,
+                    ),
                     child: Center(
-                        child: Text('C',
-                            style: TextStyle(
-                                fontSize: 9,
-                                fontWeight: FontWeight.w900,
-                                color: AppColors.of(context).secondary))),
+                      child: Text(
+                        'C',
+                        style: TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.w900,
+                          color: AppColors.of(context).secondary,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               if (isViceCaptain)
@@ -855,13 +983,19 @@ class _BuilderSlot extends StatelessWidget {
                     width: 16,
                     height: 16,
                     decoration: BoxDecoration(
-                        color: AppColors.of(context).accent, shape: BoxShape.circle),
+                      color: AppColors.of(context).accent,
+                      shape: BoxShape.circle,
+                    ),
                     child: Center(
-                        child: Text('V',
-                            style: TextStyle(
-                                fontSize: 9,
-                                fontWeight: FontWeight.w900,
-                                color: AppColors.of(context).secondary))),
+                      child: Text(
+                        'V',
+                        style: TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.w900,
+                          color: AppColors.of(context).secondary,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               // Sub-out badge on starting outfield players
@@ -873,11 +1007,16 @@ class _BuilderSlot extends StatelessWidget {
                     width: 14,
                     height: 14,
                     decoration: BoxDecoration(
-                        color: AppColors.of(context).accent.withAlpha(220),
-                        shape: BoxShape.circle),
+                      color: AppColors.of(context).accent.withAlpha(220),
+                      shape: BoxShape.circle,
+                    ),
                     child: const Center(
-                        child: Icon(Icons.arrow_downward_rounded,
-                            size: 9, color: Colors.white)),
+                      child: Icon(
+                        Icons.arrow_downward_rounded,
+                        size: 9,
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
                 ),
               // Sub-in badge on bench outfield players
@@ -889,11 +1028,16 @@ class _BuilderSlot extends StatelessWidget {
                     width: 14,
                     height: 14,
                     decoration: BoxDecoration(
-                        color: AppColors.of(context).primary.withAlpha(220),
-                        shape: BoxShape.circle),
+                      color: AppColors.of(context).primary.withAlpha(220),
+                      shape: BoxShape.circle,
+                    ),
                     child: Center(
-                        child: Icon(Icons.arrow_upward_rounded,
-                            size: 9, color: AppColors.of(context).secondary)),
+                      child: Icon(
+                        Icons.arrow_upward_rounded,
+                        size: 9,
+                        color: AppColors.of(context).secondary,
+                      ),
+                    ),
                   ),
                 ),
             ],
@@ -909,12 +1053,16 @@ class _BuilderSlot extends StatelessWidget {
               constraints: const BoxConstraints(maxWidth: 72),
               child: Text(
                 player!.webName.length > 9
-                    ? player!.webName.substring(0, player!.webName.length.clamp(0, 8))
+                    ? player!.webName.substring(
+                        0,
+                        player!.webName.length.clamp(0, 8),
+                      )
                     : player!.webName,
                 style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 9,
-                    fontWeight: FontWeight.w600),
+                  color: Colors.white,
+                  fontSize: 9,
+                  fontWeight: FontWeight.w600,
+                ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
@@ -929,9 +1077,10 @@ class _BuilderSlot extends StatelessWidget {
               child: Text(
                 formatPrice(player!.nowCost),
                 style: TextStyle(
-                    color: AppColors.of(context).secondary,
-                    fontSize: 9,
-                    fontWeight: FontWeight.w800),
+                  color: AppColors.of(context).secondary,
+                  fontSize: 9,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
             ),
           ] else ...[
@@ -944,7 +1093,10 @@ class _BuilderSlot extends StatelessWidget {
               child: Text(
                 posLabel,
                 style: TextStyle(
-                    color: posColor, fontSize: 9, fontWeight: FontWeight.w600),
+                  color: posColor,
+                  fontSize: 9,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ],
@@ -994,7 +1146,8 @@ class _PlayerPickerSheetState extends State<_PlayerPickerSheet> {
       if (widget.position != 0 && p.elementType != widget.position) {
         return false;
       }
-      if (widget.position == 0 && p.elementType == 1) return false; // no GK for outfield bench
+      if (widget.position == 0 && p.elementType == 1)
+        return false; // no GK for outfield bench
       if (p.nowCost > widget.remaining) return false;
       if ((widget.teamCounts[p.teamId] ?? 0) >= 3) return false;
       return true;
@@ -1003,10 +1156,12 @@ class _PlayerPickerSheetState extends State<_PlayerPickerSheet> {
     if (_search.isNotEmpty) {
       final q = _search.toLowerCase();
       players = players
-          .where((p) =>
-              p.webName.toLowerCase().contains(q) ||
-              p.firstName.toLowerCase().contains(q) ||
-              p.secondName.toLowerCase().contains(q))
+          .where(
+            (p) =>
+                p.webName.toLowerCase().contains(q) ||
+                p.firstName.toLowerCase().contains(q) ||
+                p.secondName.toLowerCase().contains(q),
+          )
           .toList();
     }
 
@@ -1016,9 +1171,11 @@ class _PlayerPickerSheetState extends State<_PlayerPickerSheet> {
       case 'form':
         players.sort((a, b) => b.formValue.compareTo(a.formValue));
       default:
-        players.sort((a, b) => widget.fplProvider
-            .computePlayerScore(b)
-            .compareTo(widget.fplProvider.computePlayerScore(a)));
+        players.sort(
+          (a, b) => widget.fplProvider
+              .computePlayerScore(b)
+              .compareTo(widget.fplProvider.computePlayerScore(a)),
+        );
     }
     return players;
   }
@@ -1055,17 +1212,23 @@ class _PlayerPickerSheetState extends State<_PlayerPickerSheet> {
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
               child: Row(
                 children: [
-                  Text('Pick $posName',
-                      style: TextStyle(
-                          color: AppColors.of(context).textPrimary,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700)),
+                  Text(
+                    'Pick $posName',
+                    style: TextStyle(
+                      color: AppColors.of(context).textPrimary,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                   const Spacer(),
-                  Text('Budget: ${formatPrice(widget.remaining)}',
-                      style: TextStyle(
-                          color: AppColors.of(context).primary,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600)),
+                  Text(
+                    'Budget: ${formatPrice(widget.remaining)}',
+                    style: TextStyle(
+                      color: AppColors.of(context).primary,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -1074,15 +1237,20 @@ class _PlayerPickerSheetState extends State<_PlayerPickerSheet> {
               child: TextField(
                 controller: _searchCtrl,
                 onChanged: (v) => setState(() => _search = v),
-                style:
-                    TextStyle(color: AppColors.of(context).textPrimary, fontSize: 14),
+                style: TextStyle(
+                  color: AppColors.of(context).textPrimary,
+                  fontSize: 14,
+                ),
                 decoration: InputDecoration(
                   hintText: 'Search…',
                   prefixIcon: const Icon(Icons.search, size: 20),
                   suffixIcon: _search.isNotEmpty
                       ? IconButton(
-                          icon: Icon(Icons.clear,
-                              color: AppColors.of(context).textSecondary, size: 18),
+                          icon: Icon(
+                            Icons.clear,
+                            color: AppColors.of(context).textSecondary,
+                            size: 18,
+                          ),
                           onPressed: () {
                             _searchCtrl.clear();
                             setState(() => _search = '');
@@ -1110,19 +1278,24 @@ class _PlayerPickerSheetState extends State<_PlayerPickerSheet> {
             Expanded(
               child: candidates.isEmpty
                   ? Center(
-                      child: Text('No players match filters',
-                          style: TextStyle(color: AppColors.of(context).textSecondary)))
+                      child: Text(
+                        'No players match filters',
+                        style: TextStyle(
+                          color: AppColors.of(context).textSecondary,
+                        ),
+                      ),
+                    )
                   : ListView.builder(
                       controller: scrollCtrl,
                       padding: const EdgeInsets.symmetric(vertical: 4),
                       itemCount: candidates.length,
-                      itemBuilder: (_, i) =>
-                          _PickerPlayerRow(
-                            player: candidates[i],
-                            team: widget.fplProvider
-                                .getTeamById(candidates[i].teamId),
-                            onTap: () => widget.onSelected(candidates[i]),
-                          ),
+                      itemBuilder: (_, i) => _PickerPlayerRow(
+                        player: candidates[i],
+                        team: widget.fplProvider.getTeamById(
+                          candidates[i].teamId,
+                        ),
+                        onTap: () => widget.onSelected(candidates[i]),
+                      ),
                     ),
             ),
           ],
@@ -1143,13 +1316,21 @@ class _PlayerPickerSheetState extends State<_PlayerPickerSheet> {
               : AppColors.of(context).cardMedium,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-              color: selected ? AppColors.of(context).primary : Colors.transparent),
+            color: selected
+                ? AppColors.of(context).primary
+                : Colors.transparent,
+          ),
         ),
-        child: Text(label,
-            style: TextStyle(
-                color: selected ? AppColors.of(context).primary : AppColors.of(context).textSecondary,
-                fontSize: 12,
-                fontWeight: selected ? FontWeight.w600 : FontWeight.normal)),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: selected
+                ? AppColors.of(context).primary
+                : AppColors.of(context).textSecondary,
+            fontSize: 12,
+            fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
+          ),
+        ),
       ),
     );
   }
@@ -1160,8 +1341,11 @@ class _PickerPlayerRow extends StatelessWidget {
   final dynamic team;
   final VoidCallback onTap;
 
-  const _PickerPlayerRow(
-      {required this.player, required this.team, required this.onTap});
+  const _PickerPlayerRow({
+    required this.player,
+    required this.team,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1186,10 +1370,16 @@ class _PickerPlayerRow extends StatelessWidget {
               child: CachedNetworkImage(
                 imageUrl: player.photoUrl,
                 fit: BoxFit.cover,
-                placeholder: (_, __) => Icon(Icons.person,
-                    color: AppColors.of(context).textSecondary, size: 20),
-                errorWidget: (_, __, ___) => Icon(Icons.person,
-                    color: AppColors.of(context).textSecondary, size: 20),
+                placeholder: (_, __) => Icon(
+                  Icons.person,
+                  color: AppColors.of(context).textSecondary,
+                  size: 20,
+                ),
+                errorWidget: (_, __, ___) => Icon(
+                  Icons.person,
+                  color: AppColors.of(context).textSecondary,
+                  size: 20,
+                ),
               ),
             ),
             const SizedBox(width: 10),
@@ -1200,19 +1390,24 @@ class _PickerPlayerRow extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: Text(player.webName,
-                            style: TextStyle(
-                                color: AppColors.of(context).textPrimary,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis),
+                        child: Text(
+                          player.webName,
+                          style: TextStyle(
+                            color: AppColors.of(context).textPrimary,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                       Container(
                         width: 8,
                         height: 8,
                         decoration: BoxDecoration(
-                            color: statusColor, shape: BoxShape.circle),
+                          color: statusColor,
+                          shape: BoxShape.circle,
+                        ),
                       ),
                     ],
                   ),
@@ -1220,23 +1415,31 @@ class _PickerPlayerRow extends StatelessWidget {
                     children: [
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 4, vertical: 1),
+                          horizontal: 4,
+                          vertical: 1,
+                        ),
                         decoration: BoxDecoration(
                           color: posColor.withAlpha(40),
                           borderRadius: BorderRadius.circular(3),
                         ),
                         child: Text(
-                            PositionConstants.positionNames[player.elementType] ??
-                                '',
-                            style: TextStyle(
-                                color: posColor,
-                                fontSize: 9,
-                                fontWeight: FontWeight.w700)),
+                          PositionConstants.positionNames[player.elementType] ??
+                              '',
+                          style: TextStyle(
+                            color: posColor,
+                            fontSize: 9,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
                       ),
                       const SizedBox(width: 4),
-                      Text(team?.shortName ?? '',
-                          style: TextStyle(
-                              color: AppColors.of(context).textSecondary, fontSize: 11)),
+                      Text(
+                        team?.shortName ?? '',
+                        style: TextStyle(
+                          color: AppColors.of(context).textSecondary,
+                          fontSize: 11,
+                        ),
+                      ),
                     ],
                   ),
                 ],
@@ -1245,14 +1448,21 @@ class _PickerPlayerRow extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text(formatPrice(player.nowCost),
-                    style: TextStyle(
-                        color: AppColors.of(context).textPrimary,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600)),
-                Text('Form: ${player.form}',
-                    style: TextStyle(
-                        color: AppColors.of(context).accent, fontSize: 11)),
+                Text(
+                  formatPrice(player.nowCost),
+                  style: TextStyle(
+                    color: AppColors.of(context).textPrimary,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                Text(
+                  'Form: ${player.form}',
+                  style: TextStyle(
+                    color: AppColors.of(context).accent,
+                    fontSize: 11,
+                  ),
+                ),
               ],
             ),
           ],
@@ -1302,7 +1512,8 @@ class _SlotOptionsSheet extends StatelessWidget {
           children: [
             Center(
               child: Container(
-                width: 36, height: 4,
+                width: 36,
+                height: 4,
                 decoration: BoxDecoration(
                   color: AppColors.of(context).divider,
                   borderRadius: BorderRadius.circular(2),
@@ -1324,8 +1535,7 @@ class _SlotOptionsSheet extends StatelessWidget {
                   child: CachedNetworkImage(
                     imageUrl: player.photoUrl,
                     fit: BoxFit.cover,
-                    placeholder: (_, __) =>
-                        const Icon(Icons.person, size: 22),
+                    placeholder: (_, __) => const Icon(Icons.person, size: 22),
                     errorWidget: (_, __, ___) =>
                         const Icon(Icons.person, size: 22),
                   ),
@@ -1335,11 +1545,14 @@ class _SlotOptionsSheet extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(player.webName,
-                          style: TextStyle(
-                              color: AppColors.of(context).textPrimary,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700)),
+                      Text(
+                        player.webName,
+                        style: TextStyle(
+                          color: AppColors.of(context).textPrimary,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
                       Text(
                         '${PositionConstants.positionNames[player.elementType] ?? ''} · ${formatPrice(player.nowCost)}',
                         style: TextStyle(color: posColor, fontSize: 12),
@@ -1355,81 +1568,111 @@ class _SlotOptionsSheet extends StatelessWidget {
             // Sub Out (starting outfield only)
             if (isStartingOutfield)
               ListTile(
-                leading: const CircleAvatar(
+                leading: CircleAvatar(
                   backgroundColor: AppColors.of(context).accent,
                   radius: 16,
-                  child: Icon(Icons.arrow_downward_rounded,
-                      color: Colors.white, size: 16),
+                  child: Icon(
+                    Icons.arrow_downward_rounded,
+                    color: Colors.white,
+                    size: 16,
+                  ),
                 ),
-                title: Text('Sub Out  →  Move to Bench',
-                    style: TextStyle(color: AppColors.of(context).accent)),
-                subtitle: Text('Send to substitutes',
-                    style: TextStyle(
-                        color: AppColors.of(context).textSecondary, fontSize: 11)),
+                title: Text(
+                  'Sub Out  →  Move to Bench',
+                  style: TextStyle(color: AppColors.of(context).accent),
+                ),
+                subtitle: Text(
+                  'Send to substitutes',
+                  style: TextStyle(
+                    color: AppColors.of(context).textSecondary,
+                    fontSize: 11,
+                  ),
+                ),
                 onTap: onSubOut,
               ),
             // Sub In (bench outfield only)
             if (isBenchOutfield)
               ListTile(
-                leading: const CircleAvatar(
+                leading: CircleAvatar(
                   backgroundColor: AppColors.of(context).primary,
                   radius: 16,
-                  child: Icon(Icons.arrow_upward_rounded,
-                      color: AppColors.of(context).secondary, size: 16),
+                  child: Icon(
+                    Icons.arrow_upward_rounded,
+                    color: AppColors.of(context).secondary,
+                    size: 16,
+                  ),
                 ),
-                title: Text('Sub In  →  Move to Starting',
-                    style: TextStyle(color: AppColors.of(context).primary)),
-                subtitle: Text('Bring into starting XI',
-                    style: TextStyle(
-                        color: AppColors.of(context).textSecondary, fontSize: 11)),
+                title: Text(
+                  'Sub In  →  Move to Starting',
+                  style: TextStyle(color: AppColors.of(context).primary),
+                ),
+                subtitle: Text(
+                  'Bring into starting XI',
+                  style: TextStyle(
+                    color: AppColors.of(context).textSecondary,
+                    fontSize: 11,
+                  ),
+                ),
                 onTap: onSubIn,
               ),
             ListTile(
-              leading: const CircleAvatar(
+              leading: CircleAvatar(
                 backgroundColor: AppColors.of(context).warning,
                 radius: 16,
-                child: Text('C',
-                    style: TextStyle(
-                        color: AppColors.of(context).secondary,
-                        fontWeight: FontWeight.w900,
-                        fontSize: 12)),
+                child: Text(
+                  'C',
+                  style: TextStyle(
+                    color: AppColors.of(context).secondary,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 12,
+                  ),
+                ),
               ),
               title: Text(
-                  isCaptain ? 'Captain (already set)' : 'Set as Captain',
-                  style: TextStyle(
-                      color: isCaptain
-                          ? AppColors.of(context).textSecondary
-                          : AppColors.of(context).textPrimary)),
+                isCaptain ? 'Captain (already set)' : 'Set as Captain',
+                style: TextStyle(
+                  color: isCaptain
+                      ? AppColors.of(context).textSecondary
+                      : AppColors.of(context).textPrimary,
+                ),
+              ),
               onTap: isCaptain ? null : onSetCaptain,
             ),
             ListTile(
-              leading: const CircleAvatar(
+              leading: CircleAvatar(
                 backgroundColor: AppColors.of(context).accent,
                 radius: 16,
-                child: Text('V',
-                    style: TextStyle(
-                        color: AppColors.of(context).secondary,
-                        fontWeight: FontWeight.w900,
-                        fontSize: 12)),
+                child: Text(
+                  'V',
+                  style: TextStyle(
+                    color: AppColors.of(context).secondary,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 12,
+                  ),
+                ),
               ),
               title: Text(
-                  isViceCaptain
-                      ? 'Vice-Captain (already set)'
-                      : 'Set as Vice-Captain',
-                  style: TextStyle(
-                      color: isViceCaptain
-                          ? AppColors.of(context).textSecondary
-                          : AppColors.of(context).textPrimary)),
+                isViceCaptain
+                    ? 'Vice-Captain (already set)'
+                    : 'Set as Vice-Captain',
+                style: TextStyle(
+                  color: isViceCaptain
+                      ? AppColors.of(context).textSecondary
+                      : AppColors.of(context).textPrimary,
+                ),
+              ),
               onTap: isViceCaptain ? null : onSetViceCaptain,
             ),
             ListTile(
-              leading: const CircleAvatar(
+              leading: CircleAvatar(
                 backgroundColor: AppColors.of(context).error,
                 radius: 16,
                 child: Icon(Icons.remove, color: Colors.white, size: 16),
               ),
-              title: Text('Remove Player',
-                  style: TextStyle(color: AppColors.of(context).error)),
+              title: Text(
+                'Remove Player',
+                style: TextStyle(color: AppColors.of(context).error),
+              ),
               onTap: onRemove,
             ),
           ],

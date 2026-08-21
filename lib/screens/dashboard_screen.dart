@@ -84,7 +84,9 @@ class DashboardScreen extends StatelessWidget {
             decoration: BoxDecoration(
               color: AppColors.of(context).primary.withAlpha(20),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: AppColors.of(context).primary.withAlpha(80)),
+              border: Border.all(
+                color: AppColors.of(context).primary.withAlpha(80),
+              ),
             ),
             child: Text(
               'GW${provider.currentGameweek!.id}',
@@ -138,7 +140,7 @@ class DashboardScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              onPressed: provider.loadAllData,
+              onPressed: () => provider.loadAllData(forceRefresh: true),
               icon: const Icon(Icons.refresh),
               label: const Text(
                 'Retry',
@@ -243,7 +245,9 @@ class _DashboardContent extends StatelessWidget {
               decoration: BoxDecoration(
                 color: AppColors.of(context).primary.withAlpha(22),
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: AppColors.of(context).primary.withAlpha(80)),
+                border: Border.all(
+                  color: AppColors.of(context).primary.withAlpha(80),
+                ),
               ),
               child: Text(
                 gw.name,
@@ -344,7 +348,9 @@ class _DashboardContent extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: AppColors.of(context).primary.withAlpha(28),
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: AppColors.of(context).primary.withAlpha(70)),
+                    border: Border.all(
+                      color: AppColors.of(context).primary.withAlpha(70),
+                    ),
                   ),
                   child: Center(
                     child: Icon(
@@ -355,7 +361,7 @@ class _DashboardContent extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 12),
-                const Expanded(
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -517,7 +523,7 @@ class _DashboardContent extends StatelessWidget {
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(12),
-        decoration: AppTheme.gradientCard(context: context, ),
+        decoration: AppTheme.gradientCard(context: context),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -661,14 +667,14 @@ class _DashboardContent extends StatelessWidget {
   Widget _buildTopPerformers(BuildContext context) {
     final top = provider.getTopScorersByPoints(limit: 5);
     return Container(
-      decoration: AppTheme.gradientCard(context: context, ),
+      decoration: AppTheme.gradientCard(context: context),
       child: Column(
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
               children: [
-                const Expanded(
+                Expanded(
                   flex: 3,
                   child: Text(
                     'Player',
@@ -680,7 +686,7 @@ class _DashboardContent extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                const Expanded(
+                Expanded(
                   child: Text(
                     'Pts',
                     style: TextStyle(
@@ -691,7 +697,7 @@ class _DashboardContent extends StatelessWidget {
                     textAlign: TextAlign.center,
                   ),
                 ),
-                const Expanded(
+                Expanded(
                   child: Text(
                     'Form',
                     style: TextStyle(
@@ -702,7 +708,7 @@ class _DashboardContent extends StatelessWidget {
                     textAlign: TextAlign.center,
                   ),
                 ),
-                const Expanded(
+                Expanded(
                   child: Text(
                     'Price',
                     style: TextStyle(
@@ -881,7 +887,7 @@ class _DashboardContent extends StatelessWidget {
     bool isIn,
   ) {
     return Container(
-      decoration: AppTheme.gradientCard(context: context, ),
+      decoration: AppTheme.gradientCard(context: context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -891,7 +897,9 @@ class _DashboardContent extends StatelessWidget {
               children: [
                 Icon(
                   isIn ? Icons.arrow_circle_up : Icons.arrow_circle_down,
-                  color: isIn ? AppColors.of(context).primary : AppColors.of(context).error,
+                  color: isIn
+                      ? AppColors.of(context).primary
+                      : AppColors.of(context).error,
                   size: 16,
                 ),
                 const SizedBox(width: 6),
@@ -963,7 +971,9 @@ class _DashboardContent extends StatelessWidget {
                           ? '${(count / 1000).toStringAsFixed(1)}k'
                           : '$count',
                       style: TextStyle(
-                        color: isIn ? AppColors.of(context).primary : AppColors.of(context).error,
+                        color: isIn
+                            ? AppColors.of(context).primary
+                            : AppColors.of(context).error,
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                       ),
@@ -1001,7 +1011,7 @@ class _DashboardContent extends StatelessWidget {
     if (upcoming.isEmpty) {
       return Container(
         padding: const EdgeInsets.all(20),
-        decoration: AppTheme.gradientCard(context: context, ),
+        decoration: AppTheme.gradientCard(context: context),
         child: Center(
           child: Text(
             'No upcoming fixtures',
@@ -1078,7 +1088,7 @@ class _DashboardContent extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.all(12),
-        decoration: AppTheme.gradientCard(context: context, ),
+        decoration: AppTheme.gradientCard(context: context),
         child: Row(
           children: [
             Expanded(

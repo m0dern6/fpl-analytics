@@ -143,7 +143,10 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
             children: [
               Text(
                 'Enter your team ID from:\nfantasy.premierleague.com/entry/{id}/...',
-                style: TextStyle(color: AppColors.of(context).textSecondary, fontSize: 12),
+                style: TextStyle(
+                  color: AppColors.of(context).textSecondary,
+                  fontSize: 12,
+                ),
               ),
               const SizedBox(height: 14),
               TextFormField(
@@ -275,7 +278,7 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
   Widget _buildFormCard() {
     return Container(
       padding: const EdgeInsets.all(20),
-      decoration: AppTheme.gradientCard(context: context, ),
+      decoration: AppTheme.gradientCard(context: context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -294,7 +297,7 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
                 ),
               ),
               const SizedBox(width: 12),
-              const Expanded(
+              Expanded(
                 child: Text(
                   'Look up your FPL team',
                   style: TextStyle(
@@ -368,12 +371,19 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
       ),
       child: Row(
         children: [
-          Icon(Icons.error_outline, color: AppColors.of(context).error, size: 20),
+          Icon(
+            Icons.error_outline,
+            color: AppColors.of(context).error,
+            size: 20,
+          ),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
               _error!,
-              style: TextStyle(color: AppColors.of(context).error, fontSize: 13),
+              style: TextStyle(
+                color: AppColors.of(context).error,
+                fontSize: 13,
+              ),
             ),
           ),
         ],
@@ -438,7 +448,9 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
             decoration: BoxDecoration(
               color: AppColors.of(context).primary.withAlpha(40),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.of(context).primary.withAlpha(100)),
+              border: Border.all(
+                color: AppColors.of(context).primary.withAlpha(100),
+              ),
             ),
             child: Text(
               gw.finished ? 'Finished' : (gw.isCurrent ? 'Live' : 'Upcoming'),
@@ -480,7 +492,7 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: AppTheme.gradientCard(context: context, ),
+        decoration: AppTheme.gradientCard(context: context),
         child: Column(
           children: [
             Row(
@@ -630,7 +642,10 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
                 onPressed: _unhideLeagues,
                 child: Text(
                   'Unhide all',
-                  style: TextStyle(color: AppColors.of(context).primary, fontSize: 11),
+                  style: TextStyle(
+                    color: AppColors.of(context).primary,
+                    fontSize: 11,
+                  ),
                 ),
               ),
           ],
@@ -700,7 +715,7 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
               child: Container(
                 margin: const EdgeInsets.only(bottom: 10),
                 padding: const EdgeInsets.all(14),
-                decoration: AppTheme.gradientCard(context: context, ),
+                decoration: AppTheme.gradientCard(context: context),
                 child: Row(
                   children: [
                     Expanded(

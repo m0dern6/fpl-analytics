@@ -28,7 +28,9 @@ class FixtureDetailScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.of(context).background,
       appBar: AppBar(
-        title: Text(fixture.event != null ? 'Gameweek ${fixture.event}' : 'Fixture'),
+        title: Text(
+          fixture.event != null ? 'Gameweek ${fixture.event}' : 'Fixture',
+        ),
         backgroundColor: AppColors.of(context).secondary,
       ),
       body: SingleChildScrollView(
@@ -63,7 +65,9 @@ class FixtureDetailScreen extends StatelessWidget {
               decoration: BoxDecoration(
                 color: AppColors.of(context).primary.withAlpha(24),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: AppColors.of(context).primary.withAlpha(80)),
+                border: Border.all(
+                  color: AppColors.of(context).primary.withAlpha(80),
+                ),
               ),
               child: Text(
                 'Gameweek ${fixture.event}',
@@ -160,7 +164,9 @@ class FixtureDetailScreen extends StatelessWidget {
               decoration: BoxDecoration(
                 color: AppColors.of(context).primary.withAlpha(24),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: AppColors.of(context).primary.withAlpha(80)),
+                border: Border.all(
+                  color: AppColors.of(context).primary.withAlpha(80),
+                ),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -206,7 +212,11 @@ class FixtureDetailScreen extends StatelessWidget {
               color: AppColors.of(context).cardMedium,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(Icons.shield, color: AppColors.of(context).textSecondary, size: 32),
+            child: Icon(
+              Icons.shield,
+              color: AppColors.of(context).textSecondary,
+              size: 32,
+            ),
           ),
           errorWidget: (_, __, ___) => Container(
             width: 64,
@@ -239,7 +249,10 @@ class FixtureDetailScreen extends StatelessWidget {
         ),
         Text(
           team?.name ?? '',
-          style: TextStyle(color: AppColors.of(context).textSecondary, fontSize: 10),
+          style: TextStyle(
+            color: AppColors.of(context).textSecondary,
+            fontSize: 10,
+          ),
           textAlign: TextAlign.center,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
@@ -261,7 +274,9 @@ class FixtureDetailScreen extends StatelessWidget {
           child: Text(
             isHome ? 'Home' : 'Away',
             style: TextStyle(
-              color: isHome ? AppColors.of(context).primary : AppColors.of(context).accent,
+              color: isHome
+                  ? AppColors.of(context).primary
+                  : AppColors.of(context).accent,
               fontSize: 11,
               fontWeight: FontWeight.w600,
             ),
@@ -274,7 +289,7 @@ class FixtureDetailScreen extends StatelessWidget {
   Widget _buildDetailsCard(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: AppTheme.gradientCard(context: context, ),
+      decoration: AppTheme.gradientCard(context: context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -288,13 +303,15 @@ class FixtureDetailScreen extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           if (fixture.kickoffTime != null) ...[
-            _detailRow(context, 
+            _detailRow(
+              context,
               Icons.calendar_today_rounded,
               'Date',
               formatDateTime(fixture.kickoffTime),
             ),
             const SizedBox(height: 10),
-            _detailRow(context, 
+            _detailRow(
+              context,
               Icons.access_time_rounded,
               'Kick-off',
               _extractTime(fixture.kickoffTime!),
@@ -302,14 +319,16 @@ class FixtureDetailScreen extends StatelessWidget {
             const SizedBox(height: 10),
           ],
           if (fixture.event != null)
-            _detailRow(context, 
+            _detailRow(
+              context,
               Icons.sports_soccer_rounded,
               'Gameweek',
               'GW${fixture.event}',
             ),
           if (fixture.finished && fixture.minutes != null) ...[
             const SizedBox(height: 10),
-            _detailRow(context, 
+            _detailRow(
+              context,
               Icons.timer_rounded,
               'Minutes Played',
               '${fixture.minutes}\'',
@@ -320,7 +339,12 @@ class FixtureDetailScreen extends StatelessWidget {
     ).animate().fadeIn(delay: 100.ms);
   }
 
-  Widget _detailRow(BuildContext context, IconData icon, String label, String value) {
+  Widget _detailRow(
+    BuildContext context,
+    IconData icon,
+    String label,
+    String value,
+  ) {
     return Row(
       children: [
         Container(
@@ -334,7 +358,10 @@ class FixtureDetailScreen extends StatelessWidget {
         const SizedBox(width: 12),
         Text(
           label,
-          style: TextStyle(color: AppColors.of(context).textSecondary, fontSize: 13),
+          style: TextStyle(
+            color: AppColors.of(context).textSecondary,
+            fontSize: 13,
+          ),
         ),
         const Spacer(),
         Text(
@@ -356,7 +383,7 @@ class FixtureDetailScreen extends StatelessWidget {
       builder: (context, provider, _) {
         return Container(
           padding: const EdgeInsets.all(16),
-          decoration: AppTheme.gradientCard(context: context, ),
+          decoration: AppTheme.gradientCard(context: context),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -384,7 +411,7 @@ class FixtureDetailScreen extends StatelessWidget {
     FplProvider provider,
     FixtureStat stat,
   ) {
-    final info = _statInfo(stat.identifier);
+    final info = _statInfo(context, stat.identifier);
     if (info == null) return const SizedBox.shrink();
 
     final allEntries = [
@@ -414,8 +441,9 @@ class FixtureDetailScreen extends StatelessWidget {
             ],
           ),
         ),
-        ...allEntries.map((entry) =>
-            _buildPlayerEventRow(context, provider, entry, info)),
+        ...allEntries.map(
+          (entry) => _buildPlayerEventRow(context, provider, entry, info),
+        ),
         Divider(color: AppColors.of(context).divider, height: 16),
       ],
     );
@@ -431,16 +459,18 @@ class FixtureDetailScreen extends StatelessWidget {
     final teamName = entry.isHome
         ? (homeTeam?.shortName ?? 'H')
         : (awayTeam?.shortName ?? 'A');
-    final teamColor = entry.isHome ? AppColors.of(context).primary : AppColors.of(context).accent;
+    final teamColor = entry.isHome
+        ? AppColors.of(context).primary
+        : AppColors.of(context).accent;
 
     return InkWell(
       onTap: player != null
           ? () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => PlayerDetailScreen(player: player),
-                ),
-              )
+              context,
+              MaterialPageRoute(
+                builder: (_) => PlayerDetailScreen(player: player),
+              ),
+            )
           : null,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 6),
@@ -530,7 +560,9 @@ class FixtureDetailScreen extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: AppColors.of(context).warning.withAlpha(24),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: AppColors.of(context).warning.withAlpha(80)),
+                  border: Border.all(
+                    color: AppColors.of(context).warning.withAlpha(80),
+                  ),
                 ),
                 child: Text(
                   '${entry.stat.value * info.pointsEach! > 0 ? '+' : ''}${entry.stat.value * info.pointsEach!} pts',
@@ -553,7 +585,7 @@ class FixtureDetailScreen extends StatelessWidget {
     return '×${stat.value}';
   }
 
-  _StatMeta? _statInfo(String identifier) {
+  _StatMeta? _statInfo(BuildContext context, String identifier) {
     switch (identifier) {
       case 'goals_scored':
         return _StatMeta(
@@ -633,7 +665,7 @@ class FixtureDetailScreen extends StatelessWidget {
   Widget _buildDifficultyCard(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: AppTheme.gradientCard(context: context, ),
+      decoration: AppTheme.gradientCard(context: context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -649,7 +681,8 @@ class FixtureDetailScreen extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: _difficultyRow(context, 
+                child: _difficultyRow(
+                  context,
                   homeTeam?.shortName ?? 'Home',
                   fixture.teamHDifficulty,
                   isHome: true,
@@ -657,7 +690,8 @@ class FixtureDetailScreen extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: _difficultyRow(context, 
+                child: _difficultyRow(
+                  context,
                   awayTeam?.shortName ?? 'Away',
                   fixture.teamADifficulty,
                   isHome: false,
@@ -670,7 +704,12 @@ class FixtureDetailScreen extends StatelessWidget {
     ).animate().fadeIn(delay: 200.ms);
   }
 
-  Widget _difficultyRow(BuildContext context, String teamName, int difficulty, {required bool isHome}) {
+  Widget _difficultyRow(
+    BuildContext context,
+    String teamName,
+    int difficulty, {
+    required bool isHome,
+  }) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -690,7 +729,10 @@ class FixtureDetailScreen extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             isHome ? 'Home' : 'Away',
-            style: TextStyle(color: AppColors.of(context).textSecondary, fontSize: 10),
+            style: TextStyle(
+              color: AppColors.of(context).textSecondary,
+              fontSize: 10,
+            ),
           ),
           const SizedBox(height: 8),
           DifficultyBadge(difficulty: difficulty, size: 32),

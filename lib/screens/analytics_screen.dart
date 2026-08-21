@@ -157,7 +157,9 @@ class _FormChartTabState extends State<_FormChartTab> {
               margin: const EdgeInsets.only(right: 8),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
               decoration: BoxDecoration(
-                color: isSelected ? color.withAlpha(30) : AppColors.of(context).cardMedium,
+                color: isSelected
+                    ? color.withAlpha(30)
+                    : AppColors.of(context).cardMedium,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
                   color: isSelected ? color : Colors.transparent,
@@ -166,7 +168,9 @@ class _FormChartTabState extends State<_FormChartTab> {
               child: Text(
                 e.value,
                 style: TextStyle(
-                  color: isSelected ? color : AppColors.of(context).textSecondary,
+                  color: isSelected
+                      ? color
+                      : AppColors.of(context).textSecondary,
                   fontSize: 12,
                   fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
                 ),
@@ -184,7 +188,7 @@ class _FormChartTabState extends State<_FormChartTab> {
         .fold(0.0, (a, b) => a > b ? a : b);
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: AppTheme.gradientCard(context: context, ),
+      decoration: AppTheme.gradientCard(context: context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -268,8 +272,10 @@ class _FormChartTabState extends State<_FormChartTab> {
                 ),
                 gridData: FlGridData(
                   drawVerticalLine: false,
-                  getDrawingHorizontalLine: (_) =>
-                      FlLine(color: AppColors.of(context).divider, strokeWidth: 0.5),
+                  getDrawingHorizontalLine: (_) => FlLine(
+                    color: AppColors.of(context).divider,
+                    strokeWidth: 0.5,
+                  ),
                 ),
                 borderData: FlBorderData(show: false),
               ),
@@ -310,7 +316,7 @@ class _FormChartTabState extends State<_FormChartTab> {
 
   Widget _buildFormList(BuildContext context, List<Player> players) {
     return Container(
-      decoration: AppTheme.gradientCard(context: context, ),
+      decoration: AppTheme.gradientCard(context: context),
       child: Column(
         children: players.asMap().entries.map((e) {
           final i = e.key;
@@ -417,10 +423,16 @@ class _FormChartTabState extends State<_FormChartTab> {
       child: CachedNetworkImage(
         imageUrl: player.photoUrl,
         fit: BoxFit.cover,
-        placeholder: (_, __) =>
-            Icon(Icons.person, color: AppColors.of(context).textSecondary, size: 18),
-        errorWidget: (_, __, ___) =>
-            Icon(Icons.person, color: AppColors.of(context).textSecondary, size: 18),
+        placeholder: (_, __) => Icon(
+          Icons.person,
+          color: AppColors.of(context).textSecondary,
+          size: 18,
+        ),
+        errorWidget: (_, __, ___) => Icon(
+          Icons.person,
+          color: AppColors.of(context).textSecondary,
+          size: 18,
+        ),
       ),
     );
   }
@@ -443,10 +455,8 @@ class _PpgRankingTabState extends State<_PpgRankingTab> {
   @override
   Widget build(BuildContext context) {
     final players = widget.provider.players.where((p) {
-      return (_posFilter == 0 || p.elementType == _posFilter) &&
-          p.ppgValue > 0;
-    }).toList()
-      ..sort((a, b) => b.ppgValue.compareTo(a.ppgValue));
+      return (_posFilter == 0 || p.elementType == _posFilter) && p.ppgValue > 0;
+    }).toList()..sort((a, b) => b.ppgValue.compareTo(a.ppgValue));
 
     final top = players.take(_limit).toList();
 
@@ -459,7 +469,10 @@ class _PpgRankingTabState extends State<_PpgRankingTab> {
           const SizedBox(height: 4),
           Text(
             'Top players by average points per gameweek',
-            style: TextStyle(color: AppColors.of(context).textSecondary, fontSize: 12),
+            style: TextStyle(
+              color: AppColors.of(context).textSecondary,
+              fontSize: 12,
+            ),
           ),
           const SizedBox(height: 12),
           _buildPositionFilter(),
@@ -499,7 +512,9 @@ class _PpgRankingTabState extends State<_PpgRankingTab> {
               margin: const EdgeInsets.only(right: 8),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
               decoration: BoxDecoration(
-                color: isSelected ? color.withAlpha(30) : AppColors.of(context).cardMedium,
+                color: isSelected
+                    ? color.withAlpha(30)
+                    : AppColors.of(context).cardMedium,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
                   color: isSelected ? color : Colors.transparent,
@@ -508,7 +523,9 @@ class _PpgRankingTabState extends State<_PpgRankingTab> {
               child: Text(
                 e.value,
                 style: TextStyle(
-                  color: isSelected ? color : AppColors.of(context).textSecondary,
+                  color: isSelected
+                      ? color
+                      : AppColors.of(context).textSecondary,
                   fontSize: 12,
                   fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
                 ),
@@ -521,11 +538,12 @@ class _PpgRankingTabState extends State<_PpgRankingTab> {
   }
 
   Widget _buildPpgBarChart(BuildContext context, List<Player> players) {
-    final maxPpg =
-        players.map((p) => p.ppgValue).fold(0.0, (a, b) => a > b ? a : b);
+    final maxPpg = players
+        .map((p) => p.ppgValue)
+        .fold(0.0, (a, b) => a > b ? a : b);
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: AppTheme.gradientCard(context: context, ),
+      decoration: AppTheme.gradientCard(context: context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -545,8 +563,7 @@ class _PpgRankingTabState extends State<_PpgRankingTab> {
                 alignment: BarChartAlignment.spaceAround,
                 maxY: maxPpg * 1.2,
                 barGroups: players.asMap().entries.map((e) {
-                  final posColor =
-                      getPositionColor(e.value.elementType);
+                  final posColor = getPositionColor(e.value.elementType);
                   return BarChartGroupData(
                     x: e.key,
                     barRods: [
@@ -595,8 +612,7 @@ class _PpgRankingTabState extends State<_PpgRankingTab> {
                           child: Text(
                             players[idx].ppgValue.toStringAsFixed(1),
                             style: TextStyle(
-                              color: getPositionColor(
-                                  players[idx].elementType),
+                              color: getPositionColor(players[idx].elementType),
                               fontSize: 8,
                               fontWeight: FontWeight.w700,
                             ),
@@ -636,7 +652,7 @@ class _PpgRankingTabState extends State<_PpgRankingTab> {
                 ),
                 gridData: FlGridData(
                   drawVerticalLine: false,
-                  getDrawingHorizontalLine: (_) => const FlLine(
+                  getDrawingHorizontalLine: (_) => FlLine(
                     color: AppColors.of(context).divider,
                     strokeWidth: 0.5,
                   ),
@@ -698,13 +714,13 @@ class _PpgRankingTabState extends State<_PpgRankingTab> {
 
   Widget _buildPpgList(BuildContext context, List<Player> players) {
     return Container(
-      decoration: AppTheme.gradientCard(context: context, ),
+      decoration: AppTheme.gradientCard(context: context),
       child: Column(
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             child: Row(
-              children: const [
+              children: [
                 SizedBox(width: 28),
                 SizedBox(width: 8),
                 Expanded(
@@ -941,7 +957,8 @@ class _HeatMapTab extends StatelessWidget {
                       _buildHeader(context, nextGws),
                       const SizedBox(height: 4),
                       ...provider.teams.map(
-                        (team) => _buildTeamRow(context, team, nextGws, provider),
+                        (team) =>
+                            _buildTeamRow(context, team, nextGws, provider),
                       ),
                     ],
                   ),
@@ -964,7 +981,10 @@ class _HeatMapTab extends StatelessWidget {
           children: [
             Text(
               'Difficulty: ',
-              style: TextStyle(color: AppColors.of(context).textSecondary, fontSize: 12),
+              style: TextStyle(
+                color: AppColors.of(context).textSecondary,
+                fontSize: 12,
+              ),
             ),
             ...DifficultyConstants.colors.entries.map(
               (e) => Padding(
@@ -1030,7 +1050,12 @@ class _HeatMapTab extends StatelessWidget {
     );
   }
 
-  Widget _buildTeamRow(BuildContext context, dynamic team, List<int> gws, FplProvider provider) {
+  Widget _buildTeamRow(
+    BuildContext context,
+    dynamic team,
+    List<int> gws,
+    FplProvider provider,
+  ) {
     return Container(
       margin: const EdgeInsets.only(bottom: 2),
       child: Row(
@@ -1258,7 +1283,10 @@ class _RadarTabState extends State<_RadarTab> {
           TextField(
             controller: ctrl,
             onChanged: onQuery,
-            style: TextStyle(color: AppColors.of(context).textPrimary, fontSize: 13),
+            style: TextStyle(
+              color: AppColors.of(context).textPrimary,
+              fontSize: 13,
+            ),
             decoration: InputDecoration(
               hintText: label,
               hintStyle: const TextStyle(fontSize: 12),
@@ -1323,7 +1351,7 @@ class _RadarTabState extends State<_RadarTab> {
     final posColor = getPositionColor(player.elementType);
     return Container(
       padding: const EdgeInsets.all(8),
-      decoration: AppTheme.gradientCard(context: context, ),
+      decoration: AppTheme.gradientCard(context: context),
       child: Row(
         children: [
           Container(
@@ -1365,7 +1393,11 @@ class _RadarTabState extends State<_RadarTab> {
           ),
           GestureDetector(
             onTap: onClear,
-            child: Icon(Icons.close, color: AppColors.of(context).error, size: 16),
+            child: Icon(
+              Icons.close,
+              color: AppColors.of(context).error,
+              size: 16,
+            ),
           ),
         ],
       ),
@@ -1403,7 +1435,7 @@ class _RadarTabState extends State<_RadarTab> {
 
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: AppTheme.gradientCard(context: context, ),
+      decoration: AppTheme.gradientCard(context: context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1453,7 +1485,9 @@ class _RadarTabState extends State<_RadarTab> {
                 ],
                 radarBackgroundColor: Colors.transparent,
                 borderData: FlBorderData(show: false),
-                radarBorderData: BorderSide(color: AppColors.of(context).divider),
+                radarBorderData: BorderSide(
+                  color: AppColors.of(context).divider,
+                ),
                 titlePositionPercentageOffset: 0.2,
                 titleTextStyle: TextStyle(
                   color: AppColors.of(context).textSecondary,
@@ -1546,7 +1580,7 @@ class _RadarTabState extends State<_RadarTab> {
     ];
 
     return Container(
-      decoration: AppTheme.gradientCard(context: context, ),
+      decoration: AppTheme.gradientCard(context: context),
       child: Column(
         children: [
           Padding(
@@ -1596,7 +1630,10 @@ class _RadarTabState extends State<_RadarTab> {
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
                 border: Border(
-                  bottom: BorderSide(color: AppColors.of(context).divider, width: 0.5),
+                  bottom: BorderSide(
+                    color: AppColors.of(context).divider,
+                    width: 0.5,
+                  ),
                 ),
               ),
               child: Row(
@@ -1628,7 +1665,9 @@ class _RadarTabState extends State<_RadarTab> {
                     child: Text(
                       r.$3,
                       style: TextStyle(
-                        color: bWins ? AppColors.of(context).accent : AppColors.of(context).textPrimary,
+                        color: bWins
+                            ? AppColors.of(context).accent
+                            : AppColors.of(context).textPrimary,
                         fontSize: 13,
                         fontWeight: bWins ? FontWeight.w700 : FontWeight.w400,
                       ),

@@ -163,7 +163,9 @@ class _BubbleTabState extends State<_BubbleTab> {
                       vertical: 7,
                     ),
                     decoration: BoxDecoration(
-                      color: isSel ? col.withAlpha(30) : AppColors.of(context).cardMedium,
+                      color: isSel
+                          ? col.withAlpha(30)
+                          : AppColors.of(context).cardMedium,
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
                         color: isSel ? col : Colors.transparent,
@@ -172,7 +174,9 @@ class _BubbleTabState extends State<_BubbleTab> {
                     child: Text(
                       e.value,
                       style: TextStyle(
-                        color: isSel ? col : AppColors.of(context).textSecondary,
+                        color: isSel
+                            ? col
+                            : AppColors.of(context).textSecondary,
                         fontSize: 12,
                         fontWeight: isSel ? FontWeight.w700 : FontWeight.w400,
                       ),
@@ -185,7 +189,7 @@ class _BubbleTabState extends State<_BubbleTab> {
           const SizedBox(height: 16),
           Container(
             padding: const EdgeInsets.all(16),
-            decoration: AppTheme.gradientCard(context: context, ),
+            decoration: AppTheme.gradientCard(context: context),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -276,11 +280,11 @@ class _BubbleTabState extends State<_BubbleTab> {
                       ),
                       gridData: FlGridData(
                         drawVerticalLine: true,
-                        getDrawingHorizontalLine: (_) => const FlLine(
+                        getDrawingHorizontalLine: (_) => FlLine(
                           color: AppColors.of(context).divider,
                           strokeWidth: 0.5,
                         ),
-                        getDrawingVerticalLine: (_) => const FlLine(
+                        getDrawingVerticalLine: (_) => FlLine(
                           color: AppColors.of(context).divider,
                           strokeWidth: 0.5,
                         ),
@@ -374,7 +378,7 @@ class _LeadersList extends StatelessWidget {
     if (maxVal == 0) return const SizedBox.shrink();
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: AppTheme.gradientCard(context: context, ),
+      decoration: AppTheme.gradientCard(context: context),
       child: SizedBox(
         height: 200,
         child: BarChart(
@@ -453,8 +457,10 @@ class _LeadersList extends StatelessWidget {
             ),
             gridData: FlGridData(
               drawVerticalLine: false,
-              getDrawingHorizontalLine: (_) =>
-                  FlLine(color: AppColors.of(context).divider, strokeWidth: 0.5),
+              getDrawingHorizontalLine: (_) => FlLine(
+                color: AppColors.of(context).divider,
+                strokeWidth: 0.5,
+              ),
             ),
             borderData: FlBorderData(show: false),
           ),
@@ -465,7 +471,7 @@ class _LeadersList extends StatelessWidget {
 
   Widget _buildLeadersList(BuildContext context) {
     return Container(
-      decoration: AppTheme.gradientCard(context: context, ),
+      decoration: AppTheme.gradientCard(context: context),
       child: Column(
         children: players.asMap().entries.map((entry) {
           final i = entry.key;
@@ -498,7 +504,9 @@ class _LeadersList extends StatelessWidget {
                     child: Text(
                       '${i + 1}',
                       style: TextStyle(
-                        color: i == 0 ? color : AppColors.of(context).textSecondary,
+                        color: i == 0
+                            ? color
+                            : AppColors.of(context).textSecondary,
                         fontWeight: i == 0 ? FontWeight.w700 : FontWeight.w400,
                         fontSize: 14,
                       ),

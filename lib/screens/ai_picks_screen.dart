@@ -23,21 +23,41 @@ class _AiPicksScreenState extends State<AiPicksScreen>
   AiPickMode _computedMode = AiPickMode.bestXi;
   Map<String, List<Player>>? _result;
 
-  static const _tabs = [
-    _TabInfo('Best XI', Icons.star, AppColors.of(context).primary, AiPickMode.bestXi),
+  List<_TabInfo> get _tabs => [
+    _TabInfo(
+      'Best XI',
+      Icons.star,
+      AppColors.of(context).primary,
+      AiPickMode.bestXi,
+    ),
     _TabInfo('Wildcard', Icons.shuffle, Color(0xFFB388FF), AiPickMode.wildcard),
-    _TabInfo('Free Hit', Icons.refresh, AppColors.of(context).accent, AiPickMode.freeHit),
     _TabInfo(
-        'Triple Cap', Icons.star_border, AppColors.of(context).warning, AiPickMode.tripleCaptain),
+      'Free Hit',
+      Icons.refresh,
+      AppColors.of(context).accent,
+      AiPickMode.freeHit,
+    ),
     _TabInfo(
-        'Bench Boost', Icons.people, AppColors.of(context).error, AiPickMode.benchBoost),
+      'Triple Cap',
+      Icons.star_border,
+      AppColors.of(context).warning,
+      AiPickMode.tripleCaptain,
+    ),
+    _TabInfo(
+      'Bench Boost',
+      Icons.people,
+      AppColors.of(context).error,
+      AiPickMode.benchBoost,
+    ),
   ];
 
   @override
   void initState() {
     super.initState();
-    _tabCtrl = TabController(length: _tabs.length, vsync: this);
-    WidgetsBinding.instance.addPostFrameCallback((_) => _analyse(AiPickMode.bestXi));
+    _tabCtrl = TabController(length: 5, vsync: this);
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _analyse(AiPickMode.bestXi),
+    );
   }
 
   @override
@@ -68,42 +88,47 @@ class _AiPicksScreenState extends State<AiPicksScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<FplProvider>(builder: (context, provider, _) {
-      return Scaffold(
-        backgroundColor: AppColors.of(context).background,
-        appBar: AppBar(
-          backgroundColor: AppColors.of(context).secondary,
-          title: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(7),
-                decoration: BoxDecoration(
-                  color: AppColors.of(context).primary.withAlpha(24),
-                  borderRadius: BorderRadius.circular(10),
+    return Consumer<FplProvider>(
+      builder: (context, provider, _) {
+        return Scaffold(
+          backgroundColor: AppColors.of(context).background,
+          appBar: AppBar(
+            backgroundColor: AppColors.of(context).secondary,
+            title: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(7),
+                  decoration: BoxDecoration(
+                    color: AppColors.of(context).primary.withAlpha(24),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    Icons.auto_awesome_rounded,
+                    color: AppColors.of(context).primary,
+                    size: 18,
+                  ),
                 ),
-                child: Icon(Icons.auto_awesome_rounded,
-                    color: AppColors.of(context).primary, size: 18),
+                const SizedBox(width: 10),
+                const Text('AI Smart Picks'),
+              ],
+            ),
+          ),
+          body: Column(
+            children: [
+              // ── Mode selector ─────────────────────────────────────────────
+              _buildModeSelector(),
+              const SizedBox(height: 2),
+              // ── Content ───────────────────────────────────────────────────
+              Expanded(
+                child: provider.isLoading
+                    ? const LoadingListWidget()
+                    : _buildTabBody(context, provider),
               ),
-              const SizedBox(width: 10),
-              const Text('AI Smart Picks'),
             ],
           ),
-        ),
-        body: Column(
-          children: [
-            // ── Mode selector ─────────────────────────────────────────────
-            _buildModeSelector(),
-            const SizedBox(height: 2),
-            // ── Content ───────────────────────────────────────────────────
-            Expanded(
-              child: provider.isLoading
-                  ? const LoadingListWidget()
-                  : _buildTabBody(context, provider),
-            ),
-          ],
-        ),
-      );
-    });
+        );
+      },
+    );
   }
 
   Widget _buildModeSelector() {
@@ -128,7 +153,10 @@ class _AiPicksScreenState extends State<AiPicksScreen>
               },
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: isSelected
                       ? tab.color.withAlpha(28)
@@ -144,11 +172,13 @@ class _AiPicksScreenState extends State<AiPicksScreen>
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(tab.icon,
-                        color: isSelected
-                            ? tab.color
-                            : AppColors.of(context).textSecondary,
-                        size: 14),
+                    Icon(
+                      tab.icon,
+                      color: isSelected
+                          ? tab.color
+                          : AppColors.of(context).textSecondary,
+                      size: 14,
+                    ),
                     const SizedBox(width: 5),
                     Text(
                       tab.label,
@@ -172,15 +202,17 @@ class _AiPicksScreenState extends State<AiPicksScreen>
     );
   }
 
-
   Widget _buildTabBody(BuildContext context, FplProvider provider) {
     if (_isAnalysing) {
       return _buildAnalysingView();
     }
     if (_result == null || provider.players.isEmpty) {
       return Center(
-          child: Text('No data available',
-              style: TextStyle(color: AppColors.of(context).textSecondary)));
+        child: Text(
+          'No data available',
+          style: TextStyle(color: AppColors.of(context).textSecondary),
+        ),
+      );
     }
     return _buildResultView(context, provider, _result!, _computedMode);
   }
@@ -196,19 +228,25 @@ class _AiPicksScreenState extends State<AiPicksScreen>
             decoration: BoxDecoration(
               color: AppColors.of(context).primary.withAlpha(18),
               shape: BoxShape.circle,
-              border:
-                  Border.all(color: AppColors.of(context).primary.withAlpha(60), width: 1.5),
+              border: Border.all(
+                color: AppColors.of(context).primary.withAlpha(60),
+                width: 1.5,
+              ),
             ),
-            child: Icon(Icons.auto_awesome_rounded,
-                color: AppColors.of(context).primary, size: 36),
+            child: Icon(
+              Icons.auto_awesome_rounded,
+              color: AppColors.of(context).primary,
+              size: 36,
+            ),
           ),
           const SizedBox(height: 20),
           Text(
             'Analysing players…',
             style: TextStyle(
-                color: AppColors.of(context).textPrimary,
-                fontSize: 17,
-                fontWeight: FontWeight.w700),
+              color: AppColors.of(context).textPrimary,
+              fontSize: 17,
+              fontWeight: FontWeight.w700,
+            ),
           ),
           const SizedBox(height: 8),
           Padding(
@@ -216,7 +254,10 @@ class _AiPicksScreenState extends State<AiPicksScreen>
             child: Text(
               'Using form, xG, ICT, fixtures & transfer\ntrends to build the best team.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: AppColors.of(context).textSecondary, fontSize: 13),
+              style: TextStyle(
+                color: AppColors.of(context).textSecondary,
+                fontSize: 13,
+              ),
             ),
           ),
           const SizedBox(height: 28),
@@ -224,7 +265,7 @@ class _AiPicksScreenState extends State<AiPicksScreen>
             width: 180,
             child: ClipRRect(
               borderRadius: BorderRadius.circular(4),
-              child: const LinearProgressIndicator(
+              child: LinearProgressIndicator(
                 color: AppColors.of(context).primary,
                 backgroundColor: AppColors.of(context).cardMedium,
                 minHeight: 3,
@@ -236,8 +277,12 @@ class _AiPicksScreenState extends State<AiPicksScreen>
     );
   }
 
-  Widget _buildResultView(BuildContext context, FplProvider provider,
-      Map<String, List<Player>> result, AiPickMode mode) {
+  Widget _buildResultView(
+    BuildContext context,
+    FplProvider provider,
+    Map<String, List<Player>> result,
+    AiPickMode mode,
+  ) {
     final starting = result['starting'] ?? [];
     final subs = result['subs'] ?? [];
     final all = result['all'] ?? [];
@@ -261,8 +306,16 @@ class _AiPicksScreenState extends State<AiPicksScreen>
           children: [
             _buildModeExplanation(mode),
             _buildStats(totalCost, totalPts, captain, mode),
-            _buildPitch(context, gks, defs, mids, fwds, captain, viceCaptain,
-                provider),
+            _buildPitch(
+              context,
+              gks,
+              defs,
+              mids,
+              fwds,
+              captain,
+              viceCaptain,
+              provider,
+            ),
             _buildSubsSection(context, subs, provider),
             _buildCaptainRationale(captain, viceCaptain, provider),
             _buildTopPlayersTable(context, starting, provider),
@@ -291,15 +344,22 @@ class _AiPicksScreenState extends State<AiPicksScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(info.title,
-                    style: TextStyle(
-                        color: info.color,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700)),
+                Text(
+                  info.title,
+                  style: TextStyle(
+                    color: info.color,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
                 const SizedBox(height: 2),
-                Text(info.desc,
-                    style: TextStyle(
-                        color: AppColors.of(context).textSecondary, fontSize: 11)),
+                Text(
+                  info.desc,
+                  style: TextStyle(
+                    color: AppColors.of(context).textSecondary,
+                    fontSize: 11,
+                  ),
+                ),
               ],
             ),
           ),
@@ -309,7 +369,11 @@ class _AiPicksScreenState extends State<AiPicksScreen>
   }
 
   Widget _buildStats(
-      int totalCost, int totalPts, Player? captain, AiPickMode mode) {
+    int totalCost,
+    int totalPts,
+    Player? captain,
+    AiPickMode mode,
+  ) {
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
       padding: const EdgeInsets.all(16),
@@ -331,16 +395,23 @@ class _AiPicksScreenState extends State<AiPicksScreen>
       children: [
         Icon(icon, color: AppColors.of(context).primary, size: 18),
         const SizedBox(height: 3),
-        Text(value,
-            style: TextStyle(
-                color: AppColors.of(context).textPrimary,
-                fontSize: 14,
-                fontWeight: FontWeight.w700),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis),
-        Text(label,
-            style:
-                TextStyle(color: AppColors.of(context).textSecondary, fontSize: 10)),
+        Text(
+          value,
+          style: TextStyle(
+            color: AppColors.of(context).textPrimary,
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        Text(
+          label,
+          style: TextStyle(
+            color: AppColors.of(context).textSecondary,
+            fontSize: 10,
+          ),
+        ),
       ],
     );
   }
@@ -369,17 +440,41 @@ class _AiPicksScreenState extends State<AiPicksScreen>
       child: Column(
         children: [
           const SizedBox(height: 14),
-          _pitchRow(context, fwds, captain, viceCaptain,
-              PositionConstants.positionColors[4]!, provider),
+          _pitchRow(
+            context,
+            fwds,
+            captain,
+            viceCaptain,
+            PositionConstants.positionColors[4]!,
+            provider,
+          ),
           const SizedBox(height: 10),
-          _pitchRow(context, mids, captain, viceCaptain,
-              PositionConstants.positionColors[3]!, provider),
+          _pitchRow(
+            context,
+            mids,
+            captain,
+            viceCaptain,
+            PositionConstants.positionColors[3]!,
+            provider,
+          ),
           const SizedBox(height: 10),
-          _pitchRow(context, defs, captain, viceCaptain,
-              PositionConstants.positionColors[2]!, provider),
+          _pitchRow(
+            context,
+            defs,
+            captain,
+            viceCaptain,
+            PositionConstants.positionColors[2]!,
+            provider,
+          ),
           const SizedBox(height: 10),
-          _pitchRow(context, gks, captain, viceCaptain,
-              PositionConstants.positionColors[1]!, provider),
+          _pitchRow(
+            context,
+            gks,
+            captain,
+            viceCaptain,
+            PositionConstants.positionColors[1]!,
+            provider,
+          ),
           const SizedBox(height: 10),
           Container(
             width: double.infinity,
@@ -405,96 +500,128 @@ class _AiPicksScreenState extends State<AiPicksScreen>
     FplProvider provider,
   ) {
     if (players.isEmpty) return const SizedBox.shrink();
-    return LayoutBuilder(builder: (context, constraints) {
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: players.map((p) {
-          final diff = provider.getNextFixtureDifficulty(p.teamId);
-          return SizedBox(
-            width: (constraints.maxWidth / players.length).clamp(60.0, 80.0),
-            child: _AiPitchPlayer(
-              player: p,
-              posColor: posColor,
-              isCaptain: captain?.id == p.id,
-              isViceCaptain: viceCaptain?.id == p.id,
-              nextFixtureDifficulty: diff,
-              onTap: () => Navigator.push(context,
-                  MaterialPageRoute(builder: (_) => PlayerDetailScreen(player: p))),
-            ),
-          );
-        }).toList(),
-      );
-    });
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: players.map((p) {
+            final diff = provider.getNextFixtureDifficulty(p.teamId);
+            return SizedBox(
+              width: (constraints.maxWidth / players.length).clamp(60.0, 80.0),
+              child: _AiPitchPlayer(
+                player: p,
+                posColor: posColor,
+                isCaptain: captain?.id == p.id,
+                isViceCaptain: viceCaptain?.id == p.id,
+                nextFixtureDifficulty: diff,
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => PlayerDetailScreen(player: p),
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        );
+      },
+    );
   }
 
   Widget _buildSubsSection(
-      BuildContext context, List<Player> subs, FplProvider provider) {
+    BuildContext context,
+    List<Player> subs,
+    FplProvider provider,
+  ) {
     if (subs.isEmpty) return const SizedBox.shrink();
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
       padding: const EdgeInsets.all(12),
-      decoration: AppTheme.gradientCard(context: context, ),
+      decoration: AppTheme.gradientCard(context: context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(Icons.swap_horiz, color: AppColors.of(context).textSecondary, size: 16),
+              Icon(
+                Icons.swap_horiz,
+                color: AppColors.of(context).textSecondary,
+                size: 16,
+              ),
               SizedBox(width: 6),
-              Text('Substitutes',
-                  style: TextStyle(
-                      color: AppColors.of(context).textSecondary,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600)),
+              Text(
+                'Substitutes',
+                style: TextStyle(
+                  color: AppColors.of(context).textSecondary,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 10),
-          LayoutBuilder(builder: (context, constraints) {
-            return Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: subs.take(4).map((p) {
-                final diff = provider.getNextFixtureDifficulty(p.teamId);
-                return SizedBox(
-                  width: (constraints.maxWidth / 4).clamp(60.0, 80.0),
-                  child: _AiPitchPlayer(
-                    player: p,
-                    posColor: getPositionColor(p.elementType),
-                    isSub: true,
-                    nextFixtureDifficulty: diff,
-                    onTap: () => Navigator.push(
+          LayoutBuilder(
+            builder: (context, constraints) {
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: subs.take(4).map((p) {
+                  final diff = provider.getNextFixtureDifficulty(p.teamId);
+                  return SizedBox(
+                    width: (constraints.maxWidth / 4).clamp(60.0, 80.0),
+                    child: _AiPitchPlayer(
+                      player: p,
+                      posColor: getPositionColor(p.elementType),
+                      isSub: true,
+                      nextFixtureDifficulty: diff,
+                      onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (_) => PlayerDetailScreen(player: p))),
-                  ),
-                );
-              }).toList(),
-            );
-          }),
+                          builder: (_) => PlayerDetailScreen(player: p),
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              );
+            },
+          ),
         ],
       ),
     );
   }
 
   Widget _buildCaptainRationale(
-      Player? captain, Player? viceCaptain, FplProvider provider) {
+    Player? captain,
+    Player? viceCaptain,
+    FplProvider provider,
+  ) {
     if (captain == null) return const SizedBox.shrink();
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
       padding: const EdgeInsets.all(14),
-      decoration: AppTheme.gradientCard(context: context, 
-          colors: [const Color(0xFF1a2a3a), const Color(0xFF0d1a2a)]),
+      decoration: AppTheme.gradientCard(
+        context: context,
+        colors: [const Color(0xFF1a2a3a), const Color(0xFF0d1a2a)],
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(Icons.lightbulb_outline, color: AppColors.of(context).warning, size: 16),
+              Icon(
+                Icons.lightbulb_outline,
+                color: AppColors.of(context).warning,
+                size: 16,
+              ),
               SizedBox(width: 6),
-              Text('Captain Pick Rationale',
-                  style: TextStyle(
-                      color: AppColors.of(context).textPrimary,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700)),
+              Text(
+                'Captain Pick Rationale',
+                style: TextStyle(
+                  color: AppColors.of(context).textPrimary,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 10),
@@ -522,16 +649,24 @@ class _AiPicksScreenState extends State<AiPicksScreen>
             shape: BoxShape.circle,
             color: AppColors.of(context).cardMedium,
             border: Border.all(
-                color: getPositionColor(player.elementType), width: 1.5),
+              color: getPositionColor(player.elementType),
+              width: 1.5,
+            ),
           ),
           clipBehavior: Clip.antiAlias,
           child: CachedNetworkImage(
             imageUrl: player.photoUrl,
             fit: BoxFit.cover,
-            placeholder: (_, __) => Icon(Icons.person,
-                color: AppColors.of(context).textSecondary, size: 18),
-            errorWidget: (_, __, ___) => Icon(Icons.person,
-                color: AppColors.of(context).textSecondary, size: 18),
+            placeholder: (_, __) => Icon(
+              Icons.person,
+              color: AppColors.of(context).textSecondary,
+              size: 18,
+            ),
+            errorWidget: (_, __, ___) => Icon(
+              Icons.person,
+              color: AppColors.of(context).textSecondary,
+              size: 18,
+            ),
           ),
         ),
         const SizedBox(width: 10),
@@ -539,38 +674,51 @@ class _AiPicksScreenState extends State<AiPicksScreen>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(player.webName,
-                  style: TextStyle(
-                      color: AppColors.of(context).textPrimary,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600)),
               Text(
-                  '${team?.shortName ?? ''} • Form ${player.form} • ${formatPrice(player.nowCost)}',
-                  style: TextStyle(
-                      color: AppColors.of(context).textSecondary, fontSize: 11)),
+                player.webName,
+                style: TextStyle(
+                  color: AppColors.of(context).textPrimary,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              Text(
+                '${team?.shortName ?? ''} • Form ${player.form} • ${formatPrice(player.nowCost)}',
+                style: TextStyle(
+                  color: AppColors.of(context).textSecondary,
+                  fontSize: 11,
+                ),
+              ),
             ],
           ),
         ),
         Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            Text(role,
-                style: TextStyle(
-                    color: AppColors.of(context).warning,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600)),
+            Text(
+              role,
+              style: TextStyle(
+                color: AppColors.of(context).warning,
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
                   width: 8,
                   height: 8,
-                  decoration:
-                      BoxDecoration(color: diffColor, shape: BoxShape.circle),
+                  decoration: BoxDecoration(
+                    color: diffColor,
+                    shape: BoxShape.circle,
+                  ),
                 ),
                 const SizedBox(width: 3),
-                Text('FDR $diff',
-                    style: TextStyle(color: diffColor, fontSize: 10)),
+                Text(
+                  'FDR $diff',
+                  style: TextStyle(color: diffColor, fontSize: 10),
+                ),
               ],
             ),
           ],
@@ -580,10 +728,13 @@ class _AiPicksScreenState extends State<AiPicksScreen>
   }
 
   Widget _buildTopPlayersTable(
-      BuildContext context, List<Player> players, FplProvider provider) {
+    BuildContext context,
+    List<Player> players,
+    FplProvider provider,
+  ) {
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-      decoration: AppTheme.gradientCard(context: context, ),
+      decoration: AppTheme.gradientCard(context: context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -591,13 +742,20 @@ class _AiPicksScreenState extends State<AiPicksScreen>
             padding: EdgeInsets.fromLTRB(14, 12, 14, 8),
             child: Row(
               children: [
-                Icon(Icons.analytics, color: AppColors.of(context).accent, size: 16),
+                Icon(
+                  Icons.analytics,
+                  color: AppColors.of(context).accent,
+                  size: 16,
+                ),
                 SizedBox(width: 6),
-                Text('Player Stats',
-                    style: TextStyle(
-                        color: AppColors.of(context).textPrimary,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700)),
+                Text(
+                  'Player Stats',
+                  style: TextStyle(
+                    color: AppColors.of(context).textPrimary,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ],
             ),
           ),
@@ -605,32 +763,57 @@ class _AiPicksScreenState extends State<AiPicksScreen>
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
             child: Row(
-              children: const [
+              children: [
                 Expanded(
-                    flex: 3,
-                    child: Text('Player',
-                        style: TextStyle(
-                            color: AppColors.of(context).textSecondary, fontSize: 11))),
+                  flex: 3,
+                  child: Text(
+                    'Player',
+                    style: TextStyle(
+                      color: AppColors.of(context).textSecondary,
+                      fontSize: 11,
+                    ),
+                  ),
+                ),
                 Expanded(
-                    child: Text('Form',
-                        style: TextStyle(
-                            color: AppColors.of(context).textSecondary, fontSize: 11),
-                        textAlign: TextAlign.center)),
+                  child: Text(
+                    'Form',
+                    style: TextStyle(
+                      color: AppColors.of(context).textSecondary,
+                      fontSize: 11,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
                 Expanded(
-                    child: Text('xG',
-                        style: TextStyle(
-                            color: AppColors.of(context).textSecondary, fontSize: 11),
-                        textAlign: TextAlign.center)),
+                  child: Text(
+                    'xG',
+                    style: TextStyle(
+                      color: AppColors.of(context).textSecondary,
+                      fontSize: 11,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
                 Expanded(
-                    child: Text('ICT',
-                        style: TextStyle(
-                            color: AppColors.of(context).textSecondary, fontSize: 11),
-                        textAlign: TextAlign.center)),
+                  child: Text(
+                    'ICT',
+                    style: TextStyle(
+                      color: AppColors.of(context).textSecondary,
+                      fontSize: 11,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
                 Expanded(
-                    child: Text('FDR',
-                        style: TextStyle(
-                            color: AppColors.of(context).textSecondary, fontSize: 11),
-                        textAlign: TextAlign.center)),
+                  child: Text(
+                    'FDR',
+                    style: TextStyle(
+                      color: AppColors.of(context).textSecondary,
+                      fontSize: 11,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
               ],
             ),
           ),
@@ -640,13 +823,21 @@ class _AiPicksScreenState extends State<AiPicksScreen>
             final team = provider.getTeamById(p.teamId);
             final diff = provider.getNextFixtureDifficulty(p.teamId);
             final diffColor =
-                DifficultyConstants.colors[diff] ?? AppColors.of(context).textSecondary;
+                DifficultyConstants.colors[diff] ??
+                AppColors.of(context).textSecondary;
             final posColor = getPositionColor(p.elementType);
             return InkWell(
-              onTap: () => Navigator.push(context,
-                  MaterialPageRoute(builder: (_) => PlayerDetailScreen(player: p))),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => PlayerDetailScreen(player: p),
+                ),
+              ),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 8,
+                ),
                 child: Row(
                   children: [
                     Expanded(
@@ -666,17 +857,23 @@ class _AiPicksScreenState extends State<AiPicksScreen>
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(p.webName,
-                                    style: TextStyle(
-                                        color: AppColors.of(context).textPrimary,
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis),
-                                Text(team?.shortName ?? '',
-                                    style: TextStyle(
-                                        color: AppColors.of(context).textSecondary,
-                                        fontSize: 10)),
+                                Text(
+                                  p.webName,
+                                  style: TextStyle(
+                                    color: AppColors.of(context).textPrimary,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Text(
+                                  team?.shortName ?? '',
+                                  style: TextStyle(
+                                    color: AppColors.of(context).textSecondary,
+                                    fontSize: 10,
+                                  ),
+                                ),
                               ],
                             ),
                           ),
@@ -684,44 +881,57 @@ class _AiPicksScreenState extends State<AiPicksScreen>
                       ),
                     ),
                     Expanded(
-                      child: Text(p.form,
-                          style: TextStyle(
-                              color: AppColors.of(context).accent,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600),
-                          textAlign: TextAlign.center),
+                      child: Text(
+                        p.form,
+                        style: TextStyle(
+                          color: AppColors.of(context).accent,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
                     ),
                     Expanded(
                       child: Text(
-                          (double.tryParse(p.expectedGoalsStr) ?? 0)
-                              .toStringAsFixed(1),
-                          style: TextStyle(
-                              color: AppColors.of(context).primary, fontSize: 12),
-                          textAlign: TextAlign.center),
+                        (double.tryParse(p.expectedGoalsStr) ?? 0)
+                            .toStringAsFixed(1),
+                        style: TextStyle(
+                          color: AppColors.of(context).primary,
+                          fontSize: 12,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
                     ),
                     Expanded(
                       child: Text(
-                          (double.tryParse(p.ictIndex) ?? 0)
-                              .toStringAsFixed(0),
-                          style: TextStyle(
-                              color: AppColors.of(context).warning, fontSize: 12),
-                          textAlign: TextAlign.center),
+                        (double.tryParse(p.ictIndex) ?? 0).toStringAsFixed(0),
+                        style: TextStyle(
+                          color: AppColors.of(context).warning,
+                          fontSize: 12,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
                     ),
                     Expanded(
                       child: Container(
                         margin: const EdgeInsets.symmetric(horizontal: 8),
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 6, vertical: 2),
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: diffColor.withAlpha(40),
                           borderRadius: BorderRadius.circular(4),
                         ),
-                        child: Text('$diff',
-                            style: TextStyle(
-                                color: diffColor,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700),
-                            textAlign: TextAlign.center),
+                        child: Text(
+                          '$diff',
+                          style: TextStyle(
+                            color: diffColor,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
                       ),
                     ),
                   ],
@@ -746,7 +956,7 @@ class _AiPicksScreenState extends State<AiPicksScreen>
               'Great for a complete squad rebuild.',
         );
       case AiPickMode.freeHit:
-        return const _ModeInfo(
+        return _ModeInfo(
           icon: Icons.refresh,
           color: AppColors.of(context).accent,
           title: 'Free Hit Team',
@@ -755,7 +965,7 @@ class _AiPicksScreenState extends State<AiPicksScreen>
               'single gameweek only, ignoring price constraints.',
         );
       case AiPickMode.tripleCaptain:
-        return const _ModeInfo(
+        return _ModeInfo(
           icon: Icons.star_border,
           color: AppColors.of(context).warning,
           title: 'Triple Captain Suggestion',
@@ -764,7 +974,7 @@ class _AiPicksScreenState extends State<AiPicksScreen>
               'Pick your captain wisely – their points count 3×.',
         );
       case AiPickMode.benchBoost:
-        return const _ModeInfo(
+        return _ModeInfo(
           icon: Icons.people,
           color: AppColors.of(context).error,
           title: 'Bench Boost Team',
@@ -773,7 +983,7 @@ class _AiPicksScreenState extends State<AiPicksScreen>
               'Use when your bench players also have great fixtures.',
         );
       default:
-        return const _ModeInfo(
+        return _ModeInfo(
           icon: Icons.auto_awesome,
           color: AppColors.of(context).primary,
           title: 'AI Best XI',
@@ -800,11 +1010,12 @@ class _ModeInfo {
   final Color color;
   final String title;
   final String desc;
-  const _ModeInfo(
-      {required this.icon,
-      required this.color,
-      required this.title,
-      required this.desc});
+  const _ModeInfo({
+    required this.icon,
+    required this.color,
+    required this.title,
+    required this.desc,
+  });
 }
 
 // ─── Pitch Player for AI Screen ───────────────────────────────────────────────
@@ -832,7 +1043,7 @@ class _AiPitchPlayer extends StatelessWidget {
   Widget build(BuildContext context) {
     final diffColor = nextFixtureDifficulty != null
         ? (DifficultyConstants.colors[nextFixtureDifficulty] ??
-            AppColors.of(context).textSecondary)
+              AppColors.of(context).textSecondary)
         : null;
     final size = isSub ? 46.0 : 54.0;
 
@@ -856,10 +1067,16 @@ class _AiPitchPlayer extends StatelessWidget {
                 child: CachedNetworkImage(
                   imageUrl: player.photoUrl,
                   fit: BoxFit.cover,
-                  placeholder: (_, __) => Icon(Icons.person,
-                      color: AppColors.of(context).textSecondary, size: size * 0.5),
-                  errorWidget: (_, __, ___) => Icon(Icons.person,
-                      color: AppColors.of(context).textSecondary, size: size * 0.5),
+                  placeholder: (_, __) => Icon(
+                    Icons.person,
+                    color: AppColors.of(context).textSecondary,
+                    size: size * 0.5,
+                  ),
+                  errorWidget: (_, __, ___) => Icon(
+                    Icons.person,
+                    color: AppColors.of(context).textSecondary,
+                    size: size * 0.5,
+                  ),
                 ),
               ),
               if (diffColor != null)
@@ -872,16 +1089,19 @@ class _AiPitchPlayer extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: diffColor,
                       shape: BoxShape.circle,
-                      border:
-                          Border.all(color: AppColors.of(context).cardDark, width: 1.5),
+                      border: Border.all(
+                        color: AppColors.of(context).cardDark,
+                        width: 1.5,
+                      ),
                     ),
                     child: Center(
                       child: Text(
                         '${nextFixtureDifficulty}',
                         style: const TextStyle(
-                            fontSize: 7,
-                            fontWeight: FontWeight.w900,
-                            color: Colors.white),
+                          fontSize: 7,
+                          fontWeight: FontWeight.w900,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ),
@@ -894,13 +1114,19 @@ class _AiPitchPlayer extends StatelessWidget {
                     width: 16,
                     height: 16,
                     decoration: BoxDecoration(
-                        color: AppColors.of(context).warning, shape: BoxShape.circle),
+                      color: AppColors.of(context).warning,
+                      shape: BoxShape.circle,
+                    ),
                     child: Center(
-                        child: Text('C',
-                            style: TextStyle(
-                                fontSize: 9,
-                                fontWeight: FontWeight.w900,
-                                color: AppColors.of(context).secondary))),
+                      child: Text(
+                        'C',
+                        style: TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.w900,
+                          color: AppColors.of(context).secondary,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               if (isViceCaptain)
@@ -911,13 +1137,19 @@ class _AiPitchPlayer extends StatelessWidget {
                     width: 16,
                     height: 16,
                     decoration: BoxDecoration(
-                        color: AppColors.of(context).accent, shape: BoxShape.circle),
+                      color: AppColors.of(context).accent,
+                      shape: BoxShape.circle,
+                    ),
                     child: Center(
-                        child: Text('V',
-                            style: TextStyle(
-                                fontSize: 9,
-                                fontWeight: FontWeight.w900,
-                                color: AppColors.of(context).secondary))),
+                      child: Text(
+                        'V',
+                        style: TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.w900,
+                          color: AppColors.of(context).secondary,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
             ],
@@ -932,10 +1164,16 @@ class _AiPitchPlayer extends StatelessWidget {
             constraints: const BoxConstraints(maxWidth: 72),
             child: Text(
               player.webName.length > 9
-                  ? player.webName.substring(0, player.webName.length.clamp(0, 8))
+                  ? player.webName.substring(
+                      0,
+                      player.webName.length.clamp(0, 8),
+                    )
                   : player.webName,
               style: const TextStyle(
-                  color: Colors.white, fontSize: 9, fontWeight: FontWeight.w600),
+                color: Colors.white,
+                fontSize: 9,
+                fontWeight: FontWeight.w600,
+              ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
@@ -950,9 +1188,10 @@ class _AiPitchPlayer extends StatelessWidget {
             child: Text(
               player.form,
               style: TextStyle(
-                  color: AppColors.of(context).secondary,
-                  fontSize: 9,
-                  fontWeight: FontWeight.w800),
+                color: AppColors.of(context).secondary,
+                fontSize: 9,
+                fontWeight: FontWeight.w800,
+              ),
             ),
           ),
         ],

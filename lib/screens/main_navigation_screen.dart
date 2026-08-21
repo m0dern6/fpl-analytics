@@ -31,7 +31,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<FplProvider>().loadAllData();
+      context.read<FplProvider>().loadAllData(forceRefresh: true);
       context.read<UserTeamsProvider>().loadTeams();
     });
   }
@@ -142,7 +142,9 @@ class _NavItem extends StatelessWidget {
               ),
               child: Icon(
                 isSelected ? dest.filledIcon : dest.outlinedIcon,
-                color: isSelected ? AppColors.of(context).primary : AppColors.of(context).textSecondary,
+                color: isSelected
+                    ? AppColors.of(context).primary
+                    : AppColors.of(context).textSecondary,
                 size: 22,
               ),
             ),
@@ -150,7 +152,9 @@ class _NavItem extends StatelessWidget {
             AnimatedDefaultTextStyle(
               duration: const Duration(milliseconds: 220),
               style: TextStyle(
-                color: isSelected ? AppColors.of(context).primary : AppColors.of(context).textSecondary,
+                color: isSelected
+                    ? AppColors.of(context).primary
+                    : AppColors.of(context).textSecondary,
                 fontSize: 10,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
                 letterSpacing: isSelected ? 0.1 : 0,
