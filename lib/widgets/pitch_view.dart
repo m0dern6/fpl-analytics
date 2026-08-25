@@ -14,6 +14,7 @@ class PitchView extends StatelessWidget {
   final String? activeChip;
   final Map<int, int>? pointsMap;
   final bool isDreamTeam;
+  final bool showSubs;
   final Function(Map<String, dynamic> pick) onPlayerTap;
 
   const PitchView({
@@ -24,6 +25,7 @@ class PitchView extends StatelessWidget {
     this.activeChip,
     this.pointsMap,
     this.isDreamTeam = false,
+    this.showSubs = true,
     required this.onPlayerTap,
   });
 
@@ -55,13 +57,12 @@ class PitchView extends StatelessWidget {
             _buildPitchRow(midPicks, isStarting: true),
             const SizedBox(height: 6),
             _buildPitchRow(fwdPicks, isStarting: true),
-            if (bench.isNotEmpty || isDreamTeam) ...[
+            if (showSubs && (bench.isNotEmpty || isDreamTeam)) ...[
               const SizedBox(height: 10),
               _buildBenchDivider(activeChip == 'bboost'),
               const SizedBox(height: 8),
               if (bench.isNotEmpty) _buildPitchRow(bench, isStarting: false),
               if (bench.isEmpty && isDreamTeam)
-                // show 4 empty spots for bench in dream team
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   child: Row(
@@ -518,7 +519,10 @@ class _PitchPlayerCard extends StatelessWidget {
         cardGradient = LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [AppColors.of(context).primary.withAlpha(30), Colors.white.withAlpha(10)],
+          colors: [
+            AppColors.of(context).primary.withAlpha(30),
+            Colors.white.withAlpha(10),
+          ],
         );
       case _CardState.good:
         borderColor = const Color(0xFF34D399);
@@ -620,9 +624,9 @@ class _PitchPlayerCard extends StatelessWidget {
               child: Text(
                 _getStatusText(player, effectivePts),
                 style: const TextStyle(
-                  color: Colors.black,
-                  fontSize: 8.5,
-                  fontWeight: FontWeight.w900,
+                  color: Colors.white,
+                  fontSize: 9.5,
+                  fontWeight: FontWeight.w700,
                 ),
                 textAlign: TextAlign.center,
                 maxLines: 1,

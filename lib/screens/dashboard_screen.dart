@@ -16,8 +16,11 @@ import 'player_detail_screen.dart';
 import 'gameweek_detail_screen.dart';
 import 'fixture_detail_screen.dart';
 import 'fpl_team_screen.dart';
+import 'my_teams_screen.dart';
 import 'season_trend_detail_screen.dart';
 import 'form_leaders_screen.dart';
+import 'top_performers_screen.dart';
+import 'transfer_activity_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -97,6 +100,17 @@ class DashboardScreen extends StatelessWidget {
               ),
             ),
           ),
+        IconButton(
+          tooltip: 'My Teams',
+          icon: Icon(
+            Icons.person_rounded,
+            color: AppColors.of(context).textSecondary,
+          ),
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const MyTeamsScreen()),
+          ),
+        ),
         IconButton(
           icon: Icon(
             Icons.refresh_rounded,
@@ -198,11 +212,41 @@ class _DashboardContent extends StatelessWidget {
                 topValue,
               ),
               const SizedBox(height: 20),
-              _buildSectionTitle(context, 'Top Performers'),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildSectionTitle(context, 'Top Performers'),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const TopPerformersScreen(),
+                      ),
+                    ),
+                    child: const Text('View All'),
+                  ),
+                ],
+              ),
               const SizedBox(height: 12),
               _buildTopPerformers(context),
               const SizedBox(height: 20),
-              _buildSectionTitle(context, 'Transfer Activity'),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildSectionTitle(context, 'Transfer Activity'),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const TransferActivityScreen(),
+                      ),
+                    ),
+                    child: const Text('View All'),
+                  ),
+                ],
+              ),
               const SizedBox(height: 12),
               _buildTransferSection(context),
               const SizedBox(height: 20),
@@ -635,6 +679,14 @@ class _DashboardContent extends StatelessWidget {
           icon: Icons.star_rounded,
           valueColor: AppColors.of(context).primary,
           imageUrl: topScorer?.photoUrl,
+          onTap: topScorer == null
+              ? null
+              : () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => PlayerDetailScreen(player: topScorer),
+                  ),
+                ),
         ).animate().fadeIn(delay: 100.ms),
         StatCard(
           title: 'Top Assists',
@@ -643,6 +695,14 @@ class _DashboardContent extends StatelessWidget {
           icon: Icons.sports_soccer_rounded,
           valueColor: AppColors.of(context).accent,
           imageUrl: topAssist?.photoUrl,
+          onTap: topAssist == null
+              ? null
+              : () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => PlayerDetailScreen(player: topAssist),
+                  ),
+                ),
         ).animate().fadeIn(delay: 200.ms),
         StatCard(
           title: 'Most Owned',
@@ -651,6 +711,14 @@ class _DashboardContent extends StatelessWidget {
           icon: Icons.people_rounded,
           valueColor: const Color(0xFFA78BFA),
           imageUrl: topSelected?.photoUrl,
+          onTap: topSelected == null
+              ? null
+              : () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => PlayerDetailScreen(player: topSelected),
+                  ),
+                ),
         ).animate().fadeIn(delay: 300.ms),
         StatCard(
           title: 'Best Value',
@@ -659,6 +727,14 @@ class _DashboardContent extends StatelessWidget {
           icon: Icons.trending_up_rounded,
           valueColor: const Color(0xFF34D399),
           imageUrl: topValue?.photoUrl,
+          onTap: topValue == null
+              ? null
+              : () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => PlayerDetailScreen(player: topValue),
+                  ),
+                ),
         ).animate().fadeIn(delay: 400.ms),
       ],
     );

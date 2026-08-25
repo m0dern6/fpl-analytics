@@ -47,8 +47,21 @@ Color getPositionColor(int elementType) {
 String formatDateShort(String? isoDate) {
   if (isoDate == null) return '';
   try {
-    final dt = DateTime.parse(isoDate);
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    final dt = DateTime.parse(isoDate).toLocal();
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
     return '${dt.day} ${months[dt.month - 1]}';
   } catch (_) {
     return '';
@@ -59,7 +72,20 @@ String formatDateTime(String? isoDate) {
   if (isoDate == null) return '';
   try {
     final dt = DateTime.parse(isoDate).toLocal();
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
     final hour = dt.hour.toString().padLeft(2, '0');
     final minute = dt.minute.toString().padLeft(2, '0');
     return '${dt.day} ${months[dt.month - 1]} $hour:$minute';

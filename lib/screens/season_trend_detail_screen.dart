@@ -5,10 +5,17 @@ import '../models/gameweek.dart';
 import '../utils/app_theme.dart';
 import '../utils/constants.dart';
 
+class SeasonTrendDataPoint {
+  final int gwId;
+  final double value;
+
+  const SeasonTrendDataPoint(this.gwId, this.value);
+}
+
 class SeasonTrendDetailScreen extends StatelessWidget {
   final String title;
   final String subtitle;
-  final List<_GwDataPoint> dataPoints;
+  final List<SeasonTrendDataPoint> dataPoints;
   final Color color;
   final IconData icon;
   final String Function(double) valueFormatter;
@@ -371,19 +378,14 @@ class SeasonTrendDetailScreen extends StatelessWidget {
   }
 }
 
-class _GwDataPoint {
-  final int gwId;
-  final double value;
-
-  const _GwDataPoint(this.gwId, this.value);
-}
-
 /// Helper factory for season trend screens
 class SeasonTrendScreenFactory {
   static SeasonTrendDetailScreen avgScore(List<Gameweek> finishedGws) {
     final points = finishedGws
         .where((gw) => gw.averageEntryScore != null)
-        .map((gw) => _GwDataPoint(gw.id, gw.averageEntryScore!.toDouble()))
+        .map(
+          (gw) => SeasonTrendDataPoint(gw.id, gw.averageEntryScore!.toDouble()),
+        )
         .toList();
     return SeasonTrendDetailScreen(
       title: 'GW Avg Score',
@@ -398,7 +400,7 @@ class SeasonTrendScreenFactory {
   static SeasonTrendDetailScreen highScore(List<Gameweek> finishedGws) {
     final points = finishedGws
         .where((gw) => gw.highestScore != null)
-        .map((gw) => _GwDataPoint(gw.id, gw.highestScore!.toDouble()))
+        .map((gw) => SeasonTrendDataPoint(gw.id, gw.highestScore!.toDouble()))
         .toList();
     return SeasonTrendDetailScreen(
       title: 'GW High Score',
@@ -412,7 +414,7 @@ class SeasonTrendScreenFactory {
 
   static SeasonTrendDetailScreen transfers(List<Gameweek> finishedGws) {
     final points = finishedGws
-        .map((gw) => _GwDataPoint(gw.id, gw.transfersMade.toDouble()))
+        .map((gw) => SeasonTrendDataPoint(gw.id, gw.transfersMade.toDouble()))
         .toList();
     return SeasonTrendDetailScreen(
       title: 'Transfers / GW',

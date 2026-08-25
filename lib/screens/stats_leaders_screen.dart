@@ -24,7 +24,7 @@ class _StatsLeadersScreenState extends State<StatsLeadersScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 6, vsync: this);
+    _tabController = TabController(length: 5, vsync: this);
   }
 
   @override
@@ -50,7 +50,6 @@ class _StatsLeadersScreenState extends State<StatsLeadersScreen>
                 Tab(text: 'Assists'),
                 Tab(text: 'Clean Sheets'),
                 Tab(text: 'Bonus'),
-                Tab(text: 'ICT'),
                 Tab(text: 'By Position'),
               ],
             ),
@@ -91,14 +90,6 @@ class _StatsLeadersScreenState extends State<StatsLeadersScreen>
                       valueFormatter: (v) => v.toInt().toString(),
                       color: AppColors.of(context).warning,
                       label: 'Bonus Points',
-                    ),
-                    _LeadersList(
-                      players: provider.getTopScorersByICT(limit: 10),
-                      provider: provider,
-                      valueGetter: (p) => p.ictValue,
-                      valueFormatter: (v) => v.toStringAsFixed(1),
-                      color: const Color(0xFFB388FF),
-                      label: 'ICT Index',
                     ),
                     _BubbleTab(provider: provider),
                   ],

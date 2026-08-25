@@ -313,7 +313,7 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
   Widget _statTile(String label, String value, IconData icon, Color color) {
     return Container(
       padding: const EdgeInsets.all(14),
-      decoration: AppTheme.gradientCard(context: context, ),
+      decoration: AppTheme.gradientCard(context: context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -358,7 +358,7 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
       ),
       child: Container(
         padding: const EdgeInsets.all(16),
-        decoration: AppTheme.gradientCard(context: context, ),
+        decoration: AppTheme.gradientCard(context: context),
         child: Row(
           children: [
             Container(
@@ -420,7 +420,9 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
                             color: AppColors.of(context).warning.withAlpha(30),
                             borderRadius: BorderRadius.circular(4),
                             border: Border.all(
-                              color: AppColors.of(context).warning.withAlpha(100),
+                              color: AppColors.of(
+                                context,
+                              ).warning.withAlpha(100),
                             ),
                           ),
                           child: Text(
@@ -519,6 +521,7 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
           provider: widget.provider,
           gwId: widget.gw.id,
           isDreamTeam: true,
+          showSubs: false,
           pointsMap: pointsMap,
           onPlayerTap: (pick) => _showPlayerDetail(pick['element'] as int),
         ),
@@ -596,13 +599,16 @@ class _GameweekDetailScreenState extends State<GameweekDetailScreen> {
   Widget _buildLoadingOrEmptyPitch(bool isLoading) {
     return Container(
       height: 200,
-      decoration: AppTheme.gradientCard(context: context, ),
+      decoration: AppTheme.gradientCard(context: context),
       child: Center(
         child: isLoading
             ? CircularProgressIndicator(color: AppColors.of(context).primary)
             : Text(
                 'Data unavailable for this gameweek',
-                style: TextStyle(color: AppColors.of(context).textSecondary, fontSize: 12),
+                style: TextStyle(
+                  color: AppColors.of(context).textSecondary,
+                  fontSize: 12,
+                ),
               ),
       ),
     );

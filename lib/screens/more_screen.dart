@@ -8,6 +8,7 @@ import 'compare_screen.dart';
 import 'teams_screen.dart';
 import 'fixtures_screen.dart';
 import 'gameweeks_screen.dart';
+import 'my_teams_screen.dart';
 
 class MoreScreen extends StatelessWidget {
   const MoreScreen({super.key});
@@ -15,6 +16,16 @@ class MoreScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final items = [
+      _ExploreItem(
+        title: 'My Teams',
+        subtitle: 'Manage your custom FPL squads',
+        icon: Icons.person_rounded,
+        iconColor: const Color(0xFF8B5CF6),
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const MyTeamsScreen()),
+        ),
+      ),
       _ExploreItem(
         title: 'Gameweeks',
         subtitle: 'History & live scores',
@@ -85,7 +96,9 @@ class MoreScreen extends StatelessWidget {
         actions: [
           Consumer<ThemeProvider>(
             builder: (context, themeProvider, _) => IconButton(
-              icon: Icon(themeProvider.isDark ? Icons.light_mode : Icons.dark_mode),
+              icon: Icon(
+                themeProvider.isDark ? Icons.light_mode : Icons.dark_mode,
+              ),
               onPressed: () => context.read<ThemeProvider>().toggle(),
             ),
           ),

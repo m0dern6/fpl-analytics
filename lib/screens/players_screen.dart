@@ -8,7 +8,7 @@ import '../widgets/player_card.dart';
 import '../widgets/loading_widget.dart';
 import 'player_detail_screen.dart';
 
-enum SortOption { points, form, price, ict, selected, value }
+enum SortOption { points, form, price, selected, value }
 
 class PlayersScreen extends StatefulWidget {
   const PlayersScreen({super.key});
@@ -55,9 +55,6 @@ class _PlayersScreenState extends State<PlayersScreen> {
           break;
         case SortOption.price:
           cmp = a.nowCost.compareTo(b.nowCost);
-          break;
-        case SortOption.ict:
-          cmp = a.ictValue.compareTo(b.ictValue);
           break;
         case SortOption.selected:
           cmp = a.selectedPercent.compareTo(b.selectedPercent);
@@ -110,11 +107,6 @@ class _PlayersScreenState extends State<PlayersScreen> {
                     SortOption.price,
                     'Price',
                     Icons.attach_money_rounded,
-                  ),
-                  _sortItem(
-                    SortOption.ict,
-                    'ICT Index',
-                    Icons.analytics_rounded,
                   ),
                   _sortItem(
                     SortOption.selected,
@@ -190,14 +182,18 @@ class _PlayersScreenState extends State<PlayersScreen> {
         children: [
           Icon(
             icon,
-            color: isSelected ? AppColors.of(context).primary : AppColors.of(context).textSecondary,
+            color: isSelected
+                ? AppColors.of(context).primary
+                : AppColors.of(context).textSecondary,
             size: 18,
           ),
           const SizedBox(width: 8),
           Text(
             label,
             style: TextStyle(
-              color: isSelected ? AppColors.of(context).primary : AppColors.of(context).textPrimary,
+              color: isSelected
+                  ? AppColors.of(context).primary
+                  : AppColors.of(context).textPrimary,
             ),
           ),
           if (isSelected) ...[
@@ -219,7 +215,10 @@ class _PlayersScreenState extends State<PlayersScreen> {
       child: TextField(
         controller: _searchController,
         onChanged: (v) => setState(() => _searchQuery = v),
-        style: TextStyle(color: AppColors.of(context).textPrimary, fontSize: 14),
+        style: TextStyle(
+          color: AppColors.of(context).textPrimary,
+          fontSize: 14,
+        ),
         decoration: InputDecoration(
           hintText: 'Search players…',
           prefixIcon: const Icon(Icons.search_rounded, size: 20),
@@ -325,8 +324,11 @@ class _PlayersScreenState extends State<PlayersScreen> {
                   value: 0,
                   child: Row(
                     children: [
-                      Icon(Icons.groups_rounded,
-                          color: AppColors.of(context).textSecondary, size: 20),
+                      Icon(
+                        Icons.groups_rounded,
+                        color: AppColors.of(context).textSecondary,
+                        size: 20,
+                      ),
                       const SizedBox(width: 8),
                       Text(
                         'All Teams',
@@ -389,7 +391,9 @@ class _PlayersScreenState extends State<PlayersScreen> {
         margin: const EdgeInsets.only(right: 8),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
         decoration: BoxDecoration(
-          color: isSelected ? color.withAlpha(28) : AppColors.of(context).cardMedium,
+          color: isSelected
+              ? color.withAlpha(28)
+              : AppColors.of(context).cardMedium,
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
             color: isSelected ? color.withAlpha(160) : Colors.transparent,
@@ -413,7 +417,11 @@ class _PlayersScreenState extends State<PlayersScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.search_off, color: AppColors.of(context).textSecondary, size: 48),
+          Icon(
+            Icons.search_off,
+            color: AppColors.of(context).textSecondary,
+            size: 48,
+          ),
           SizedBox(height: 12),
           Text(
             'No players found',

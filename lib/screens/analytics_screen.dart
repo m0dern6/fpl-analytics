@@ -1170,9 +1170,9 @@ class _RadarTabState extends State<_RadarTab> {
   @override
   void initState() {
     super.initState();
-    // Default to top ICT player
+    // Default to the highest-scoring players.
     final sorted = List<Player>.from(widget.provider.players)
-      ..sort((a, b) => b.ictValue.compareTo(a.ictValue));
+      ..sort((a, b) => b.totalPoints.compareTo(a.totalPoints));
     if (sorted.isNotEmpty) _playerA = sorted.first;
     if (sorted.length > 1) _playerB = sorted[1];
   }
@@ -1405,16 +1405,10 @@ class _RadarTabState extends State<_RadarTab> {
   }
 
   Widget _buildRadarCard(BuildContext context, Player a, Player? b) {
-    // Normalize stats to 0-1: ICT, Influence, Creativity, Threat, PPG, Form
-    double maxIct = 200,
-        maxInf = 200,
-        maxCre = 200,
-        maxThr = 200,
-        maxPpg = 12,
-        maxForm = 10;
+    // Normalize stats to 0-1 for the radar chart.
+    double maxInf = 200, maxCre = 200, maxThr = 200, maxPpg = 12, maxForm = 10;
 
     List<double> normalise(Player p) => [
-      (p.ictValue / maxIct).clamp(0.0, 1.0),
       (p.influenceValue / maxInf).clamp(0.0, 1.0),
       (p.creativityValue / maxCre).clamp(0.0, 1.0),
       (p.threatValue / maxThr).clamp(0.0, 1.0),
@@ -1422,14 +1416,7 @@ class _RadarTabState extends State<_RadarTab> {
       (p.formValue / maxForm).clamp(0.0, 1.0),
     ];
 
-    final labelsText = [
-      'ICT',
-      'Influence',
-      'Creativity',
-      'Threat',
-      'PPG',
-      'Form',
-    ];
+    final labelsText = ['Influence', 'Creativity', 'Threat', 'PPG', 'Form'];
     final valuesA = normalise(a);
     final valuesB = b != null ? normalise(b) : <double>[];
 
@@ -1547,11 +1534,6 @@ class _RadarTabState extends State<_RadarTab> {
         b != null ? '${b.totalPoints}' : '–',
       ),
       ('Form', formatForm(a.form), b != null ? formatForm(b.form) : '–'),
-      (
-        'ICT Index',
-        a.ictValue.toStringAsFixed(1),
-        b != null ? b.ictValue.toStringAsFixed(1) : '–',
-      ),
       (
         'Influence',
         a.influenceValue.toStringAsFixed(1),

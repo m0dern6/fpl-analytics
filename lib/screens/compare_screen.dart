@@ -65,7 +65,14 @@ class _CompareScreenState extends State<CompareScreen> {
                         color: AppColors.of(context).cardMedium,
                         shape: BoxShape.circle,
                       ),
-                      child: Text('VS', style: TextStyle(color: AppColors.of(context).primary, fontWeight: FontWeight.w700, fontSize: 12)),
+                      child: Text(
+                        'VS',
+                        style: TextStyle(
+                          color: AppColors.of(context).primary,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 12,
+                        ),
+                      ),
                     ),
                     Expanded(
                       child: _buildPlayerSelector(
@@ -89,9 +96,19 @@ class _CompareScreenState extends State<CompareScreen> {
                   Center(
                     child: Column(
                       children: [
-                        Icon(Icons.compare_arrows, color: AppColors.of(context).textSecondary, size: 64),
+                        Icon(
+                          Icons.compare_arrows,
+                          color: AppColors.of(context).textSecondary,
+                          size: 64,
+                        ),
                         SizedBox(height: 12),
-                        Text('Select two players to compare', style: TextStyle(color: AppColors.of(context).textSecondary, fontSize: 16)),
+                        Text(
+                          'Select two players to compare',
+                          style: TextStyle(
+                            color: AppColors.of(context).textSecondary,
+                            fontSize: 16,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -125,11 +142,13 @@ class _CompareScreenState extends State<CompareScreen> {
           GestureDetector(
             onTap: () => Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => PlayerDetailScreen(player: selected)),
+              MaterialPageRoute(
+                builder: (_) => PlayerDetailScreen(player: selected),
+              ),
             ),
             child: Container(
               padding: const EdgeInsets.all(10),
-              decoration: AppTheme.gradientCard(context: context, ),
+              decoration: AppTheme.gradientCard(context: context),
               child: Column(
                 children: [
                   Container(
@@ -147,35 +166,54 @@ class _CompareScreenState extends State<CompareScreen> {
                     child: CachedNetworkImage(
                       imageUrl: selected.photoUrl,
                       fit: BoxFit.cover,
-                      placeholder: (_, __) => Icon(Icons.person,
-                          color: AppColors.of(context).textSecondary, size: 24),
-                      errorWidget: (_, __, ___) => Icon(Icons.person,
-                          color: AppColors.of(context).textSecondary, size: 24),
+                      placeholder: (_, __) => Icon(
+                        Icons.person,
+                        color: AppColors.of(context).textSecondary,
+                        size: 24,
+                      ),
+                      errorWidget: (_, __, ___) => Icon(
+                        Icons.person,
+                        color: AppColors.of(context).textSecondary,
+                        size: 24,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 6),
                   Text(
                     selected.webName,
-                    style: TextStyle(color: AppColors.of(context).primary, fontSize: 13, fontWeight: FontWeight.w700),
+                    style: TextStyle(
+                      color: AppColors.of(context).primary,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                    ),
                     textAlign: TextAlign.center,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   Text(
                     provider.getTeamById(selected.teamId)?.shortName ?? '',
-                    style: TextStyle(color: AppColors.of(context).textSecondary, fontSize: 11),
+                    style: TextStyle(
+                      color: AppColors.of(context).textSecondary,
+                      fontSize: 11,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   GestureDetector(
                     onTap: () {
                       setState(() {
-                        if (label == 'Player A') _playerA = null;
-                        else _playerB = null;
+                        if (label == 'Player A')
+                          _playerA = null;
+                        else
+                          _playerB = null;
                       });
                       controller.clear();
                       onQueryChanged('');
                     },
-                    child: Icon(Icons.close, color: AppColors.of(context).error, size: 16),
+                    child: Icon(
+                      Icons.close,
+                      color: AppColors.of(context).error,
+                      size: 16,
+                    ),
                   ),
                 ],
               ),
@@ -185,12 +223,18 @@ class _CompareScreenState extends State<CompareScreen> {
           TextField(
             controller: controller,
             onChanged: onQueryChanged,
-            style: TextStyle(color: AppColors.of(context).textPrimary, fontSize: 13),
+            style: TextStyle(
+              color: AppColors.of(context).textPrimary,
+              fontSize: 13,
+            ),
             decoration: InputDecoration(
               hintText: label,
               hintStyle: const TextStyle(fontSize: 12),
               prefixIcon: const Icon(Icons.search, size: 18),
-              contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+              contentPadding: const EdgeInsets.symmetric(
+                vertical: 10,
+                horizontal: 12,
+              ),
             ),
           ),
         if (results.isNotEmpty) ...[
@@ -202,24 +246,45 @@ class _CompareScreenState extends State<CompareScreen> {
               border: Border.all(color: AppColors.of(context).divider),
             ),
             child: Column(
-              children: results.map((p) => InkWell(
-                onTap: () {
-                  onSelected(p);
-                  controller.clear();
-                  onQueryChanged('');
-                },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(p.webName, style: TextStyle(color: AppColors.of(context).textPrimary, fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
+              children: results
+                  .map(
+                    (p) => InkWell(
+                      onTap: () {
+                        onSelected(p);
+                        controller.clear();
+                        onQueryChanged('');
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 8,
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                p.webName,
+                                style: TextStyle(
+                                  color: AppColors.of(context).textPrimary,
+                                  fontSize: 12,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            Text(
+                              formatPrice(p.nowCost),
+                              style: TextStyle(
+                                color: AppColors.of(context).textSecondary,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      Text(formatPrice(p.nowCost), style: TextStyle(color: AppColors.of(context).textSecondary, fontSize: 11)),
-                    ],
-                  ),
-                ),
-              )).toList(),
+                    ),
+                  )
+                  .toList(),
             ),
           ),
         ],
@@ -227,7 +292,12 @@ class _CompareScreenState extends State<CompareScreen> {
     );
   }
 
-  Widget _buildComparison(BuildContext context, FplProvider provider, Player a, Player b) {
+  Widget _buildComparison(
+    BuildContext context,
+    FplProvider provider,
+    Player a,
+    Player b,
+  ) {
     return Column(
       children: [
         _buildRadarChart(a, b),
@@ -240,11 +310,18 @@ class _CompareScreenState extends State<CompareScreen> {
   Widget _buildRadarChart(Player a, Player b) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: AppTheme.gradientCard(context: context, ),
+      decoration: AppTheme.gradientCard(context: context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('ICT Comparison', style: TextStyle(color: AppColors.of(context).textPrimary, fontSize: 14, fontWeight: FontWeight.w600)),
+          Text(
+            'Performance Comparison',
+            style: TextStyle(
+              color: AppColors.of(context).textPrimary,
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
           const SizedBox(height: 12),
           Row(
             children: [
@@ -255,14 +332,36 @@ class _CompareScreenState extends State<CompareScreen> {
           ),
           const SizedBox(height: 16),
           ...[
-            ('ICT Index', a.ictValue, b.ictValue, [a.ictValue, b.ictValue].reduce((x, y) => x > y ? x : y)),
-            ('Influence', a.influenceValue, b.influenceValue, [a.influenceValue, b.influenceValue].reduce((x, y) => x > y ? x : y)),
-            ('Creativity', a.creativityValue, b.creativityValue, [a.creativityValue, b.creativityValue].reduce((x, y) => x > y ? x : y)),
-            ('Threat', a.threatValue, b.threatValue, [a.threatValue, b.threatValue].reduce((x, y) => x > y ? x : y)),
-          ].map((item) => Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: _compBar(item.$1, item.$2, item.$3, item.$4),
-          )),
+            (
+              'Influence',
+              a.influenceValue,
+              b.influenceValue,
+              [
+                a.influenceValue,
+                b.influenceValue,
+              ].reduce((x, y) => x > y ? x : y),
+            ),
+            (
+              'Creativity',
+              a.creativityValue,
+              b.creativityValue,
+              [
+                a.creativityValue,
+                b.creativityValue,
+              ].reduce((x, y) => x > y ? x : y),
+            ),
+            (
+              'Threat',
+              a.threatValue,
+              b.threatValue,
+              [a.threatValue, b.threatValue].reduce((x, y) => x > y ? x : y),
+            ),
+          ].map(
+            (item) => Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: _compBar(item.$1, item.$2, item.$3, item.$4),
+            ),
+          ),
         ],
       ),
     );
@@ -272,7 +371,11 @@ class _CompareScreenState extends State<CompareScreen> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Container(width: 10, height: 10, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+        Container(
+          width: 10,
+          height: 10,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
         const SizedBox(width: 4),
         Text(label, style: TextStyle(color: color, fontSize: 11)),
       ],
@@ -284,13 +387,26 @@ class _CompareScreenState extends State<CompareScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: TextStyle(color: AppColors.of(context).textSecondary, fontSize: 11)),
+        Text(
+          label,
+          style: TextStyle(
+            color: AppColors.of(context).textSecondary,
+            fontSize: 11,
+          ),
+        ),
         const SizedBox(height: 4),
         Row(
           children: [
             SizedBox(
               width: 40,
-              child: Text(valA.toStringAsFixed(1), style: TextStyle(color: AppColors.of(context).primary, fontSize: 11), textAlign: TextAlign.right),
+              child: Text(
+                valA.toStringAsFixed(1),
+                style: TextStyle(
+                  color: AppColors.of(context).primary,
+                  fontSize: 11,
+                ),
+                textAlign: TextAlign.right,
+              ),
             ),
             const SizedBox(width: 6),
             Expanded(
@@ -303,7 +419,9 @@ class _CompareScreenState extends State<CompareScreen> {
                       Container(color: AppColors.of(context).cardMedium),
                       FractionallySizedBox(
                         widthFactor: (valA / max).clamp(0.0, 1.0),
-                        child: Container(color: AppColors.of(context).primary.withAlpha(153)),
+                        child: Container(
+                          color: AppColors.of(context).primary.withAlpha(153),
+                        ),
                       ),
                     ],
                   ),
@@ -321,7 +439,9 @@ class _CompareScreenState extends State<CompareScreen> {
                       Container(color: AppColors.of(context).cardMedium),
                       FractionallySizedBox(
                         widthFactor: (valB / max).clamp(0.0, 1.0),
-                        child: Container(color: AppColors.of(context).accent.withAlpha(153)),
+                        child: Container(
+                          color: AppColors.of(context).accent.withAlpha(153),
+                        ),
                       ),
                     ],
                   ),
@@ -331,7 +451,13 @@ class _CompareScreenState extends State<CompareScreen> {
             const SizedBox(width: 6),
             SizedBox(
               width: 40,
-              child: Text(valB.toStringAsFixed(1), style: TextStyle(color: AppColors.of(context).accent, fontSize: 11)),
+              child: Text(
+                valB.toStringAsFixed(1),
+                style: TextStyle(
+                  color: AppColors.of(context).accent,
+                  fontSize: 11,
+                ),
+              ),
             ),
           ],
         ),
@@ -344,48 +470,101 @@ class _CompareScreenState extends State<CompareScreen> {
       ('Total Points', '${a.totalPoints}', '${b.totalPoints}'),
       ('Price', formatPrice(a.nowCost), formatPrice(b.nowCost)),
       ('Form', formatForm(a.form), formatForm(b.form)),
-      ('Selected %', formatPercent(a.selectedByPercent), formatPercent(b.selectedByPercent)),
+      (
+        'Selected %',
+        formatPercent(a.selectedByPercent),
+        formatPercent(b.selectedByPercent),
+      ),
       ('Goals', '${a.goals}', '${b.goals}'),
       ('Assists', '${a.assists}', '${b.assists}'),
       ('Clean Sheets', '${a.cleanSheets}', '${b.cleanSheets}'),
       ('Bonus Points', '${a.bonus}', '${b.bonus}'),
       ('Minutes', '${a.minutes}', '${b.minutes}'),
-      ('Points/Game', formatDouble(a.pointsPerGame), formatDouble(b.pointsPerGame)),
+      (
+        'Points/Game',
+        formatDouble(a.pointsPerGame),
+        formatDouble(b.pointsPerGame),
+      ),
     ];
 
     return Container(
-      decoration: AppTheme.gradientCard(context: context, ),
+      decoration: AppTheme.gradientCard(context: context),
       child: Column(
         children: [
           Padding(
             padding: const EdgeInsets.all(12),
             child: Row(
               children: [
-                Expanded(child: Text(a.webName, style: TextStyle(color: AppColors.of(context).primary, fontSize: 13, fontWeight: FontWeight.w600), textAlign: TextAlign.left, maxLines: 1, overflow: TextOverflow.ellipsis)),
+                Expanded(
+                  child: Text(
+                    a.webName,
+                    style: TextStyle(
+                      color: AppColors.of(context).primary,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    textAlign: TextAlign.left,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
                 const SizedBox(width: 8),
-                Flexible(flex: 0, child: Text('Stat', style: TextStyle(color: AppColors.of(context).textSecondary, fontSize: 12), textAlign: TextAlign.center)),
+                Flexible(
+                  flex: 0,
+                  child: Text(
+                    'Stat',
+                    style: TextStyle(
+                      color: AppColors.of(context).textSecondary,
+                      fontSize: 12,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
                 const SizedBox(width: 8),
-                Expanded(child: Text(b.webName, style: TextStyle(color: AppColors.of(context).accent, fontSize: 13, fontWeight: FontWeight.w600), textAlign: TextAlign.right, maxLines: 1, overflow: TextOverflow.ellipsis)),
+                Expanded(
+                  child: Text(
+                    b.webName,
+                    style: TextStyle(
+                      color: AppColors.of(context).accent,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    textAlign: TextAlign.right,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
               ],
             ),
           ),
           Divider(height: 1, color: AppColors.of(context).divider),
           ...stats.map((s) {
             final (label, valA, valB) = s;
-            final numA = double.tryParse(valA.replaceAll(RegExp(r'[£%m]'), '')) ?? 0;
-            final numB = double.tryParse(valB.replaceAll(RegExp(r'[£%m]'), '')) ?? 0;
+            final numA =
+                double.tryParse(valA.replaceAll(RegExp(r'[£%m]'), '')) ?? 0;
+            final numB =
+                double.tryParse(valB.replaceAll(RegExp(r'[£%m]'), '')) ?? 0;
             final aWins = numA > numB;
             final bWins = numB > numA;
             return Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(border: Border(bottom: BorderSide(color: AppColors.of(context).divider, width: 0.5))),
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(
+                    color: AppColors.of(context).divider,
+                    width: 0.5,
+                  ),
+                ),
+              ),
               child: Row(
                 children: [
                   Expanded(
                     child: Text(
                       valA,
                       style: TextStyle(
-                        color: aWins ? AppColors.of(context).primary : AppColors.of(context).textPrimary,
+                        color: aWins
+                            ? AppColors.of(context).primary
+                            : AppColors.of(context).textPrimary,
                         fontSize: 13,
                         fontWeight: aWins ? FontWeight.w700 : FontWeight.w400,
                       ),
@@ -394,14 +573,23 @@ class _CompareScreenState extends State<CompareScreen> {
                   const SizedBox(width: 8),
                   Flexible(
                     flex: 0,
-                    child: Text(label, style: TextStyle(color: AppColors.of(context).textSecondary, fontSize: 10), textAlign: TextAlign.center),
+                    child: Text(
+                      label,
+                      style: TextStyle(
+                        color: AppColors.of(context).textSecondary,
+                        fontSize: 10,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       valB,
                       style: TextStyle(
-                        color: bWins ? AppColors.of(context).accent : AppColors.of(context).textPrimary,
+                        color: bWins
+                            ? AppColors.of(context).accent
+                            : AppColors.of(context).textPrimary,
                         fontSize: 13,
                         fontWeight: bWins ? FontWeight.w700 : FontWeight.w400,
                       ),

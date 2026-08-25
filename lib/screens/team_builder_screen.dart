@@ -243,10 +243,19 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
                 final toPlayer = _slots[toSlot]!;
                 final posColor = getPositionColor(toPlayer.elementType);
                 return ListTile(
-                  leading: CircleAvatar(
-                    radius: 18,
-                    backgroundColor: AppColors.of(context).cardMedium,
-                    backgroundImage: NetworkImage(toPlayer.photoUrl),
+                  leading: Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      color: AppColors.of(context).cardMedium,
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: Image.network(
+                      toPlayer.photoUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => const Icon(Icons.person),
+                    ),
                   ),
                   title: Text(
                     toPlayer.webName,
@@ -1568,9 +1577,13 @@ class _SlotOptionsSheet extends StatelessWidget {
             // Sub Out (starting outfield only)
             if (isStartingOutfield)
               ListTile(
-                leading: CircleAvatar(
-                  backgroundColor: AppColors.of(context).accent,
-                  radius: 16,
+                leading: Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: AppColors.of(context).accent,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                   child: Icon(
                     Icons.arrow_downward_rounded,
                     color: Colors.white,
@@ -1593,9 +1606,13 @@ class _SlotOptionsSheet extends StatelessWidget {
             // Sub In (bench outfield only)
             if (isBenchOutfield)
               ListTile(
-                leading: CircleAvatar(
-                  backgroundColor: AppColors.of(context).primary,
-                  radius: 16,
+                leading: Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: AppColors.of(context).primary,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                   child: Icon(
                     Icons.arrow_upward_rounded,
                     color: AppColors.of(context).secondary,
@@ -1616,15 +1633,21 @@ class _SlotOptionsSheet extends StatelessWidget {
                 onTap: onSubIn,
               ),
             ListTile(
-              leading: CircleAvatar(
-                backgroundColor: AppColors.of(context).warning,
-                radius: 16,
-                child: Text(
-                  'C',
-                  style: TextStyle(
-                    color: AppColors.of(context).secondary,
-                    fontWeight: FontWeight.w900,
-                    fontSize: 12,
+              leading: Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: AppColors.of(context).warning,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Center(
+                  child: Text(
+                    'C',
+                    style: TextStyle(
+                      color: AppColors.of(context).secondary,
+                      fontWeight: FontWeight.w900,
+                      fontSize: 12,
+                    ),
                   ),
                 ),
               ),
@@ -1639,15 +1662,21 @@ class _SlotOptionsSheet extends StatelessWidget {
               onTap: isCaptain ? null : onSetCaptain,
             ),
             ListTile(
-              leading: CircleAvatar(
-                backgroundColor: AppColors.of(context).accent,
-                radius: 16,
-                child: Text(
-                  'V',
-                  style: TextStyle(
-                    color: AppColors.of(context).secondary,
-                    fontWeight: FontWeight.w900,
-                    fontSize: 12,
+              leading: Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: AppColors.of(context).accent,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Center(
+                  child: Text(
+                    'V',
+                    style: TextStyle(
+                      color: AppColors.of(context).secondary,
+                      fontWeight: FontWeight.w900,
+                      fontSize: 12,
+                    ),
                   ),
                 ),
               ),
@@ -1664,9 +1693,13 @@ class _SlotOptionsSheet extends StatelessWidget {
               onTap: isViceCaptain ? null : onSetViceCaptain,
             ),
             ListTile(
-              leading: CircleAvatar(
-                backgroundColor: AppColors.of(context).error,
-                radius: 16,
+              leading: Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: AppColors.of(context).error,
+                  borderRadius: BorderRadius.circular(8),
+                ),
                 child: Icon(Icons.remove, color: Colors.white, size: 16),
               ),
               title: Text(

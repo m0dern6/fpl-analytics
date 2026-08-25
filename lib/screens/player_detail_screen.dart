@@ -142,7 +142,9 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen>
                 decoration: BoxDecoration(
                   color: AppColors.of(context).cardDark,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.of(context).primary.withAlpha(77)),
+                  border: Border.all(
+                    color: AppColors.of(context).primary.withAlpha(77),
+                  ),
                 ),
                 clipBehavior: Clip.antiAlias,
                 child: CachedNetworkImage(
@@ -275,7 +277,10 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen>
         ),
         Text(
           label,
-          style: TextStyle(color: AppColors.of(context).textSecondary, fontSize: 10),
+          style: TextStyle(
+            color: AppColors.of(context).textSecondary,
+            fontSize: 10,
+          ),
         ),
       ],
     );
@@ -364,8 +369,6 @@ class _OverviewTab extends StatelessWidget {
           const SizedBox(height: 20),
           _buildExpectedStatsSection(context),
           const SizedBox(height: 20),
-          _buildIctSection(context),
-          const SizedBox(height: 20),
           _buildTransferSection(context),
         ],
       ),
@@ -404,7 +407,12 @@ class _OverviewTab extends StatelessWidget {
         Icons.sports_soccer,
         AppColors.of(context).primary,
       ),
-      _StatItem('Assists', '${player.assists}', Icons.sports, AppColors.of(context).accent),
+      _StatItem(
+        'Assists',
+        '${player.assists}',
+        Icons.sports,
+        AppColors.of(context).accent,
+      ),
       _StatItem(
         'Clean Sheets',
         '${player.cleanSheets}',
@@ -435,7 +443,12 @@ class _OverviewTab extends StatelessWidget {
         Icons.square,
         AppColors.of(context).warning,
       ),
-      _StatItem('Saves', '${player.saves}', Icons.back_hand, AppColors.of(context).accent),
+      _StatItem(
+        'Saves',
+        '${player.saves}',
+        Icons.back_hand,
+        AppColors.of(context).accent,
+      ),
     ];
 
     return GridView.count(
@@ -449,7 +462,7 @@ class _OverviewTab extends StatelessWidget {
           .map(
             (s) => Container(
               padding: const EdgeInsets.all(10),
-              decoration: AppTheme.gradientCard(context: context, ),
+              decoration: AppTheme.gradientCard(context: context),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -493,7 +506,7 @@ class _OverviewTab extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: AppTheme.gradientCard(context: context, ),
+      decoration: AppTheme.gradientCard(context: context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -524,16 +537,43 @@ class _OverviewTab extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             'Influence: ball involvement • Creativity: chance creation • Threat: goal threat',
-            style: TextStyle(color: AppColors.of(context).textSecondary, fontSize: 10),
+            style: TextStyle(
+              color: AppColors.of(context).textSecondary,
+              fontSize: 10,
+            ),
           ),
           const SizedBox(height: 14),
-          _ictBar(context, 'ICT Index', ict, 200, AppColors.of(context).primary),
+          _ictBar(
+            context,
+            'ICT Index',
+            ict,
+            200,
+            AppColors.of(context).primary,
+          ),
           const SizedBox(height: 10),
-          _ictBar(context, 'Influence', influence, 200, AppColors.of(context).accent),
+          _ictBar(
+            context,
+            'Influence',
+            influence,
+            200,
+            AppColors.of(context).accent,
+          ),
           const SizedBox(height: 10),
-          _ictBar(context, 'Creativity', creativity, 200, const Color(0xFFB388FF)),
+          _ictBar(
+            context,
+            'Creativity',
+            creativity,
+            200,
+            const Color(0xFFB388FF),
+          ),
           const SizedBox(height: 10),
-          _ictBar(context, 'Threat', threat, 200, AppColors.of(context).warning),
+          _ictBar(
+            context,
+            'Threat',
+            threat,
+            200,
+            AppColors.of(context).warning,
+          ),
         ],
       ),
     );
@@ -547,7 +587,7 @@ class _OverviewTab extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: AppTheme.gradientCard(context: context, ),
+      decoration: AppTheme.gradientCard(context: context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -563,7 +603,8 @@ class _OverviewTab extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: _expectedStatTile(context, 
+                child: _expectedStatTile(
+                  context,
                   'Expected Goals\n(xG)',
                   xg.toStringAsFixed(2),
                   AppColors.of(context).primary,
@@ -572,7 +613,8 @@ class _OverviewTab extends StatelessWidget {
               ),
               const SizedBox(width: 10),
               Expanded(
-                child: _expectedStatTile(context, 
+                child: _expectedStatTile(
+                  context,
                   'Expected Assists\n(xA)',
                   xa.toStringAsFixed(2),
                   AppColors.of(context).accent,
@@ -585,7 +627,8 @@ class _OverviewTab extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: _expectedStatTile(context, 
+                child: _expectedStatTile(
+                  context,
                   'Points Per Game\n(PPG)',
                   ppg.toStringAsFixed(1),
                   AppColors.of(context).warning,
@@ -594,7 +637,8 @@ class _OverviewTab extends StatelessWidget {
               ),
               const SizedBox(width: 10),
               Expanded(
-                child: _expectedStatTile(context, 
+                child: _expectedStatTile(
+                  context,
                   'Value\n(pts per £m)',
                   vsn.toStringAsFixed(1),
                   const Color(0xFF69F0AE),
@@ -608,7 +652,8 @@ class _OverviewTab extends StatelessWidget {
     );
   }
 
-  Widget _expectedStatTile(BuildContext context, 
+  Widget _expectedStatTile(
+    BuildContext context,
     String label,
     String value,
     Color color,
@@ -649,7 +694,13 @@ class _OverviewTab extends StatelessWidget {
     );
   }
 
-  Widget _ictBar(BuildContext context, String label, double value, double maxVal, Color color) {
+  Widget _ictBar(
+    BuildContext context,
+    String label,
+    double value,
+    double maxVal,
+    Color color,
+  ) {
     final pct = (value / maxVal).clamp(0.0, 1.0);
     return Row(
       children: [
@@ -706,7 +757,7 @@ class _OverviewTab extends StatelessWidget {
   Widget _buildTransferSection(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: AppTheme.gradientCard(context: context, ),
+      decoration: AppTheme.gradientCard(context: context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -722,7 +773,8 @@ class _OverviewTab extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: _transferStat(context, 
+                child: _transferStat(
+                  context,
                   'In (Season)',
                   _formatCount(player.transfersIn),
                   Icons.arrow_upward,
@@ -730,7 +782,8 @@ class _OverviewTab extends StatelessWidget {
                 ),
               ),
               Expanded(
-                child: _transferStat(context, 
+                child: _transferStat(
+                  context,
                   'Out (Season)',
                   _formatCount(player.transfersOut),
                   Icons.arrow_downward,
@@ -743,7 +796,8 @@ class _OverviewTab extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: _transferStat(context, 
+                child: _transferStat(
+                  context,
                   'In (GW)',
                   _formatCount(player.transfersInEvent),
                   Icons.arrow_upward,
@@ -751,7 +805,8 @@ class _OverviewTab extends StatelessWidget {
                 ),
               ),
               Expanded(
-                child: _transferStat(context, 
+                child: _transferStat(
+                  context,
                   'Out (GW)',
                   _formatCount(player.transfersOutEvent),
                   Icons.arrow_downward,
@@ -771,7 +826,13 @@ class _OverviewTab extends StatelessWidget {
     return '$n';
   }
 
-  Widget _transferStat(BuildContext context, String label, String value, IconData icon, Color color) {
+  Widget _transferStat(
+    BuildContext context,
+    String label,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return Row(
       children: [
         Icon(icon, color: color, size: 20),
@@ -829,11 +890,11 @@ class _HistoryTab extends StatefulWidget {
 class _HistoryTabState extends State<_HistoryTab>
     with SingleTickerProviderStateMixin {
   int _gwRange = 10; // 5, 10, 15, 20, 25, 30
-  int _metricIndex = 0; // 0=Points, 1=Minutes, 2=Goals+Assists, 3=BPS, 4=ICT
+  int _metricIndex = 0; // 0=Points, 1=Minutes, 2=Goals+Assists, 3=BPS
   late TabController _metricTabController;
 
   static const _ranges = [5, 10, 15, 20, 25, 30];
-  static const _metricLabels = ['Points', 'Minutes', 'G+A', 'BPS', 'ICT'];
+  static const _metricLabels = ['Points', 'Minutes', 'G+A', 'BPS'];
 
   @override
   void initState() {
@@ -864,8 +925,6 @@ class _HistoryTabState extends State<_HistoryTab>
           return (h.goalsScored + h.assists).toDouble();
         case 3:
           return h.bps.toDouble();
-        case 4:
-          return double.tryParse(h.ictIndex) ?? 0.0;
         default:
           return h.totalPoints.toDouble();
       }
@@ -992,7 +1051,9 @@ class _HistoryTabState extends State<_HistoryTab>
         indicator: BoxDecoration(
           color: AppColors.of(context).primary.withAlpha(30),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: AppColors.of(context).primary.withAlpha(80)),
+          border: Border.all(
+            color: AppColors.of(context).primary.withAlpha(80),
+          ),
         ),
         labelPadding: const EdgeInsets.symmetric(horizontal: 16),
         tabAlignment: TabAlignment.start,
@@ -1023,7 +1084,7 @@ class _HistoryTabState extends State<_HistoryTab>
 
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: AppTheme.gradientCard(context: context, ),
+      decoration: AppTheme.gradientCard(context: context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1168,14 +1229,21 @@ class _HistoryTabState extends State<_HistoryTab>
                   drawVerticalLine: true,
                   verticalInterval: 1,
                   horizontalInterval: maxVal > 0 ? maxVal / 4 : 1,
-                  getDrawingHorizontalLine: (_) =>
-                      FlLine(color: AppColors.of(context).divider, strokeWidth: 0.8),
-                  getDrawingVerticalLine: (_) =>
-                      FlLine(color: AppColors.of(context).divider, strokeWidth: 0.5),
+                  getDrawingHorizontalLine: (_) => FlLine(
+                    color: AppColors.of(context).divider,
+                    strokeWidth: 0.8,
+                  ),
+                  getDrawingVerticalLine: (_) => FlLine(
+                    color: AppColors.of(context).divider,
+                    strokeWidth: 0.5,
+                  ),
                 ),
                 borderData: FlBorderData(
                   show: true,
-                  border: Border.all(color: AppColors.of(context).divider, width: 0.5),
+                  border: Border.all(
+                    color: AppColors.of(context).divider,
+                    width: 0.5,
+                  ),
                 ),
                 minY: 0,
                 maxY: maxVal * 1.35 < 1 ? 2 : maxVal * 1.35,
@@ -1197,13 +1265,15 @@ class _HistoryTabState extends State<_HistoryTab>
 
   Widget _buildHistoryTable() {
     return Container(
-      decoration: AppTheme.gradientCard(context: context, ),
+      decoration: AppTheme.gradientCard(context: context),
       child: Column(
         children: [
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             decoration: BoxDecoration(
-              border: Border(bottom: BorderSide(color: AppColors.of(context).divider)),
+              border: Border(
+                bottom: BorderSide(color: AppColors.of(context).divider),
+              ),
             ),
             child: Row(
               children: [
@@ -1284,7 +1354,10 @@ class _HistoryTabState extends State<_HistoryTab>
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
                 border: Border(
-                  bottom: BorderSide(color: AppColors.of(context).divider, width: 0.5),
+                  bottom: BorderSide(
+                    color: AppColors.of(context).divider,
+                    width: 0.5,
+                  ),
                 ),
               ),
               child: Row(
@@ -1360,7 +1433,9 @@ class _HistoryTabState extends State<_HistoryTab>
 
   Widget _buildOpponentCell(PlayerHistory h) {
     final opp = widget.provider.getTeamById(h.opponentTeam);
-    final badgeColor = h.wasHome ? AppColors.of(context).primary : AppColors.of(context).accent;
+    final badgeColor = h.wasHome
+        ? AppColors.of(context).primary
+        : AppColors.of(context).accent;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -1394,7 +1469,10 @@ class _HistoryTabState extends State<_HistoryTab>
         Flexible(
           child: Text(
             opp?.shortName ?? '${h.opponentTeam}',
-            style: TextStyle(color: AppColors.of(context).textPrimary, fontSize: 12),
+            style: TextStyle(
+              color: AppColors.of(context).textPrimary,
+              fontSize: 12,
+            ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -1445,7 +1523,7 @@ class _FixturesTab extends StatelessWidget {
         final opponent = provider.getTeamById(opponentId);
         return Container(
           padding: const EdgeInsets.all(14),
-          decoration: AppTheme.gradientCard(context: context, ),
+          decoration: AppTheme.gradientCard(context: context),
           child: Row(
             children: [
               Container(

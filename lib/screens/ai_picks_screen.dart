@@ -252,7 +252,7 @@ class _AiPicksScreenState extends State<AiPicksScreen>
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 40),
             child: Text(
-              'Using form, xG, ICT, fixtures & transfer\ntrends to build the best team.',
+              'Using form, xG, fixtures & transfer\ntrends to build the best team.',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: AppColors.of(context).textSecondary,
@@ -796,16 +796,6 @@ class _AiPicksScreenState extends State<AiPicksScreen>
                 ),
                 Expanded(
                   child: Text(
-                    'ICT',
-                    style: TextStyle(
-                      color: AppColors.of(context).textSecondary,
-                      fontSize: 11,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                Expanded(
-                  child: Text(
                     'FDR',
                     style: TextStyle(
                       color: AppColors.of(context).textSecondary,
@@ -903,16 +893,6 @@ class _AiPicksScreenState extends State<AiPicksScreen>
                       ),
                     ),
                     Expanded(
-                      child: Text(
-                        (double.tryParse(p.ictIndex) ?? 0).toStringAsFixed(0),
-                        style: TextStyle(
-                          color: AppColors.of(context).warning,
-                          fontSize: 12,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    Expanded(
                       child: Container(
                         margin: const EdgeInsets.symmetric(horizontal: 8),
                         padding: const EdgeInsets.symmetric(
@@ -988,8 +968,8 @@ class _AiPicksScreenState extends State<AiPicksScreen>
           color: AppColors.of(context).primary,
           title: 'AI Best XI',
           desc:
-              'Smart algorithm using form, xG, xA, ICT index, fixture '
-              'difficulty & transfer trends to pick your optimal squad.',
+              'Smart algorithm using form, xG, xA, fixture difficulty & '
+              'transfer trends to pick your optimal squad.',
         );
     }
   }

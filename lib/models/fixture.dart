@@ -15,8 +15,10 @@ class FixtureStatEntry {
 /// One stat category for a fixture (e.g. goals_scored, assists, …).
 class FixtureStat {
   final String identifier;
+
   /// Away team contributions.
   final List<FixtureStatEntry> away;
+
   /// Home team contributions.
   final List<FixtureStatEntry> home;
 
@@ -78,12 +80,15 @@ class Fixture {
 
   factory Fixture.fromJson(Map<String, dynamic> json) {
     final rawStats = json['stats'] as List<dynamic>? ?? [];
+    final rawKickoff = json['kickoff_time'] as String?;
     return Fixture(
       id: json['id'] as int,
       event: json['event'] as int?,
       finished: json['finished'] as bool? ?? false,
       finishedProvisional: json['finished_provisional'] as bool? ?? false,
-      kickoffTime: json['kickoff_time'] as String?,
+      kickoffTime: rawKickoff == null
+          ? null
+          : DateTime.parse(rawKickoff).toUtc().toIso8601String(),
       homeTeamId: json['team_h'] as int,
       awayTeamId: json['team_a'] as int,
       homeTeamScore: json['team_h_score'] as int?,

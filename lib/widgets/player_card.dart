@@ -87,7 +87,9 @@ class PlayerCard extends StatelessWidget {
                         Text(
                           team?.shortName ?? '',
                           style: TextStyle(
-                              color: AppColors.of(context).textSecondary, fontSize: 11),
+                            color: AppColors.of(context).textSecondary,
+                            fontSize: 11,
+                          ),
                         ),
                       ],
                     ),
@@ -112,7 +114,9 @@ class PlayerCard extends StatelessWidget {
                   Text(
                     formatPrice(player.nowCost),
                     style: TextStyle(
-                        color: AppColors.of(context).textSecondary, fontSize: 11),
+                      color: AppColors.of(context).textSecondary,
+                      fontSize: 11,
+                    ),
                   ),
                 ],
               ),
@@ -173,8 +177,11 @@ class PlayerCard extends StatelessWidget {
                         if (player.news.isNotEmpty)
                           Padding(
                             padding: const EdgeInsets.only(left: 4),
-                            child: Icon(Icons.warning_amber_rounded,
-                                color: AppColors.of(context).warning, size: 15),
+                            child: Icon(
+                              Icons.warning_amber_rounded,
+                              color: AppColors.of(context).warning,
+                              size: 15,
+                            ),
                           ),
                       ],
                     ),
@@ -186,22 +193,28 @@ class PlayerCard extends StatelessWidget {
                         Text(
                           team?.name ?? '',
                           style: TextStyle(
-                              color: AppColors.of(context).textSecondary, fontSize: 12),
+                            color: AppColors.of(context).textSecondary,
+                            fontSize: 12,
+                          ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        _miniStat(context, 'Form', formatForm(player.form), AppColors.of(context).accent),
+                        _miniStat(
+                          context,
+                          'Form',
+                          formatForm(player.form),
+                          AppColors.of(context).accent,
+                        ),
                         const SizedBox(width: 14),
-                        _miniStat(context, 'ICT',
-                            formatDouble(player.ictIndex, decimals: 1),
-                            AppColors.of(context).warning),
-                        const SizedBox(width: 14),
-                        _miniStat(context, 'Sel%',
-                            formatPercent(player.selectedByPercent),
-                            AppColors.of(context).textSecondary),
+                        _miniStat(
+                          context,
+                          'Sel%',
+                          formatPercent(player.selectedByPercent),
+                          AppColors.of(context).textSecondary,
+                        ),
                       ],
                     ),
                   ],
@@ -216,13 +229,17 @@ class PlayerCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 9,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.of(context).primary.withAlpha(22),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                          color: AppColors.of(context).primary.withAlpha(70), width: 1),
+                        color: AppColors.of(context).primary.withAlpha(70),
+                        width: 1,
+                      ),
                     ),
                     child: Text(
                       '${player.totalPoints}',
@@ -238,13 +255,17 @@ class PlayerCard extends StatelessWidget {
                   Text(
                     formatPrice(player.nowCost),
                     style: TextStyle(
-                        color: AppColors.of(context).textSecondary, fontSize: 12),
+                      color: AppColors.of(context).textSecondary,
+                      fontSize: 12,
+                    ),
                   ),
                   const SizedBox(height: 1),
                   Text(
                     'pts',
-                    style:
-                        TextStyle(color: AppColors.of(context).textSecondary, fontSize: 10),
+                    style: TextStyle(
+                      color: AppColors.of(context).textSecondary,
+                      fontSize: 10,
+                    ),
                   ),
                 ],
               ),
@@ -272,10 +293,16 @@ class PlayerCard extends StatelessWidget {
           child: CachedNetworkImage(
             imageUrl: player.photoUrl,
             fit: BoxFit.cover,
-            placeholder: (_, __) => Icon(Icons.person,
-                color: AppColors.of(context).textSecondary, size: size * 0.55),
-            errorWidget: (_, __, ___) => Icon(Icons.person,
-                color: AppColors.of(context).textSecondary, size: size * 0.55),
+            placeholder: (_, __) => Icon(
+              Icons.person,
+              color: AppColors.of(context).textSecondary,
+              size: size * 0.55,
+            ),
+            errorWidget: (_, __, ___) => Icon(
+              Icons.person,
+              color: AppColors.of(context).textSecondary,
+              size: size * 0.55,
+            ),
           ),
         ),
         if (player.chanceOfPlayingNextRound != null &&
@@ -291,7 +318,10 @@ class PlayerCard extends StatelessWidget {
                     ? AppColors.of(context).error
                     : AppColors.of(context).warning,
                 shape: BoxShape.circle,
-                border: Border.all(color: AppColors.of(context).cardDark, width: 1.5),
+                border: Border.all(
+                  color: AppColors.of(context).cardDark,
+                  width: 1.5,
+                ),
               ),
               child: Center(
                 child: Text(
@@ -320,26 +350,40 @@ class PlayerCard extends StatelessWidget {
       child: Text(
         label,
         style: TextStyle(
-            color: color, fontSize: 10, fontWeight: FontWeight.w700),
+          color: color,
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+        ),
       ),
     );
   }
 
-  Widget _miniStat(BuildContext context, String label, String value, Color valueColor) {
+  Widget _miniStat(
+    BuildContext context,
+    String label,
+    String value,
+    Color valueColor,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label,
-            style: TextStyle(
-                color: AppColors.of(context).textSecondary,
-                fontSize: 9,
-                fontWeight: FontWeight.w500)),
+        Text(
+          label,
+          style: TextStyle(
+            color: AppColors.of(context).textSecondary,
+            fontSize: 9,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
         const SizedBox(height: 1),
-        Text(value,
-            style: TextStyle(
-                color: valueColor,
-                fontSize: 12,
-                fontWeight: FontWeight.w600)),
+        Text(
+          value,
+          style: TextStyle(
+            color: valueColor,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
       ],
     );
   }
