@@ -14,18 +14,38 @@ class FixtureCard extends StatelessWidget {
   final Fixture fixture;
   final FplProvider provider;
   final bool compact;
+  final bool showDifficulty;
 
   const FixtureCard({
     super.key,
     required this.fixture,
     required this.provider,
     this.compact = false,
+    this.showDifficulty = true,
   });
 
   @override
   Widget build(BuildContext context) {
     final home = provider.getTeamById(fixture.homeTeamId);
     final away = provider.getTeamById(fixture.awayTeamId);
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final isLive = fixture.isLive;
+    final isFinished = fixture.isFinishedOrProvisional;
+    final decoration = isLive
+        ? BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFFE91E63), Color(0xFFFF5252)],
+            ),
+            borderRadius: BorderRadius.circular(16),
+          )
+        : isFinished
+        ? BoxDecoration(
+            color: isLight ? Colors.grey.shade300 : Colors.grey.shade800,
+            borderRadius: BorderRadius.circular(16),
+          )
+        : AppTheme.gradientCard(context: context);
 
     return GestureDetector(
       onTap: () => Navigator.push(
@@ -40,7 +60,7 @@ class FixtureCard extends StatelessWidget {
       ),
       child: Container(
         padding: EdgeInsets.all(compact ? 10 : 14),
-        decoration: AppTheme.gradientCard(context: context),
+        decoration: decoration,
         child: compact
             ? _compactLayout(context, home, away)
             : _fullLayout(context, home, away),
@@ -49,8 +69,40 @@ class FixtureCard extends StatelessWidget {
   }
 
   Widget _fullLayout(BuildContext context, Team? home, Team? away) {
+    final isLive = fixture.isLive;
+    final isFinished = fixture.isFinishedOrProvisional;
+    final isDarkBackground =
+        isLive || Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDarkBackground
+        ? Colors.white
+        : AppColors.of(context).textPrimary;
+    final secondaryTextColor = isDarkBackground
+        ? Colors.white.withAlpha(220)
+        : AppColors.of(context).textSecondary;
+
     return Column(
       children: [
+        if (isLive)
+          Align(
+            alignment: Alignment.centerRight,
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: const Text(
+                'LIVE',
+                style: TextStyle(
+                  color: Color(0xFFE91E63),
+                  fontSize: 10,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.6,
+                ),
+              ),
+            ),
+          ),
         Row(
           children: [
             Expanded(
@@ -59,17 +111,25 @@ class FixtureCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
               decoration: BoxDecoration(
-                color: AppColors.of(context).cardMedium,
+                color: isLive
+                    ? Colors.white.withAlpha(40)
+                    : isFinished
+                    ? Colors.black.withAlpha(18)
+                    : AppColors.of(context).cardMedium,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppColors.of(context).divider),
+                border: Border.all(
+                  color: isLive
+                      ? Colors.white.withAlpha(120)
+                      : AppColors.of(context).divider,
+                ),
               ),
               child: fixture.hasResult
                   ? Text(
                       '${fixture.homeTeamScore} - ${fixture.awayTeamScore}',
                       style: TextStyle(
-                        color: AppColors.of(context).textPrimary,
+                        color: textColor,
                         fontWeight: FontWeight.w800,
-                        fontSize: 16,
+                        fontSize: isLive ? 18 : 16,
                       ),
                     )
                   : Column(
@@ -79,7 +139,7 @@ class FixtureCard extends StatelessWidget {
                               ? formatDateShort(fixture.kickoffTime)
                               : 'TBC',
                           style: TextStyle(
-                            color: AppColors.of(context).textPrimary,
+                            color: textColor,
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                           ),
@@ -89,7 +149,7 @@ class FixtureCard extends StatelessWidget {
                               ? _extractTime(fixture.kickoffTime!)
                               : '',
                           style: TextStyle(
-                            color: AppColors.of(context).textSecondary,
+                            color: secondaryTextColor,
                             fontSize: 11,
                           ),
                         ),
@@ -106,21 +166,21 @@ class FixtureCard extends StatelessWidget {
             ),
           ],
         ),
-        if (!fixture.finished && fixture.kickoffTime != null) ...[
+        if (!fixture.isFinishedOrProvisional && fixture.kickoffTime != null) ...[
           const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
                 Icons.access_time,
-                color: AppColors.of(context).textSecondary,
+                color: secondaryTextColor,
                 size: 12,
               ),
               const SizedBox(width: 4),
               Text(
                 formatDateTime(fixture.kickoffTime),
                 style: TextStyle(
-                  color: AppColors.of(context).textSecondary,
+                  color: secondaryTextColor,
                   fontSize: 11,
                 ),
               ),
@@ -132,6 +192,17 @@ class FixtureCard extends StatelessWidget {
   }
 
   Widget _compactLayout(BuildContext context, Team? home, Team? away) {
+    final isLive = fixture.isLive;
+    final isFinished = fixture.isFinishedOrProvisional;
+    final textColor = isLive
+        ? Colors.white
+        : Theme.of(context).brightness == Brightness.dark
+        ? AppColors.of(context).textPrimary
+        : AppColors.of(context).textPrimary;
+    final subColor = isLive
+        ? Colors.white.withAlpha(220)
+        : AppColors.of(context).textSecondary;
+
     return Row(
       children: [
         Expanded(
@@ -142,7 +213,7 @@ class FixtureCard extends StatelessWidget {
                 child: Text(
                   home?.shortName ?? '?',
                   style: TextStyle(
-                    color: AppColors.of(context).textPrimary,
+                    color: textColor,
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                   ),
@@ -168,22 +239,26 @@ class FixtureCard extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           decoration: BoxDecoration(
-            color: AppColors.of(context).cardMedium,
+            color: isLive
+                ? Colors.white.withAlpha(40)
+                : isFinished
+                ? Colors.black.withAlpha(18)
+                : AppColors.of(context).cardMedium,
             borderRadius: BorderRadius.circular(8),
           ),
           child: fixture.hasResult
               ? Text(
                   '${fixture.homeTeamScore} - ${fixture.awayTeamScore}',
                   style: TextStyle(
-                    color: AppColors.of(context).textPrimary,
+                    color: textColor,
                     fontWeight: FontWeight.w700,
-                    fontSize: 13,
+                    fontSize: isLive ? 15 : 13,
                   ),
                 )
               : Text(
                   _formatTimeShort(fixture.kickoffTime),
                   style: TextStyle(
-                    color: AppColors.of(context).textSecondary,
+                    color: subColor,
                     fontSize: 12,
                   ),
                 ),
@@ -207,7 +282,7 @@ class FixtureCard extends StatelessWidget {
                 child: Text(
                   away?.shortName ?? '?',
                   style: TextStyle(
-                    color: AppColors.of(context).textPrimary,
+                    color: textColor,
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                   ),
@@ -227,6 +302,14 @@ class FixtureCard extends StatelessWidget {
     int difficulty,
     bool isHome,
   ) {
+    final isLive = fixture.isLive;
+    final textColor = isLive
+        ? Colors.white
+        : AppColors.of(context).textPrimary;
+    final subColor = isLive
+        ? Colors.white.withAlpha(220)
+        : AppColors.of(context).textSecondary;
+
     final badge = CachedNetworkImage(
       imageUrl: team?.badgeUrl ?? '',
       width: 32,
@@ -247,7 +330,7 @@ class FixtureCard extends StatelessWidget {
                   Text(
                     team?.shortName ?? '?',
                     style: TextStyle(
-                      color: AppColors.of(context).textPrimary,
+                      color: textColor,
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
                     ),
@@ -261,7 +344,7 @@ class FixtureCard extends StatelessWidget {
                   Text(
                     team?.shortName ?? '?',
                     style: TextStyle(
-                      color: AppColors.of(context).textPrimary,
+                      color: textColor,
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
                     ),
@@ -274,16 +357,18 @@ class FixtureCard extends StatelessWidget {
               ? MainAxisAlignment.end
               : MainAxisAlignment.start,
           children: [
-            DifficultyBadge(difficulty: difficulty, size: 24),
-            const SizedBox(width: 4),
-            Text(
-              isHome ? 'H' : 'A',
-              style: TextStyle(
-                color: AppColors.of(context).textSecondary,
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
+            if (showDifficulty) ...[
+              DifficultyBadge(difficulty: difficulty, size: 24),
+              const SizedBox(width: 4),
+              Text(
+                isHome ? 'H' : 'A',
+                style: TextStyle(
+                  color: subColor,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
-            ),
+            ],
           ],
         ),
       ],

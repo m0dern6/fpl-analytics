@@ -106,4 +106,20 @@ class Fixture {
   }
 
   bool get hasResult => homeTeamScore != null && awayTeamScore != null;
+
+  bool get isLive =>
+      (started ?? false) && !finished && !finishedProvisional;
+
+  bool get isFinishedOrProvisional => finished || finishedProvisional;
+
+  DateTime? get kickoffDateTimeLocal {
+    if (kickoffTime == null) return null;
+    return DateTime.tryParse(kickoffTime!)?.toLocal();
+  }
+
+  String? get localDayKey {
+    final local = kickoffDateTimeLocal;
+    if (local == null) return null;
+    return '${local.year}-${local.month.toString().padLeft(2, '0')}-${local.day.toString().padLeft(2, '0')}';
+  }
 }

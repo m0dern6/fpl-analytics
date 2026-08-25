@@ -100,6 +100,39 @@ class FplProvider extends ChangeNotifier {
     } catch (_) {}
   }
 
+  Future<void> refreshFixturesForGameweek(int gw) async {
+    try {
+      final gwFixtures = await _service.fetchFixturesForGameweek(gw);
+      final Map<int, Fixture> byId = {for (final f in _fixtures) f.id: f};
+      for (final fixture in gwFixtures) {
+        byId[fixture.id] = fixture;
+      }
+      _fixtures = byId.values.toList()
+        ..sort(
+          (a, b) => (a.kickoffTime ?? '').compareTo(b.kickoffTime ?? ''),
+        );
+      notifyListeners();
+    } catch (_) {}
+  }
+
+  Future<Fixture?> refreshFixtureById({required int fixtureId, required int gw}) async {
+    try {
+      final gwFixtures = await _service.fetchFixturesForGameweek(gw);
+      final fresh = gwFixtures.where((f) => f.id == fixtureId).firstOrNull;
+      if (fresh == null) return null;
+      final Map<int, Fixture> byId = {for (final f in _fixtures) f.id: f};
+      byId[fresh.id] = fresh;
+      _fixtures = byId.values.toList()
+        ..sort(
+          (a, b) => (a.kickoffTime ?? '').compareTo(b.kickoffTime ?? ''),
+        );
+      notifyListeners();
+      return fresh;
+    } catch (_) {
+      return null;
+    }
+  }
+
   Map<String, dynamic>? getLiveStatsForPlayer(int playerId) {
     return _liveData[playerId];
   }

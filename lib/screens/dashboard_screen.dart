@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'dart:async';
 import '../providers/fpl_provider.dart';
 import '../models/player.dart';
 import '../models/fixture.dart';
@@ -11,10 +12,9 @@ import '../utils/constants.dart';
 import '../utils/formatters.dart';
 import '../widgets/stat_card.dart';
 import '../widgets/loading_widget.dart';
-import '../widgets/difficulty_badge.dart';
+import '../widgets/fixture_card.dart';
 import 'player_detail_screen.dart';
 import 'gameweek_detail_screen.dart';
-import 'fixture_detail_screen.dart';
 import 'fpl_team_screen.dart';
 import 'my_teams_screen.dart';
 import 'season_trend_detail_screen.dart';
@@ -22,8 +22,36 @@ import 'form_leaders_screen.dart';
 import 'top_performers_screen.dart';
 import 'transfer_activity_screen.dart';
 
-class DashboardScreen extends StatelessWidget {
+class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
+
+  @override
+  State<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State<DashboardScreen> {
+  Timer? _liveRefreshTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _liveRefreshTimer = Timer.periodic(const Duration(minutes: 1), (_) {
+      if (!mounted) return;
+      final provider = context.read<FplProvider>();
+      final gw = provider.currentGameweek;
+      if (gw == null) return;
+      final gwFixtures = provider.getFixturesForGameweek(gw.id);
+      final hasLive = gwFixtures.any((f) => f.isLive);
+      if (!hasLive) return;
+      provider.refreshFixturesForGameweek(gw.id);
+    });
+  }
+
+  @override
+  void dispose() {
+    _liveRefreshTimer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -831,7 +859,7 @@ class _DashboardContent extends StatelessWidget {
                       height: 36,
                       clipBehavior: Clip.antiAlias,
                       decoration: BoxDecoration(
-                        shape: BoxShape.circle,
+                        borderRadius: BorderRadius.circular(8),
                         color: AppColors.of(context).cardMedium,
                       ),
                       child: CachedNetworkImage(
@@ -1012,7 +1040,7 @@ class _DashboardContent extends StatelessWidget {
                       height: 30,
                       clipBehavior: Clip.antiAlias,
                       decoration: BoxDecoration(
-                        shape: BoxShape.circle,
+                        borderRadius: BorderRadius.circular(7),
                         color: AppColors.of(context).cardMedium,
                       ),
                       child: CachedNetworkImage(
@@ -1097,22 +1125,27 @@ class _DashboardContent extends StatelessWidget {
       );
     }
 
-    // Group fixtures by day
     final Map<String, List<Fixture>> groupedByDay = {};
     for (final f in upcoming) {
-      if (f.kickoffTime == null) continue;
-      // Format to get the day string
-      final dateStr = formatDateShort(f.kickoffTime!);
-      groupedByDay.putIfAbsent(dateStr, () => []).add(f);
+      final dayKey = f.localDayKey;
+      if (dayKey == null) continue;
+      groupedByDay.putIfAbsent(dayKey, () => []).add(f);
     }
 
     final children = <Widget>[];
-    for (final entry in groupedByDay.entries) {
+    final sortedKeys = groupedByDay.keys.toList()
+      ..sort((a, b) => a.compareTo(b));
+    for (final key in sortedKeys) {
+      final dayFixtures = groupedByDay[key] ?? [];
+      final firstLocal = dayFixtures.first.kickoffDateTimeLocal;
+      final dayLabel = firstLocal == null
+          ? ''
+          : formatDateShort(firstLocal.toIso8601String());
       children.add(
         Padding(
           padding: const EdgeInsets.only(top: 8.0, bottom: 8.0, left: 4.0),
           child: Text(
-            entry.key,
+            dayLabel,
             style: TextStyle(
               color: AppColors.of(context).textSecondary,
               fontSize: 12,
@@ -1122,8 +1155,18 @@ class _DashboardContent extends StatelessWidget {
         ),
       );
       children.addAll(
-        entry.value
-            .map((fixture) => _buildFixtureRow(context, fixture))
+        dayFixtures
+            .map(
+              (fixture) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: FixtureCard(
+                  fixture: fixture,
+                  provider: provider,
+                  compact: true,
+                  showDifficulty: false,
+                ),
+              ),
+            )
             .toList(),
       );
     }
@@ -1134,136 +1177,6 @@ class _DashboardContent extends StatelessWidget {
     );
   }
 
-  String _formatTimeShort(String? timeStr) {
-    if (timeStr == null) return '';
-    try {
-      final time = DateTime.parse(timeStr).toLocal();
-      final hour = time.hour.toString().padLeft(2, '0');
-      final minute = time.minute.toString().padLeft(2, '0');
-      return '$hour:$minute';
-    } catch (_) {
-      return '';
-    }
-  }
-
-  Widget _buildFixtureRow(BuildContext context, Fixture fixture) {
-    final home = provider.getTeamById(fixture.homeTeamId);
-    final away = provider.getTeamById(fixture.awayTeamId);
-
-    return GestureDetector(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => FixtureDetailScreen(
-            fixture: fixture,
-            homeTeam: home,
-            awayTeam: away,
-          ),
-        ),
-      ),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 8),
-        padding: const EdgeInsets.all(12),
-        decoration: AppTheme.gradientCard(context: context),
-        child: Row(
-          children: [
-            Expanded(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Flexible(
-                    child: Text(
-                      home?.shortName ?? '?',
-                      style: TextStyle(
-                        color: AppColors.of(context).textPrimary,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      textAlign: TextAlign.right,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  if (home != null)
-                    CachedNetworkImage(
-                      imageUrl: home.badgeUrl,
-                      width: 26,
-                      height: 26,
-                      fit: BoxFit.contain,
-                      placeholder: (_, __) =>
-                          const SizedBox(width: 26, height: 26),
-                      errorWidget: (_, __, ___) =>
-                          const SizedBox(width: 26, height: 26),
-                    ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: AppColors.of(context).cardMedium,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: fixture.hasResult
-                  ? Text(
-                      '${fixture.homeTeamScore} - ${fixture.awayTeamScore}',
-                      style: TextStyle(
-                        color: AppColors.of(context).textPrimary,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 13,
-                      ),
-                    )
-                  : Text(
-                      _formatTimeShort(fixture.kickoffTime),
-                      style: TextStyle(
-                        color: AppColors.of(context).textSecondary,
-                        fontSize: 12,
-                      ),
-                    ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Row(
-                children: [
-                  if (away != null)
-                    CachedNetworkImage(
-                      imageUrl: away.badgeUrl,
-                      width: 26,
-                      height: 26,
-                      fit: BoxFit.contain,
-                      placeholder: (_, __) =>
-                          const SizedBox(width: 26, height: 26),
-                      errorWidget: (_, __, ___) =>
-                          const SizedBox(width: 26, height: 26),
-                    ),
-                  const SizedBox(width: 6),
-                  Flexible(
-                    child: Text(
-                      away?.shortName ?? '?',
-                      style: TextStyle(
-                        color: AppColors.of(context).textPrimary,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Row(
-              children: [
-                DifficultyBadge(difficulty: fixture.teamHDifficulty, size: 22),
-                const SizedBox(width: 2),
-                DifficultyBadge(difficulty: fixture.teamADifficulty, size: 22),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }
 
 class _DashboardSkeleton extends StatelessWidget {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'dart:async';
 import '../providers/fpl_provider.dart';
 import '../models/fixture.dart';
 import '../models/team.dart';
@@ -135,17 +136,42 @@ class _FixturesScreenState extends State<FixturesScreen>
   }
 }
 
-class _GwFixturesList extends StatelessWidget {
+class _GwFixturesList extends StatefulWidget {
   final int gwId;
   final FplProvider provider;
 
   const _GwFixturesList({required this.gwId, required this.provider});
 
   @override
-  Widget build(BuildContext context) {
-    final fixtures = provider.getFixturesForGameweek(gwId);
+  State<_GwFixturesList> createState() => _GwFixturesListState();
+}
 
-    if (provider.isLoading) return const LoadingListWidget(itemCount: 5);
+class _GwFixturesListState extends State<_GwFixturesList> {
+  Timer? _liveRefreshTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _liveRefreshTimer = Timer.periodic(const Duration(minutes: 1), (_) {
+      if (!mounted) return;
+      final fixtures = widget.provider.getFixturesForGameweek(widget.gwId);
+      final hasLive = fixtures.any((f) => f.isLive);
+      if (!hasLive) return;
+      widget.provider.refreshFixturesForGameweek(widget.gwId);
+    });
+  }
+
+  @override
+  void dispose() {
+    _liveRefreshTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final fixtures = widget.provider.getFixturesForGameweek(widget.gwId);
+
+    if (widget.provider.isLoading) return const LoadingListWidget(itemCount: 5);
 
     if (fixtures.isEmpty) {
       return Center(
@@ -159,7 +185,7 @@ class _GwFixturesList extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              'GW$gwId fixtures not available yet',
+            'GW${widget.gwId} fixtures not available yet',
               style: TextStyle(color: AppColors.of(context).textSecondary),
             ),
           ],
@@ -172,7 +198,7 @@ class _GwFixturesList extends StatelessWidget {
       itemCount: fixtures.length,
       separatorBuilder: (_, __) => const SizedBox(height: 8),
       itemBuilder: (_, i) =>
-          FixtureCard(fixture: fixtures[i], provider: provider),
+          FixtureCard(fixture: fixtures[i], provider: widget.provider),
     );
   }
 }
