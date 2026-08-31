@@ -288,9 +288,9 @@ class _PlayersScreenState extends State<PlayersScreen> {
                         width: 16,
                         height: 16,
                         fit: BoxFit.contain,
-                        placeholder: (_, __) =>
+                        placeholder: (_, _) =>
                             const SizedBox(width: 16, height: 16),
-                        errorWidget: (_, __, ___) =>
+                        errorWidget: (_, _, _) =>
                             const SizedBox(width: 16, height: 16),
                       ),
                       const SizedBox(width: 4),
@@ -354,9 +354,9 @@ class _PlayersScreenState extends State<PlayersScreen> {
                           width: 20,
                           height: 20,
                           fit: BoxFit.contain,
-                          placeholder: (_, __) =>
+                          placeholder: (_, _) =>
                               const SizedBox(width: 20, height: 20),
-                          errorWidget: (_, __, ___) =>
+                          errorWidget: (_, _, _) =>
                               const SizedBox(width: 20, height: 20),
                         ),
                         const SizedBox(width: 8),

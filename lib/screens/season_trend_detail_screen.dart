@@ -192,7 +192,7 @@ class SeasonTrendDetailScreen extends StatelessWidget {
                     barWidth: 2.5,
                     dotData: FlDotData(
                       show: true,
-                      getDotPainter: (spot, __, ___, ____) =>
+                      getDotPainter: (spot, percent, bar, index) =>
                           FlDotCirclePainter(
                             radius: 3.5,
                             color: color,

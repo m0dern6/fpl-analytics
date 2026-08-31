@@ -68,8 +68,8 @@ class _TeamFixturesScreenState extends State<TeamFixturesScreen> {
                   width: 54,
                   height: 54,
                   fit: BoxFit.contain,
-                  placeholder: (_, __) => const SizedBox(width: 54, height: 54),
-                  errorWidget: (_, __, ___) =>
+                  placeholder: (_, _) => const SizedBox(width: 54, height: 54),
+                  errorWidget: (_, _, _) =>
                       const SizedBox(width: 54, height: 54),
                 ),
                 const SizedBox(width: 14),
@@ -160,9 +160,9 @@ class _TeamFixturesScreenState extends State<TeamFixturesScreen> {
                                 width: 24,
                                 height: 24,
                                 fit: BoxFit.contain,
-                                placeholder: (_, __) =>
+                                placeholder: (_, _) =>
                                     const SizedBox(width: 24, height: 24),
-                                errorWidget: (_, __, ___) =>
+                                errorWidget: (_, _, _) =>
                                     const SizedBox(width: 24, height: 24),
                               ),
                               const SizedBox(width: 8),

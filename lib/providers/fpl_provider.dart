@@ -15,12 +15,15 @@ class FplProvider extends ChangeNotifier {
   List<Gameweek> _gameweeks = [];
   List<Fixture> _fixtures = [];
   List<ElementType> _elementTypes = [];
-  Map<int, PlayerSummary> _playerSummaries = {};
+  final Map<int, PlayerSummary> _playerSummaries = {};
+  final Map<int, Map<int, Map<String, dynamic>>> _liveDataByGw = {};
   Map<int, Map<String, dynamic>> _liveData = {};
-  Map<int, List<Player>> _dreamTeams = {};
-  Map<int, Map<int, int>> _dreamTeamPoints = {}; // gw -> { playerId: gwPoints }
-  Map<int, Map<int, Map<String, dynamic>>> _managerTeams = {}; // gw -> { entryId: picks }
+  int? _currentLiveGw;
+  final Map<int, List<Player>> _dreamTeams = {};
+  final Map<int, Map<int, int>> _dreamTeamPoints = {}; // gw -> { playerId: gwPoints }
+  final Map<int, Map<int, Map<String, dynamic>>> _managerTeams = {}; // gw -> { entryId: picks }
   final Set<int> _dreamTeamLoadingGws = {};
+  final Set<int> _liveDataLoadingGws = {};
 
   bool _isLoading = false;
   bool _isLoadingFixtures = false;
@@ -36,6 +39,7 @@ class FplProvider extends ChangeNotifier {
   bool get isLoadingFixtures => _isLoadingFixtures;
   String? get error => _error;
   Gameweek? get currentGameweek => _currentGameweek;
+  int? get currentLiveGw => _currentLiveGw;
 
   Future<void> loadAllData({bool forceRefresh = false}) async {
     _isLoading = true;
@@ -94,14 +98,174 @@ class FplProvider extends ChangeNotifier {
   }
 
   Future<void> loadLiveGwData(int gw) async {
+    if (_liveDataLoadingGws.contains(gw)) return;
+    _liveDataLoadingGws.add(gw);
     try {
-      _liveData = await _service.fetchLiveGameweekData(gw);
+      final data = await _service.fetchLiveGameweekData(gw);
+      _liveDataByGw[gw] = data;
+      _currentLiveGw = gw;
+      _liveData = data;
       notifyListeners();
-    } catch (_) {}
+    } catch (_) {} finally {
+      _liveDataLoadingGws.remove(gw);
+    }
   }
 
-  Map<String, dynamic>? getLiveStatsForPlayer(int playerId) {
-    return _liveData[playerId];
+  bool isLiveGwLoading(int gw) => _liveDataLoadingGws.contains(gw);
+
+  Map<String, dynamic>? getLiveStatsForPlayer(int playerId, {int? gw}) {
+    final gwData = gw != null ? _liveDataByGw[gw] : _liveData;
+    if (gwData == null) return null;
+    final element = gwData[playerId];
+    if (element == null) return null;
+    if (element.containsKey('stats')) {
+      return element['stats'] as Map<String, dynamic>?;
+    }
+    return element;
+  }
+
+  List<dynamic>? getLiveExplainForPlayer(int playerId, {int? gw}) {
+    final gwData = gw != null ? _liveDataByGw[gw] : _liveData;
+    if (gwData == null) return null;
+    final element = gwData[playerId];
+    if (element == null) return null;
+    return element['explain'] as List<dynamic>?;
+  }
+
+  /// Resolves the exact official FPL points earned for a specific stat identifier
+  /// directly from the official API `explain` array.
+  /// If not yet in explain, falls back to the official FPL rulebook based on position.
+  int getOfficialStatPoints(int playerId, String identifier, {int? fixtureId, int? gw}) {
+    final explains = getLiveExplainForPlayer(playerId, gw: gw);
+    if (explains != null && explains.isNotEmpty) {
+      for (final exp in explains) {
+        if (exp is Map<String, dynamic>) {
+          if (fixtureId != null && exp['fixture'] != null && exp['fixture'] != fixtureId) {
+            continue;
+          }
+          final stats = exp['stats'] as List<dynamic>?;
+          if (stats != null) {
+            for (final s in stats) {
+              if (s is Map<String, dynamic> && s['identifier'] == identifier) {
+                return s['points'] as int? ?? 0;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    final player = getPlayerById(playerId);
+    final pos = player?.elementType ?? 3;
+
+    switch (identifier) {
+      case 'goals_scored':
+        if (pos == 1 || pos == 2) return 6; // GK / DEF
+        if (pos == 3) return 5; // MID
+        return 4; // FWD
+      case 'assists':
+        return 3;
+      case 'clean_sheets':
+        if (pos == 1 || pos == 2) return 4;
+        if (pos == 3) return 1;
+        return 0;
+      case 'penalties_saved':
+        return 5;
+      case 'penalties_missed':
+        return -2;
+      case 'yellow_cards':
+        return -1;
+      case 'red_cards':
+        return -3;
+      case 'own_goals':
+        return -2;
+      case 'bonus':
+        return 1;
+      default:
+        return 0;
+    }
+  }
+
+  /// Returns official points scored by a player in a specific gameweek.
+  int getPlayerPointsForGameweek(int playerId, int gw) {
+    // 1. Check live data for this specific GW
+    final live = getLiveStatsForPlayer(playerId, gw: gw);
+    if (live != null && live.containsKey('total_points')) {
+      return live['total_points'] as int? ?? 0;
+    }
+
+    // 2. Check dream team points for this GW
+    if (_dreamTeamPoints.containsKey(gw) && _dreamTeamPoints[gw]!.containsKey(playerId)) {
+      return _dreamTeamPoints[gw]![playerId]!;
+    }
+
+    // 3. If current GW, fallback to player.eventPoints
+    if (_currentGameweek?.id == gw) {
+      final p = getPlayerById(playerId);
+      if (p != null) return p.eventPoints;
+    }
+
+    return 0;
+  }
+
+  /// Calculates the live gameweek total points for an FPL squad with full fidelity:
+  /// - Starting 11 players vs Bench
+  /// - Captain multiplier (x2, or x3 if triple captain chip)
+  /// - Vice-captain fallback if captain played 0 minutes
+  /// - Bench Boost chip (includes all 4 bench players)
+  int calculateLiveTeamPoints(
+    List<dynamic> picks, {
+    int? gw,
+    String? activeChip,
+  }) {
+    if (picks.isEmpty) return 0;
+    final event = gw ?? _currentGameweek?.id ?? 1;
+
+    int totalPoints = 0;
+    bool captainPlayed = false;
+    int? vcElementId;
+
+    for (final pick in picks) {
+      if (pick is! Map<String, dynamic>) continue;
+      final elementId = pick['element'] as int? ?? 0;
+      final position = pick['position'] as int? ?? 1;
+      final isCaptain = pick['is_captain'] as bool? ?? false;
+      final isViceCaptain = pick['is_vice_captain'] as bool? ?? false;
+      final multiplier = pick['multiplier'] as int? ?? 1;
+      final isBench = position > 11;
+
+      final liveStats = getLiveStatsForPlayer(elementId, gw: event);
+      final rawPoints = liveStats?['total_points'] as int? ??
+          getPlayerPointsForGameweek(elementId, event);
+      final minutes = liveStats?['minutes'] as int? ?? 0;
+
+      if (isCaptain && minutes > 0) {
+        captainPlayed = true;
+      }
+      if (isViceCaptain) {
+        vcElementId = elementId;
+      }
+
+      if (!isBench) {
+        totalPoints += rawPoints * (multiplier > 0 ? multiplier : 1);
+      } else if (activeChip == 'bboost') {
+        totalPoints += rawPoints;
+      }
+    }
+
+    // Vice-captain promotion if captain played 0 minutes
+    if (!captainPlayed && vcElementId != null) {
+      final vcLive = getLiveStatsForPlayer(vcElementId, gw: event);
+      final vcMins = vcLive?['minutes'] as int? ?? 0;
+      if (vcMins > 0) {
+        final vcRawPts = vcLive?['total_points'] as int? ??
+            getPlayerPointsForGameweek(vcElementId, event);
+        final extraMultiplier = (activeChip == '3xc' ? 2 : 1);
+        totalPoints += vcRawPts * extraMultiplier;
+      }
+    }
+
+    return totalPoints;
   }
 
   PlayerSummary? getPlayerSummary(int playerId) => _playerSummaries[playerId];
@@ -134,7 +298,7 @@ class FplProvider extends ChangeNotifier {
   /// Returns the gameweek points for a player in a specific dream-team GW.
   /// Falls back to [Player.eventPoints] if not available.
   int getDreamTeamPlayerPoints(int gw, int playerId) {
-    return _dreamTeamPoints[gw]?[playerId] ?? 0;
+    return _dreamTeamPoints[gw]?[playerId] ?? getPlayerPointsForGameweek(playerId, gw);
   }
 
   Future<void> loadManagerTeam(int entryId, int gw) async {
@@ -217,9 +381,11 @@ class FplProvider extends ChangeNotifier {
   }
 
   List<Player> getTopScorersByCleanSheets({int limit = 10}) {
-    final sorted = List<Player>.from(_players)
+    final filtered = _players
+        .where((p) => p.elementType == 1 || p.elementType == 2)
+        .toList()
       ..sort((a, b) => b.cleanSheets.compareTo(a.cleanSheets));
-    return sorted.take(limit).toList();
+    return filtered.take(limit).toList();
   }
 
   List<Player> getTopScorersByICT({int limit = 10}) {
@@ -240,10 +406,28 @@ class FplProvider extends ChangeNotifier {
   List<Fixture> getFixturesForGameweek(int gw) =>
       _fixtures.where((f) => f.event == gw).toList();
 
+  Future<void> updateFixturesForGameweek(int gw) async {
+    try {
+      final updated = await _service.fetchFixturesForGameweek(gw);
+      if (updated.isNotEmpty) {
+        final updatedMap = {for (final f in updated) f.id: f};
+        _fixtures = _fixtures.map((f) => updatedMap[f.id] ?? f).toList();
+        // If there were new fixtures not in _fixtures, add them
+        final existingIds = _fixtures.map((f) => f.id).toSet();
+        for (final f in updated) {
+          if (!existingIds.contains(f.id)) {
+            _fixtures.add(f);
+          }
+        }
+        notifyListeners();
+      }
+    } catch (_) {}
+  }
+
   List<Fixture> getUpcomingFixtures({int limit = 10}) {
     final now = DateTime.now();
     return _fixtures
-        .where((f) => !f.finished && f.kickoffTime != null && DateTime.tryParse(f.kickoffTime!)?.isAfter(now) == true)
+        .where((f) => !f.finished && !f.finishedProvisional && f.kickoffTime != null && DateTime.tryParse(f.kickoffTime!)?.isAfter(now) == true)
         .take(limit)
         .toList();
   }

@@ -155,4 +155,9 @@ class Player {
   double get selectedPercent => double.tryParse(selectedByPercent) ?? 0;
   double get ppgValue => double.tryParse(pointsPerGame) ?? 0;
   double get valueSeasonValue => double.tryParse(valueSeason) ?? 0;
+  double get xG => double.tryParse(expectedGoalsStr) ?? 0;
+  double get xA => double.tryParse(expectedAssistsStr) ?? 0;
+  double get xGI => xG + xA;
+  double get goalsDelta => goals - xG;
+  double get assistsDelta => assists - xA;
 }

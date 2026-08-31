@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/fpl_service.dart';
 import '../providers/fpl_provider.dart';
-import '../utils/app_theme.dart';
 import '../utils/constants.dart';
 import '../utils/formatters.dart';
 import 'fpl_pitch_screen.dart';
@@ -124,7 +123,7 @@ class _LeagueDetailScreenState extends State<LeagueDetailScreen> {
     return ListView.separated(
       padding: const EdgeInsets.all(16),
       itemCount: _standings.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 8),
+      separatorBuilder: (_, _) => const SizedBox(height: 8),
       itemBuilder: (context, index) {
         final entryItem = _standings[index];
         final rank = entryItem['rank'] as int? ?? 0;
@@ -171,13 +170,14 @@ class _LeagueDetailScreenState extends State<LeagueDetailScreen> {
                 child: CircularProgressIndicator(color: AppColors.of(context).primary),
               ),
             );
+            final navigator = Navigator.of(context);
+            final messenger = ScaffoldMessenger.of(context);
 
             try {
               final picks = await _service.fetchFplEntryPicks(entryId, gwId);
               if (mounted) {
-                Navigator.pop(context); // close dialog
-                Navigator.push(
-                  context,
+                navigator.pop(); // close dialog
+                navigator.push(
                   MaterialPageRoute(
                     builder: (_) =>
                         FplPitchScreen(picks: picks, gwNumber: gwId),
@@ -186,8 +186,8 @@ class _LeagueDetailScreenState extends State<LeagueDetailScreen> {
               }
             } catch (e) {
               if (mounted) {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
+                navigator.pop();
+                messenger.showSnackBar(
                   SnackBar(content: Text('Could not load manager team: $e')),
                 );
               }

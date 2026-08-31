@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../utils/constants.dart';
 import '../utils/formatters.dart';
 
 class DifficultyBadge extends StatelessWidget {

@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../utils/constants.dart';
 import '../providers/theme_provider.dart';
+import 'price_changes_screen.dart';
+import 'captain_matrix_screen.dart';
+import 'fpl_team_screen.dart';
 import 'fixture_difficulty_screen.dart';
 import 'stats_leaders_screen.dart';
 import 'compare_screen.dart';
 import 'teams_screen.dart';
 import 'fixtures_screen.dart';
 import 'gameweeks_screen.dart';
-import 'my_teams_screen.dart';
 
 class MoreScreen extends StatelessWidget {
   const MoreScreen({super.key});
@@ -17,18 +19,38 @@ class MoreScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final items = [
       _ExploreItem(
-        title: 'My Teams',
-        subtitle: 'Manage your custom FPL squads',
-        icon: Icons.person_rounded,
-        iconColor: const Color(0xFF8B5CF6),
+        title: 'Price Changes',
+        subtitle: 'Predicted rises & falls radar',
+        icon: Icons.trending_up_rounded,
+        iconColor: const Color(0xFF00FF87),
         onTap: () => Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => const MyTeamsScreen()),
+          MaterialPageRoute(builder: (_) => const PriceChangesScreen()),
         ),
       ),
       _ExploreItem(
-        title: 'Gameweeks',
-        subtitle: 'History & live scores',
+        title: 'Captain Decider',
+        subtitle: 'AI rating & top picks matrix',
+        icon: Icons.emoji_events_rounded,
+        iconColor: const Color(0xFFFBBF24),
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const CaptainMatrixScreen()),
+        ),
+      ),
+      _ExploreItem(
+        title: 'My FPL Team',
+        subtitle: 'Live score & rank tracker',
+        icon: Icons.account_circle_rounded,
+        iconColor: const Color(0xFF8B5CF6),
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const FplTeamScreen()),
+        ),
+      ),
+      _ExploreItem(
+        title: 'Gameweeks Hub',
+        subtitle: 'Dream Team & live scores',
         icon: Icons.calendar_month_rounded,
         iconColor: AppColors.of(context).accent,
         onTap: () => Navigator.push(

@@ -94,6 +94,18 @@ String formatDateTime(String? isoDate) {
   }
 }
 
+String formatTimeShort(String? isoDate) {
+  if (isoDate == null) return '';
+  try {
+    final dt = DateTime.parse(isoDate).toLocal();
+    final hour = dt.hour.toString().padLeft(2, '0');
+    final minute = dt.minute.toString().padLeft(2, '0');
+    return '$hour:$minute';
+  } catch (_) {
+    return '';
+  }
+}
+
 String formatStatusLabel(String? status) {
   switch (status) {
     case 'a':

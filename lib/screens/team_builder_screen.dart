@@ -135,8 +135,9 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
   // Sub Out: move a starting outfield player to bench
   void _subOut(int startingSlotIndex) {
     final player = _slots[startingSlotIndex];
-    if (player == null || startingSlotIndex < 1 || startingSlotIndex > 10)
+    if (player == null || startingSlotIndex < 1 || startingSlotIndex > 10) {
       return;
+    }
 
     // Find empty bench outfield slot
     final emptyBenchSlot = _nextBenchSlot(player.elementType);
@@ -144,9 +145,12 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
       setState(() {
         _slots[emptyBenchSlot] = player;
         _slots[startingSlotIndex] = null;
-        if (_captainIdx == startingSlotIndex) _captainIdx = emptyBenchSlot;
-        if (_viceCaptainIdx == startingSlotIndex)
+        if (_captainIdx == startingSlotIndex) {
+          _captainIdx = emptyBenchSlot;
+        }
+        if (_viceCaptainIdx == startingSlotIndex) {
           _viceCaptainIdx = emptyBenchSlot;
+        }
       });
     } else {
       // All bench outfield slots full – ask which bench player to swap with
@@ -182,14 +186,16 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
     setState(() {
       _slots[0] = benchGk;
       _slots[11] = startGk;
-      if (_captainIdx == 0)
+      if (_captainIdx == 0) {
         _captainIdx = 11;
-      else if (_captainIdx == 11)
+      } else if (_captainIdx == 11) {
         _captainIdx = 0;
-      if (_viceCaptainIdx == 0)
+      }
+      if (_viceCaptainIdx == 0) {
         _viceCaptainIdx = 11;
-      else if (_viceCaptainIdx == 11)
+      } else if (_viceCaptainIdx == 11) {
         _viceCaptainIdx = 0;
+      }
     });
   }
 
@@ -254,7 +260,7 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
                     child: Image.network(
                       toPlayer.photoUrl,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => const Icon(Icons.person),
+                      errorBuilder: (_, _, _) => const Icon(Icons.person),
                     ),
                   ),
                   title: Text(
@@ -273,14 +279,16 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
                     setState(() {
                       _slots[toSlot] = fromPlayer;
                       _slots[fromSlot] = toPlayer;
-                      if (_captainIdx == fromSlot)
+                      if (_captainIdx == fromSlot) {
                         _captainIdx = toSlot;
-                      else if (_captainIdx == toSlot)
+                      } else if (_captainIdx == toSlot) {
                         _captainIdx = fromSlot;
-                      if (_viceCaptainIdx == fromSlot)
+                      }
+                      if (_viceCaptainIdx == fromSlot) {
                         _viceCaptainIdx = toSlot;
-                      else if (_viceCaptainIdx == toSlot)
+                      } else if (_viceCaptainIdx == toSlot) {
                         _viceCaptainIdx = fromSlot;
+                      }
                     });
                   },
                 );
@@ -930,7 +938,7 @@ class _BuilderSlot extends StatelessWidget {
                 width: size,
                 height: size,
                 decoration: BoxDecoration(
-                  shape: BoxShape.circle,
+                  borderRadius: BorderRadius.circular(8),
                   color: player != null
                       ? AppColors.of(context).cardDark
                       : AppColors.of(context).cardDark.withAlpha(180),
@@ -944,12 +952,12 @@ class _BuilderSlot extends StatelessWidget {
                     ? CachedNetworkImage(
                         imageUrl: player!.photoUrl,
                         fit: BoxFit.cover,
-                        placeholder: (_, __) => Icon(
+                        placeholder: (_, _) => Icon(
                           Icons.person,
                           color: AppColors.of(context).textSecondary,
                           size: size * 0.5,
                         ),
-                        errorWidget: (_, __, ___) => Icon(
+                        errorWidget: (_, _, _) => Icon(
                           Icons.person,
                           color: AppColors.of(context).textSecondary,
                           size: size * 0.5,
@@ -1155,8 +1163,9 @@ class _PlayerPickerSheetState extends State<_PlayerPickerSheet> {
       if (widget.position != 0 && p.elementType != widget.position) {
         return false;
       }
-      if (widget.position == 0 && p.elementType == 1)
+      if (widget.position == 0 && p.elementType == 1) {
         return false; // no GK for outfield bench
+      }
       if (p.nowCost > widget.remaining) return false;
       if ((widget.teamCounts[p.teamId] ?? 0) >= 3) return false;
       return true;
@@ -1371,7 +1380,7 @@ class _PickerPlayerRow extends StatelessWidget {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                shape: BoxShape.circle,
+                borderRadius: BorderRadius.circular(8),
                 color: AppColors.of(context).cardMedium,
                 border: Border.all(color: posColor, width: 1.5),
               ),
@@ -1379,12 +1388,12 @@ class _PickerPlayerRow extends StatelessWidget {
               child: CachedNetworkImage(
                 imageUrl: player.photoUrl,
                 fit: BoxFit.cover,
-                placeholder: (_, __) => Icon(
+                placeholder: (_, _) => Icon(
                   Icons.person,
                   color: AppColors.of(context).textSecondary,
                   size: 20,
                 ),
-                errorWidget: (_, __, ___) => Icon(
+                errorWidget: (_, _, _) => Icon(
                   Icons.person,
                   color: AppColors.of(context).textSecondary,
                   size: 20,
@@ -1536,7 +1545,7 @@ class _SlotOptionsSheet extends StatelessWidget {
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    shape: BoxShape.circle,
+                    borderRadius: BorderRadius.circular(8),
                     color: AppColors.of(context).cardMedium,
                     border: Border.all(color: posColor, width: 1.5),
                   ),
@@ -1544,8 +1553,8 @@ class _SlotOptionsSheet extends StatelessWidget {
                   child: CachedNetworkImage(
                     imageUrl: player.photoUrl,
                     fit: BoxFit.cover,
-                    placeholder: (_, __) => const Icon(Icons.person, size: 22),
-                    errorWidget: (_, __, ___) =>
+                    placeholder: (_, _) => const Icon(Icons.person, size: 22),
+                    errorWidget: (_, _, _) =>
                         const Icon(Icons.person, size: 22),
                   ),
                 ),

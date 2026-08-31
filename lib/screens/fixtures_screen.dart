@@ -1,10 +1,8 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import '../providers/fpl_provider.dart';
 import '../models/fixture.dart';
-import '../models/team.dart';
-import '../utils/app_theme.dart';
 import '../utils/constants.dart';
 import '../utils/formatters.dart';
 import '../widgets/loading_widget.dart';
@@ -34,7 +32,15 @@ class _FixturesScreenState extends State<FixturesScreen>
   void initState() {
     super.initState();
     final provider = context.read<FplProvider>();
-    _selectedGw = widget.initialGameweek ?? (provider.currentGameweek?.id ?? 1);
+    final currentGw = provider.currentGameweek?.id ?? 1;
+    final currentGwFixtures = provider.fixtures.where((f) => f.event == currentGw).toList();
+    final allCurrentMatchesPlayed = currentGwFixtures.isNotEmpty &&
+        currentGwFixtures.every((f) => f.isFinished);
+    final targetGw = allCurrentMatchesPlayed
+        ? (provider.gameweeks.where((g) => g.isNext).firstOrNull?.id ?? (currentGw + 1).clamp(1, _totalGws))
+        : currentGw;
+
+    _selectedGw = widget.initialGameweek ?? targetGw;
     _tabController = TabController(
       length: _totalGws,
       vsync: this,
@@ -57,6 +63,14 @@ class _FixturesScreenState extends State<FixturesScreen>
   Widget build(BuildContext context) {
     return Consumer<FplProvider>(
       builder: (context, provider, _) {
+        final currentGw = provider.currentGameweek?.id ?? 1;
+        final currentGwFixtures = provider.fixtures.where((f) => f.event == currentGw).toList();
+        final allCurrentMatchesPlayed = currentGwFixtures.isNotEmpty &&
+            currentGwFixtures.every((f) => f.isFinished);
+        final targetGw = allCurrentMatchesPlayed
+            ? (provider.gameweeks.where((g) => g.isNext).firstOrNull?.id ?? (currentGw + 1).clamp(1, _totalGws))
+            : currentGw;
+
         if (!_didAutoScroll && provider.gameweeks.isNotEmpty) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (!mounted) return;
@@ -81,11 +95,8 @@ class _FixturesScreenState extends State<FixturesScreen>
               isScrollable: true,
               tabs: List.generate(_totalGws, (i) {
                 final gwId = i + 1;
-                final gw = provider.gameweeks.length > i
-                    ? provider.gameweeks[i]
-                    : null;
-                final isCurrent = gw?.isCurrent ?? false;
-                final isNext = gw?.isNext ?? false;
+                final isTarget = gwId == targetGw;
+
                 return Tab(
                   child: Container(
                     key: _tabKeys[i],
@@ -93,24 +104,19 @@ class _FixturesScreenState extends State<FixturesScreen>
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text('GW$gwId'),
-                        if (isCurrent) ...[
+                        Text(
+                          'GW$gwId',
+                          style: TextStyle(
+                            fontWeight: isTarget ? FontWeight.w800 : FontWeight.w500,
+                          ),
+                        ),
+                        if (isTarget) ...[
                           const SizedBox(width: 4),
                           Container(
                             width: 6,
                             height: 6,
                             decoration: BoxDecoration(
                               color: AppColors.of(context).primary,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                        ] else if (isNext) ...[
-                          const SizedBox(width: 4),
-                          Container(
-                            width: 6,
-                            height: 6,
-                            decoration: BoxDecoration(
-                              color: AppColors.of(context).accent,
                               shape: BoxShape.circle,
                             ),
                           ),
@@ -135,17 +141,49 @@ class _FixturesScreenState extends State<FixturesScreen>
   }
 }
 
-class _GwFixturesList extends StatelessWidget {
+class _GwFixturesList extends StatefulWidget {
   final int gwId;
   final FplProvider provider;
 
   const _GwFixturesList({required this.gwId, required this.provider});
 
   @override
-  Widget build(BuildContext context) {
-    final fixtures = provider.getFixturesForGameweek(gwId);
+  State<_GwFixturesList> createState() => _GwFixturesListState();
+}
 
-    if (provider.isLoading) return const LoadingListWidget(itemCount: 5);
+class _GwFixturesListState extends State<_GwFixturesList> {
+  Timer? _liveTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _startLiveTimer();
+  }
+
+  void _startLiveTimer() {
+    _liveTimer?.cancel();
+    _liveTimer = Timer.periodic(const Duration(seconds: 60), (_) {
+      final fixtures = widget.provider.getFixturesForGameweek(widget.gwId);
+      final hasLive = fixtures.any((f) => f.isLive);
+      if (hasLive) {
+        widget.provider.updateFixturesForGameweek(widget.gwId);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _liveTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final fixtures = widget.provider.getFixturesForGameweek(widget.gwId);
+
+    if (widget.provider.isLoading) {
+      return const LoadingListWidget(itemCount: 5);
+    }
 
     if (fixtures.isEmpty) {
       return Center(
@@ -159,7 +197,7 @@ class _GwFixturesList extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              'GW$gwId fixtures not available yet',
+              'GW${widget.gwId} fixtures not available yet',
               style: TextStyle(color: AppColors.of(context).textSecondary),
             ),
           ],
@@ -167,12 +205,46 @@ class _GwFixturesList extends StatelessWidget {
       );
     }
 
-    return ListView.separated(
+    // Group fixtures by local calendar day
+    final Map<String, List<Fixture>> groupedByDay = {};
+    for (final f in fixtures) {
+      final dateStr = f.kickoffTime != null
+          ? formatDateShort(f.kickoffTime!)
+          : 'TBC';
+      groupedByDay.putIfAbsent(dateStr, () => []).add(f);
+    }
+
+    final children = <Widget>[];
+    for (final entry in groupedByDay.entries) {
+      children.add(
+        Padding(
+          padding: const EdgeInsets.only(top: 8.0, bottom: 8.0, left: 4.0),
+          child: Text(
+            entry.key,
+            style: TextStyle(
+              color: AppColors.of(context).textSecondary,
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+      );
+      children.addAll(
+        entry.value.map(
+          (fixture) => Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: FixtureCard(
+              fixture: fixture,
+              provider: widget.provider,
+            ),
+          ),
+        ),
+      );
+    }
+
+    return ListView(
       padding: const EdgeInsets.all(16),
-      itemCount: fixtures.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 8),
-      itemBuilder: (_, i) =>
-          FixtureCard(fixture: fixtures[i], provider: provider),
+      children: children,
     );
   }
 }

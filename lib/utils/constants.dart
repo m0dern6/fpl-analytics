@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 
 class ApiConstants {
   static const String baseUrl = 'https://fantasy.premierleague.com/api';
-  static const String bootstrapStatic = '${baseUrl}/bootstrap-static/';
-  static const String fixtures = '${baseUrl}/fixtures/';
+  static const String bootstrapStatic = '$baseUrl/bootstrap-static/';
+  static const String fixtures = '$baseUrl/fixtures/';
   static String fixturesForGw(int gw) => '$baseUrl/fixtures/?event=$gw';
   static String elementSummary(int id) => '$baseUrl/element-summary/$id/';
   static String liveGw(int gw) => '$baseUrl/event/$gw/live/';
   static String dreamTeam(int gw) => '$baseUrl/dream-team/$gw/';
   static String fplEntry(int entryId) => '$baseUrl/entry/$entryId/';
+  static String fplEntryHistory(int entryId) => '$baseUrl/entry/$entryId/history/';
   static String fplEntryPicks(int entryId, int gw) =>
       '$baseUrl/entry/$entryId/event/$gw/picks/';
   static String leagueStandings(int leagueId) =>
@@ -98,31 +99,31 @@ class AppColors {
   });
 
   static const dark = AppColors._(
-    primary: Color(0xFF00E5A0),
+    primary: Color(0xFF00FF87),
     secondary: Color(0xFF0C0720),
-    background: Color(0xFF070C1A),
-    cardDark: Color(0xFF0F1828),
-    cardMedium: Color(0xFF172238),
-    accent: Color(0xFF7B87FA),
+    background: Color(0xFF080B11),
+    cardDark: Color(0xFF0F1523),
+    cardMedium: Color(0xFF172033),
+    accent: Color(0xFF8B5CF6),
     warning: Color(0xFFFBBF24),
-    error: Color(0xFFF87171),
-    textPrimary: Color(0xFFEDF2FF),
-    textSecondary: Color(0xFF7A8BAA),
-    divider: Color(0xFF182540),
-    navBar: Color(0xFF090F1F),
+    error: Color(0xFFF43F5E),
+    textPrimary: Color(0xFFF8FAFC),
+    textSecondary: Color(0xFF94A3B8),
+    divider: Color(0xFF1E293B),
+    navBar: Color(0xFF0A0E18),
     pitchGreen: Color(0xFF0A3318),
     pitchGreenDark: Color(0xFF06200F),
   );
 
   static const light = AppColors._(
-    primary: Color(0xFF00C787),
+    primary: Color(0xFF00B86B),
     secondary: Color(0xFFFFFFFF),
-    background: Color(0xFFF0F4F8),
+    background: Color(0xFFF1F5F9),
     cardDark: Color(0xFFFFFFFF),
-    cardMedium: Color(0xFFE8EEF5),
-    accent: Color(0xFF5B6FE8),
+    cardMedium: Color(0xFFE2E8F0),
+    accent: Color(0xFF7C3AED),
     warning: Color(0xFFD97706),
-    error: Color(0xFFDC2626),
+    error: Color(0xFFE11D48),
     textPrimary: Color(0xFF0F172A),
     textSecondary: Color(0xFF64748B),
     divider: Color(0xFFCBD5E1),

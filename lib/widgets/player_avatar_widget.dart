@@ -29,7 +29,7 @@ class PlayerAvatarWidget extends StatelessWidget {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        shape: BoxShape.circle,
+        borderRadius: BorderRadius.circular(8),
         color: AppColors.of(context).cardMedium,
         border: Border.all(color: border, width: 1.5),
       ),
@@ -37,12 +37,12 @@ class PlayerAvatarWidget extends StatelessWidget {
       child: CachedNetworkImage(
         imageUrl: player.photoUrl,
         fit: BoxFit.cover,
-        placeholder: (_, __) => Icon(
+        placeholder: (_, _) => Icon(
           Icons.person,
           color: AppColors.of(context).textSecondary,
           size: size * 0.55,
         ),
-        errorWidget: (_, __, ___) => Icon(
+        errorWidget: (_, _, _) => Icon(
           Icons.person,
           color: AppColors.of(context).textSecondary,
           size: size * 0.55,

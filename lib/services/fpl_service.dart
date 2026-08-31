@@ -151,7 +151,10 @@ class FplService {
     final Map<int, Map<String, dynamic>> result = {};
     for (final element in elements) {
       final map = element as Map<String, dynamic>;
-      result[map['id'] as int] = map['stats'] as Map<String, dynamic>;
+      result[map['id'] as int] = {
+        'stats': map['stats'] as Map<String, dynamic>? ?? {},
+        'explain': map['explain'] as List<dynamic>? ?? [],
+      };
     }
     return result;
   }
@@ -196,6 +199,21 @@ class FplService {
     final data = json.decode(response.body) as Map<String, dynamic>;
     _entryCache[entryId] = data;
     return data;
+  }
+
+  Future<Map<String, dynamic>> fetchFplEntryHistory(int entryId) async {
+    final response = await http
+        .get(
+          Uri.parse(ApiConstants.fplEntryHistory(entryId)),
+          headers: {'User-Agent': 'FPL Analytics App'},
+        )
+        .timeout(const Duration(seconds: 30));
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to load entry history: ${response.statusCode}');
+    }
+
+    return json.decode(response.body) as Map<String, dynamic>;
   }
 
   Future<Map<String, dynamic>> fetchFplEntryPicks(int entryId, int gw) async {

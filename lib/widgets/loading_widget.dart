@@ -46,8 +46,8 @@ class LoadingListWidget extends StatelessWidget {
     return ListView.separated(
       padding: const EdgeInsets.all(16),
       itemCount: itemCount,
-      separatorBuilder: (_, __) => const SizedBox(height: 8),
-      itemBuilder: (_, __) => LoadingWidget(height: itemHeight),
+      separatorBuilder: (_, _) => const SizedBox(height: 8),
+      itemBuilder: (_, _) => LoadingWidget(height: itemHeight),
     );
   }
 }
@@ -75,7 +75,7 @@ class LoadingGridWidget extends StatelessWidget {
         childAspectRatio: 1.5,
       ),
       itemCount: itemCount,
-      itemBuilder: (_, __) => LoadingWidget(height: itemHeight),
+      itemBuilder: (_, _) => LoadingWidget(height: itemHeight),
     );
   }
 }

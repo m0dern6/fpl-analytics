@@ -76,7 +76,7 @@ class _TeamCard extends StatelessWidget {
               imageUrl: team.badgeUrl,
               height: 50,
               width: 50,
-              placeholder: (_, __) => Container(
+              placeholder: (_, _) => Container(
                 width: 50,
                 height: 50,
                 decoration: BoxDecoration(
@@ -85,7 +85,7 @@ class _TeamCard extends StatelessWidget {
                 ),
                 child: Icon(Icons.shield, color: AppColors.of(context).textSecondary),
               ),
-              errorWidget: (_, __, ___) => Container(
+              errorWidget: (_, _, _) => Container(
                 width: 50,
                 height: 50,
                 decoration: BoxDecoration(
@@ -230,7 +230,7 @@ class TeamDetailScreen extends StatelessWidget {
             imageUrl: team.badgeUrl,
             height: 70,
             width: 70,
-            errorWidget: (_, __, ___) => Container(
+            errorWidget: (_, _, _) => Container(
               width: 70,
               height: 70,
               color: AppColors.of(context).cardMedium,
@@ -475,11 +475,12 @@ class TeamDetailScreen extends StatelessWidget {
         return bKey.compareTo(aKey);
       });
     final completed = recent.where((f) => f.finished == true).take(5).toList();
-    if (completed.isEmpty)
+    if (completed.isEmpty) {
       return Text(
         'No completed fixtures',
         style: TextStyle(color: AppColors.of(context).textSecondary),
       );
+    }
 
     return Column(
       children: completed.map((f) {

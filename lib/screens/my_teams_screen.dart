@@ -467,7 +467,7 @@ class _TeamCard extends StatelessWidget {
               width: 26,
               height: 26,
               decoration: BoxDecoration(
-                shape: BoxShape.circle,
+                borderRadius: BorderRadius.circular(6),
                 color: AppColors.of(context).cardMedium,
                 border: Border.all(
                   color: AppColors.of(context).cardDark,
@@ -479,9 +479,9 @@ class _TeamCard extends StatelessWidget {
                   ? CachedNetworkImage(
                       imageUrl: player.photoUrl,
                       fit: BoxFit.cover,
-                      placeholder: (_, __) =>
+                      placeholder: (_, _) =>
                           const Icon(Icons.person, size: 14),
-                      errorWidget: (_, __, ___) =>
+                      errorWidget: (_, _, _) =>
                           const Icon(Icons.person, size: 14),
                     )
                   : const Icon(Icons.person, size: 14),

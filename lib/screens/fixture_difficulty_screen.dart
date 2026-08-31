@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/fpl_provider.dart';
 import '../models/team.dart';
-import '../utils/app_theme.dart';
 import '../utils/constants.dart';
 import '../widgets/loading_widget.dart';
 

@@ -71,6 +71,20 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen>
             expandedHeight: 300,
             pinned: true,
             backgroundColor: AppColors.of(context).secondary,
+            leading: Center(
+              child: Container(
+                margin: const EdgeInsets.only(left: 8),
+                decoration: BoxDecoration(
+                  color: Colors.black.withAlpha(120),
+                  shape: BoxShape.circle,
+                ),
+                child: IconButton(
+                  icon: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 20),
+                  onPressed: () => Navigator.maybePop(context),
+                  tooltip: 'Back',
+                ),
+              ),
+            ),
             flexibleSpace: FlexibleSpaceBar(background: _buildHeroHeader(team)),
             bottom: TabBar(
               controller: _tabController,
@@ -124,11 +138,11 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen>
     final pos = getPositionShort(widget.player.elementType);
     final posColor = getPositionColor(widget.player.elementType);
     return Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [AppColors.of(context).secondary, Color(0xFF5a0060)],
+          colors: [Color(0xFF0C0720), Color(0xFF3B0764)],
         ),
       ),
       child: SafeArea(
@@ -140,24 +154,24 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen>
                 width: 100,
                 height: 120,
                 decoration: BoxDecoration(
-                  color: AppColors.of(context).cardDark,
+                  color: Colors.black.withAlpha(80),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: AppColors.of(context).primary.withAlpha(77),
+                    color: AppColors.of(context).primary.withAlpha(100),
                   ),
                 ),
                 clipBehavior: Clip.antiAlias,
                 child: CachedNetworkImage(
                   imageUrl: widget.player.photoUrl,
                   fit: BoxFit.cover,
-                  placeholder: (_, __) => Icon(
+                  placeholder: (_, _) => const Icon(
                     Icons.person,
-                    color: AppColors.of(context).textSecondary,
+                    color: Colors.white60,
                     size: 48,
                   ),
-                  errorWidget: (_, __, ___) => Icon(
+                  errorWidget: (_, _, _) => const Icon(
                     Icons.person,
-                    color: AppColors.of(context).textSecondary,
+                    color: Colors.white60,
                     size: 48,
                   ),
                 ),
@@ -170,17 +184,18 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen>
                   children: [
                     Text(
                       widget.player.webName,
-                      style: TextStyle(
-                        color: AppColors.of(context).textPrimary,
+                      style: const TextStyle(
+                        color: Colors.white,
                         fontSize: 22,
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w900,
                       ),
                     ),
                     Text(
                       '${widget.player.firstName} ${widget.player.secondName}',
                       style: TextStyle(
-                        color: AppColors.of(context).textSecondary,
+                        color: Colors.white.withAlpha(200),
                         fontSize: 13,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -209,8 +224,9 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen>
                         Text(
                           team?.name ?? '',
                           style: TextStyle(
-                            color: AppColors.of(context).textSecondary,
+                            color: Colors.white.withAlpha(220),
                             fontSize: 13,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ],
@@ -272,14 +288,15 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen>
           style: TextStyle(
             color: AppColors.of(context).primary,
             fontSize: 15,
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w800,
           ),
         ),
         Text(
           label,
           style: TextStyle(
-            color: AppColors.of(context).textSecondary,
+            color: Colors.white.withAlpha(200),
             fontSize: 10,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ],
@@ -376,7 +393,10 @@ class _OverviewTab extends StatelessWidget {
   }
 
   Widget _buildStatsGrid(BuildContext context) {
-    final stats = [
+    final isGk = player.elementType == 1;
+    final isDef = player.elementType == 2;
+
+    final stats = <_StatItem>[
       _StatItem(
         'Total Points',
         '${player.totalPoints}',
@@ -413,12 +433,13 @@ class _OverviewTab extends StatelessWidget {
         Icons.sports,
         AppColors.of(context).accent,
       ),
-      _StatItem(
-        'Clean Sheets',
-        '${player.cleanSheets}',
-        Icons.shield,
-        const Color(0xFF69F0AE),
-      ),
+      if (isGk || isDef)
+        _StatItem(
+          'Clean Sheets',
+          '${player.cleanSheets}',
+          Icons.shield,
+          const Color(0xFF69F0AE),
+        ),
       _StatItem(
         'Bonus Pts',
         '${player.bonus}',
@@ -431,24 +452,26 @@ class _OverviewTab extends StatelessWidget {
         Icons.timer,
         AppColors.of(context).textSecondary,
       ),
-      _StatItem(
-        'Goals Conc.',
-        '${player.goalsConceded}',
-        Icons.sports_soccer_outlined,
-        AppColors.of(context).error,
-      ),
+      if (isGk || isDef)
+        _StatItem(
+          'Goals Conc.',
+          '${player.goalsConceded}',
+          Icons.sports_soccer_outlined,
+          AppColors.of(context).error,
+        ),
       _StatItem(
         'Yellow Cards',
         '${player.yellowCards}',
         Icons.square,
         AppColors.of(context).warning,
       ),
-      _StatItem(
-        'Saves',
-        '${player.saves}',
-        Icons.back_hand,
-        AppColors.of(context).accent,
-      ),
+      if (isGk)
+        _StatItem(
+          'Saves',
+          '${player.saves}',
+          Icons.back_hand,
+          AppColors.of(context).accent,
+        ),
     ];
 
     return GridView.count(
@@ -495,87 +518,6 @@ class _OverviewTab extends StatelessWidget {
             ),
           )
           .toList(),
-    );
-  }
-
-  Widget _buildIctSection(BuildContext context) {
-    final ict = double.tryParse(player.ictIndex) ?? 0;
-    final influence = double.tryParse(player.influence) ?? 0;
-    final creativity = double.tryParse(player.creativity) ?? 0;
-    final threat = double.tryParse(player.threat) ?? 0;
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: AppTheme.gradientCard(context: context),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Text(
-                'ICT Index',
-                style: TextStyle(
-                  color: AppColors.of(context).textPrimary,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(width: 6),
-              Tooltip(
-                message:
-                    'ICT = Influence + Creativity + Threat\n'
-                    'A composite FPL score rating a player\'s\n'
-                    'impact on a match.',
-                child: Icon(
-                  Icons.info_outline,
-                  color: AppColors.of(context).textSecondary,
-                  size: 14,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Influence: ball involvement • Creativity: chance creation • Threat: goal threat',
-            style: TextStyle(
-              color: AppColors.of(context).textSecondary,
-              fontSize: 10,
-            ),
-          ),
-          const SizedBox(height: 14),
-          _ictBar(
-            context,
-            'ICT Index',
-            ict,
-            200,
-            AppColors.of(context).primary,
-          ),
-          const SizedBox(height: 10),
-          _ictBar(
-            context,
-            'Influence',
-            influence,
-            200,
-            AppColors.of(context).accent,
-          ),
-          const SizedBox(height: 10),
-          _ictBar(
-            context,
-            'Creativity',
-            creativity,
-            200,
-            const Color(0xFFB388FF),
-          ),
-          const SizedBox(height: 10),
-          _ictBar(
-            context,
-            'Threat',
-            threat,
-            200,
-            AppColors.of(context).warning,
-          ),
-        ],
-      ),
     );
   }
 
@@ -694,170 +636,211 @@ class _OverviewTab extends StatelessWidget {
     );
   }
 
-  Widget _ictBar(
-    BuildContext context,
-    String label,
-    double value,
-    double maxVal,
-    Color color,
-  ) {
-    final pct = (value / maxVal).clamp(0.0, 1.0);
-    return Row(
-      children: [
-        SizedBox(
-          width: 80,
-          child: Text(
-            label,
-            style: TextStyle(
-              color: AppColors.of(context).textSecondary,
-              fontSize: 12,
-            ),
-          ),
-        ),
-        Expanded(
-          child: Stack(
-            children: [
-              Container(
-                height: 8,
-                decoration: BoxDecoration(
-                  color: AppColors.of(context).cardMedium,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-              ),
-              FractionallySizedBox(
-                widthFactor: pct,
-                child: Container(
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: color,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(width: 8),
-        SizedBox(
-          width: 40,
-          child: Text(
-            value.toStringAsFixed(1),
-            style: TextStyle(
-              color: color,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-            ),
-            textAlign: TextAlign.right,
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildTransferSection(BuildContext context) {
+    final netGw = player.transfersInEvent - player.transfersOutEvent;
+    final isPositiveNet = netGw >= 0;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: AppTheme.gradientCard(context: context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Transfer Activity',
-            style: TextStyle(
-              color: AppColors.of(context).textPrimary,
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Transfer Activity',
+                style: TextStyle(
+                  color: AppColors.of(context).textPrimary,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              Row(
+                children: [
+                  Icon(
+                    Icons.pie_chart_outline_rounded,
+                    color: AppColors.of(context).textSecondary,
+                    size: 14,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    '${player.selectedByPercent}% Owned',
+                    style: TextStyle(
+                      color: AppColors.of(context).textSecondary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF00E5A0).withAlpha(15),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: const Color(0xFF00E5A0).withAlpha(60),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.arrow_upward_rounded,
+                            color: Color(0xFF00E5A0),
+                            size: 16,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Transfers In',
+                            style: TextStyle(
+                              color: AppColors.of(context).textPrimary,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        '+${formatNumber(player.transfersInEvent)}',
+                        style: const TextStyle(
+                          color: Color(0xFF00E5A0),
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '${formatNumber(player.transfersIn)} overall',
+                        style: TextStyle(
+                          color: AppColors.of(context).textSecondary,
+                          fontSize: 10,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF87171).withAlpha(15),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: const Color(0xFFF87171).withAlpha(60),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.arrow_downward_rounded,
+                            color: Color(0xFFF87171),
+                            size: 16,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Transfers Out',
+                            style: TextStyle(
+                              color: AppColors.of(context).textPrimary,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        '-${formatNumber(player.transfersOutEvent)}',
+                        style: const TextStyle(
+                          color: Color(0xFFF87171),
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '${formatNumber(player.transfersOut)} overall',
+                        style: TextStyle(
+                          color: AppColors.of(context).textSecondary,
+                          fontSize: 10,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: isPositiveNet
+                  ? const Color(0xFF00E5A0).withAlpha(12)
+                  : const Color(0xFFF87171).withAlpha(12),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: isPositiveNet
+                    ? const Color(0xFF00E5A0).withAlpha(40)
+                    : const Color(0xFFF87171).withAlpha(40),
+              ),
             ),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: _transferStat(
-                  context,
-                  'In (Season)',
-                  _formatCount(player.transfersIn),
-                  Icons.arrow_upward,
-                  AppColors.of(context).primary,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Net Transfers (GW)',
+                  style: TextStyle(
+                    color: AppColors.of(context).textSecondary,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
-              Expanded(
-                child: _transferStat(
-                  context,
-                  'Out (Season)',
-                  _formatCount(player.transfersOut),
-                  Icons.arrow_downward,
-                  AppColors.of(context).error,
+                Row(
+                  children: [
+                    Icon(
+                      isPositiveNet
+                          ? Icons.trending_up_rounded
+                          : Icons.trending_down_rounded,
+                      color: isPositiveNet
+                          ? const Color(0xFF00E5A0)
+                          : const Color(0xFFF87171),
+                      size: 16,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${isPositiveNet ? '+' : ''}${formatNumber(netGw)}',
+                      style: TextStyle(
+                        color: isPositiveNet
+                            ? const Color(0xFF00E5A0)
+                            : const Color(0xFFF87171),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: _transferStat(
-                  context,
-                  'In (GW)',
-                  _formatCount(player.transfersInEvent),
-                  Icons.arrow_upward,
-                  AppColors.of(context).primary,
-                ),
-              ),
-              Expanded(
-                child: _transferStat(
-                  context,
-                  'Out (GW)',
-                  _formatCount(player.transfersOutEvent),
-                  Icons.arrow_downward,
-                  AppColors.of(context).error,
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
-    );
-  }
-
-  String _formatCount(int n) {
-    if (n >= 1000000) return '${(n / 1000000).toStringAsFixed(1)}M';
-    if (n >= 1000) return '${(n / 1000).toStringAsFixed(1)}k';
-    return '$n';
-  }
-
-  Widget _transferStat(
-    BuildContext context,
-    String label,
-    String value,
-    IconData icon,
-    Color color,
-  ) {
-    return Row(
-      children: [
-        Icon(icon, color: color, size: 20),
-        const SizedBox(width: 8),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              value,
-              style: TextStyle(
-                color: color,
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            Text(
-              label,
-              style: TextStyle(
-                color: AppColors.of(context).textSecondary,
-                fontSize: 11,
-              ),
-            ),
-          ],
-        ),
-      ],
     );
   }
 }
@@ -1123,7 +1106,7 @@ class _HistoryTabState extends State<_HistoryTab>
                     barWidth: 2.5,
                     dotData: FlDotData(
                       show: true,
-                      getDotPainter: (spot, __, ___, ____) =>
+                      getDotPainter: (spot, percent, bar, index) =>
                           FlDotCirclePainter(
                             radius: 4,
                             color: metricColor,
@@ -1462,8 +1445,8 @@ class _HistoryTabState extends State<_HistoryTab>
             width: 16,
             height: 16,
             fit: BoxFit.contain,
-            placeholder: (_, __) => const SizedBox(width: 16, height: 16),
-            errorWidget: (_, __, ___) => const SizedBox(width: 16, height: 16),
+            placeholder: (_, _) => const SizedBox(width: 16, height: 16),
+            errorWidget: (_, _, _) => const SizedBox(width: 16, height: 16),
           ),
         const SizedBox(width: 4),
         Flexible(
@@ -1515,7 +1498,7 @@ class _FixturesTab extends StatelessWidget {
       controller: scrollController,
       padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
       itemCount: summary!.fixtures.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 8),
+      separatorBuilder: (_, _) => const SizedBox(height: 8),
       itemBuilder: (_, i) {
         final fixture = summary!.fixtures[i];
         final isHome = fixture.isHome;
@@ -1551,9 +1534,9 @@ class _FixturesTab extends StatelessWidget {
                         width: 24,
                         height: 24,
                         fit: BoxFit.contain,
-                        placeholder: (_, __) =>
+                        placeholder: (_, _) =>
                             const SizedBox(width: 24, height: 24),
-                        errorWidget: (_, __, ___) =>
+                        errorWidget: (_, _, _) =>
                             const SizedBox(width: 24, height: 24),
                       ),
                       const SizedBox(width: 6),

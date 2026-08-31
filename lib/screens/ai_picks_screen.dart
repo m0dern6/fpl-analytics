@@ -139,7 +139,7 @@ class _AiPicksScreenState extends State<AiPicksScreen>
         child: ListView.separated(
           scrollDirection: Axis.horizontal,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          separatorBuilder: (_, __) => const SizedBox(width: 8),
+          separatorBuilder: (_, _) => const SizedBox(width: 8),
           itemCount: _tabs.length,
           itemBuilder: (_, i) {
             final tab = _tabs[i];
@@ -657,12 +657,12 @@ class _AiPicksScreenState extends State<AiPicksScreen>
           child: CachedNetworkImage(
             imageUrl: player.photoUrl,
             fit: BoxFit.cover,
-            placeholder: (_, __) => Icon(
+            placeholder: (_, _) => Icon(
               Icons.person,
               color: AppColors.of(context).textSecondary,
               size: 18,
             ),
-            errorWidget: (_, __, ___) => Icon(
+            errorWidget: (_, _, _) => Icon(
               Icons.person,
               color: AppColors.of(context).textSecondary,
               size: 18,
@@ -1039,7 +1039,7 @@ class _AiPitchPlayer extends StatelessWidget {
                 width: size,
                 height: size,
                 decoration: BoxDecoration(
-                  shape: BoxShape.circle,
+                  borderRadius: BorderRadius.circular(8),
                   color: AppColors.of(context).cardDark,
                   border: Border.all(color: posColor, width: 2),
                 ),
@@ -1047,12 +1047,12 @@ class _AiPitchPlayer extends StatelessWidget {
                 child: CachedNetworkImage(
                   imageUrl: player.photoUrl,
                   fit: BoxFit.cover,
-                  placeholder: (_, __) => Icon(
+                  placeholder: (_, _) => Icon(
                     Icons.person,
                     color: AppColors.of(context).textSecondary,
                     size: size * 0.5,
                   ),
-                  errorWidget: (_, __, ___) => Icon(
+                  errorWidget: (_, _, _) => Icon(
                     Icons.person,
                     color: AppColors.of(context).textSecondary,
                     size: size * 0.5,
@@ -1076,7 +1076,7 @@ class _AiPitchPlayer extends StatelessWidget {
                     ),
                     child: Center(
                       child: Text(
-                        '${nextFixtureDifficulty}',
+                        '$nextFixtureDifficulty',
                         style: const TextStyle(
                           fontSize: 7,
                           fontWeight: FontWeight.w900,
@@ -1151,7 +1151,7 @@ class _AiPitchPlayer extends StatelessWidget {
                   : player.webName,
               style: const TextStyle(
                 color: Colors.white,
-                fontSize: 9,
+                fontSize: 10,
                 fontWeight: FontWeight.w600,
               ),
               maxLines: 1,
@@ -1160,17 +1160,17 @@ class _AiPitchPlayer extends StatelessWidget {
             ),
           ),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
             decoration: BoxDecoration(
-              color: AppColors.of(context).primary.withAlpha(204),
-              borderRadius: BorderRadius.circular(3),
+              color: AppColors.of(context).primary,
+              borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
-              player.form,
+              '${player.form} pts',
               style: TextStyle(
                 color: AppColors.of(context).secondary,
-                fontSize: 9,
-                fontWeight: FontWeight.w800,
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ),

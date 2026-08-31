@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../models/player.dart';
 import '../models/team.dart';
-import '../utils/app_theme.dart';
 import '../utils/constants.dart';
 import '../utils/formatters.dart';
 
@@ -286,19 +285,19 @@ class PlayerCard extends StatelessWidget {
           height: size,
           decoration: BoxDecoration(
             color: AppColors.of(context).cardMedium,
-            shape: BoxShape.circle,
+            borderRadius: BorderRadius.circular(8),
             border: Border.all(color: AppColors.of(context).divider),
           ),
           clipBehavior: Clip.antiAlias,
           child: CachedNetworkImage(
             imageUrl: player.photoUrl,
             fit: BoxFit.cover,
-            placeholder: (_, __) => Icon(
+            placeholder: (_, _) => Icon(
               Icons.person,
               color: AppColors.of(context).textSecondary,
               size: size * 0.55,
             ),
-            errorWidget: (_, __, ___) => Icon(
+            errorWidget: (_, _, _) => Icon(
               Icons.person,
               color: AppColors.of(context).textSecondary,
               size: size * 0.55,

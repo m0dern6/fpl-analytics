@@ -1,9 +1,9 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import '../providers/fpl_provider.dart';
+import '../models/fixture.dart';
 import '../models/player.dart';
-import '../utils/app_theme.dart';
+import '../providers/fpl_provider.dart';
 import '../utils/constants.dart';
 import '../utils/formatters.dart';
 
@@ -57,23 +57,11 @@ class PitchView extends StatelessWidget {
             _buildPitchRow(midPicks, isStarting: true),
             const SizedBox(height: 6),
             _buildPitchRow(fwdPicks, isStarting: true),
-            if (showSubs && (bench.isNotEmpty || isDreamTeam)) ...[
+            if (showSubs && !isDreamTeam && bench.isNotEmpty) ...[
               const SizedBox(height: 10),
               _buildBenchDivider(activeChip == 'bboost'),
               const SizedBox(height: 8),
-              if (bench.isNotEmpty) _buildPitchRow(bench, isStarting: false),
-              if (bench.isEmpty && isDreamTeam)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: List.generate(
-                      4,
-                      (_) =>
-                          Opacity(opacity: 0.5, child: _buildEmptyBenchSpot()),
-                    ),
-                  ),
-                ),
+              _buildPitchRow(bench, isStarting: false),
             ],
             const SizedBox(height: 20),
           ],
@@ -90,40 +78,6 @@ class PitchView extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         child: pitchContent,
       ),
-    );
-  }
-
-  Widget _buildEmptyBenchSpot() {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 50,
-          height: 50,
-          decoration: BoxDecoration(
-            color: Colors.white.withAlpha(20),
-            shape: BoxShape.circle,
-            border: Border.all(color: Colors.white.withAlpha(30)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withAlpha(30),
-                blurRadius: 4,
-                spreadRadius: 1,
-              ),
-            ],
-          ),
-          child: const Icon(Icons.person, color: Colors.white54, size: 24),
-        ),
-        const SizedBox(height: 6),
-        Container(
-          width: 50,
-          height: 14,
-          decoration: BoxDecoration(
-            color: Colors.black.withAlpha(120),
-            borderRadius: BorderRadius.circular(4),
-          ),
-        ),
-      ],
     );
   }
 
@@ -485,6 +439,35 @@ class _PitchPlayerCard extends StatelessWidget {
         ? getPositionColor(player.elementType)
         : AppColors.of(context).textSecondary;
 
+    final isInjured = player != null &&
+        ((player.chanceOfPlayingNextRound != null &&
+                player.chanceOfPlayingNextRound! <= 25) ||
+            player.status == 'i' ||
+            player.status == 's' ||
+            player.status == 'u');
+
+    final isDoubtful = player != null &&
+        !isInjured &&
+        (player.status == 'd' ||
+            (player.chanceOfPlayingNextRound != null &&
+                player.chanceOfPlayingNextRound! > 25 &&
+                player.chanceOfPlayingNextRound! <= 75));
+
+    final playerFixtures = player == null
+        ? <Fixture>[]
+        : provider
+            .getFixturesForGameweek(gwId)
+            .where((f) =>
+                f.homeTeamId == player.teamId || f.awayTeamId == player.teamId)
+            .toList();
+
+    final isMatchLive = playerFixtures.any(
+      (f) => (f.started ?? false) && !f.finished && !f.finishedProvisional,
+    );
+
+    final isMatchFinished = playerFixtures.isNotEmpty &&
+        playerFixtures.every((f) => f.finished || f.finishedProvisional);
+
     final _CardState state;
     if (isCaptain) {
       state = _CardState.captain;
@@ -500,43 +483,69 @@ class _PitchPlayerCard extends StatelessWidget {
       state = _CardState.regular;
     }
 
-    Color borderColor;
+    Color cardBgColor;
+    Color cardBorderColor;
     Gradient? cardGradient;
 
-    switch (state) {
-      case _CardState.captain:
-        borderColor = const Color(0xFFFFD700);
-        cardGradient = const LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0x33FFD700), Color(0x1A150505)],
-        );
-      case _CardState.viceCaptain:
-        borderColor = AppColors.of(context).accent;
-        cardGradient = null;
-      case _CardState.topPerformer:
-        borderColor = AppColors.of(context).primary;
-        cardGradient = LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            AppColors.of(context).primary.withAlpha(30),
-            Colors.white.withAlpha(10),
-          ],
-        );
-      case _CardState.good:
-        borderColor = const Color(0xFF34D399);
-        cardGradient = null;
-      case _CardState.bench:
-        borderColor = Colors.white.withAlpha(40);
-        cardGradient = null;
-      case _CardState.regular:
-        borderColor = posColor.withAlpha(160);
-        cardGradient = null;
+    if (isInjured) {
+      cardBgColor = const Color(0xFFE53935).withAlpha(50);
+      cardBorderColor = const Color(0xFFE53935);
+      cardGradient = null;
+    } else if (isDoubtful) {
+      cardBgColor = const Color(0xFFF59E0B).withAlpha(50);
+      cardBorderColor = const Color(0xFFF59E0B);
+      cardGradient = null;
+    } else if (isMatchLive) {
+      cardBgColor = const Color(0xFF059669).withAlpha(50);
+      cardBorderColor = const Color(0xFF10B981);
+      cardGradient = const LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [Color(0x5510B981), Color(0x22059669)],
+      );
+    } else if (isMatchFinished) {
+      cardBgColor = Theme.of(context).brightness == Brightness.dark
+          ? Colors.grey.shade800.withAlpha(160)
+          : Colors.grey.shade400.withAlpha(130);
+      cardBorderColor = Colors.white24;
+      cardGradient = null;
+    } else {
+      cardBgColor = Colors.white.withAlpha(10);
+      switch (state) {
+        case _CardState.captain:
+          cardBorderColor = const Color(0xFFFFD700);
+          cardGradient = const LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0x33FFD700), Color(0x1A150505)],
+          );
+        case _CardState.viceCaptain:
+          cardBorderColor = AppColors.of(context).accent;
+          cardGradient = null;
+        case _CardState.topPerformer:
+          cardBorderColor = AppColors.of(context).primary;
+          cardGradient = LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              AppColors.of(context).primary.withAlpha(30),
+              Colors.white.withAlpha(10),
+            ],
+          );
+        case _CardState.good:
+          cardBorderColor = const Color(0xFF34D399);
+          cardGradient = null;
+        case _CardState.bench:
+          cardBorderColor = Colors.white.withAlpha(40);
+          cardGradient = null;
+        case _CardState.regular:
+          cardBorderColor = posColor.withAlpha(160);
+          cardGradient = null;
+      }
     }
 
     if (activeChip == 'bboost' && !isStarting) {
-      borderColor = const Color(0xFF34D399);
+      cardBorderColor = const Color(0xFF34D399);
     }
 
     const cardWidth = 60.0;
@@ -550,7 +559,8 @@ class _PitchPlayerCard extends StatelessWidget {
           height: cardHeight,
           decoration: BoxDecoration(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
-            color: Colors.white.withAlpha(10), // Glassy background
+            color: cardBgColor,
+            border: Border.all(color: cardBorderColor, width: 1.5),
             gradient: cardGradient,
           ),
           clipBehavior: Clip.antiAlias,
@@ -562,10 +572,10 @@ class _PitchPlayerCard extends StatelessWidget {
                   imageUrl: player.photoUrl,
                   fit: BoxFit.cover,
                   alignment: Alignment.topCenter,
-                  placeholder: (_, __) => Center(
+                  placeholder: (_, _) => Center(
                     child: Icon(Icons.person, color: posColor, size: 26),
                   ),
-                  errorWidget: (_, __, ___) => Center(
+                  errorWidget: (_, _, _) => Center(
                     child: Icon(Icons.person, color: posColor, size: 26),
                   ),
                 )
@@ -580,11 +590,72 @@ class _PitchPlayerCard extends StatelessWidget {
                 )
               else if (isViceCaptain)
                 Positioned(top: 4, left: 4, child: _buildBadge('V')),
+
+              if (isInjured || isDoubtful)
+                Positioned(
+                  top: 3,
+                  right: 3,
+                  child: Container(
+                    padding: const EdgeInsets.all(2),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withAlpha(180),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: const Text('⚠️', style: TextStyle(fontSize: 8)),
+                  ),
+                )
+              else if (isMatchLive)
+                Positioned(
+                  top: 3,
+                  right: 3,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 3,
+                      vertical: 1.5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF10B981),
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 4,
+                          height: 4,
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(width: 2),
+                        const Text(
+                          'LIVE',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 6.5,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
             ],
           ),
         ),
       ],
     );
+
+    final badgeBgColor = _ptsBadgeColor(
+      context,
+      state,
+      effectivePts,
+      isMatchLive: isMatchLive,
+      isMatchFinished: isMatchFinished,
+    );
+    final isDarkBadge =
+        ThemeData.estimateBrightnessForColor(badgeBgColor) == Brightness.dark;
 
     return GestureDetector(
       onTap: onTap,
@@ -614,19 +685,20 @@ class _PitchPlayerCard extends StatelessWidget {
             ),
             Container(
               width: cardWidth,
-              padding: const EdgeInsets.symmetric(vertical: 3),
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
               decoration: BoxDecoration(
-                color: _ptsBadgeColor(context, state, effectivePts),
+                color: badgeBgColor,
                 borderRadius: const BorderRadius.vertical(
                   bottom: Radius.circular(4),
                 ),
               ),
               child: Text(
                 _getStatusText(player, effectivePts),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 9.5,
+                style: TextStyle(
+                  color: isDarkBadge ? Colors.white : Colors.black87,
+                  fontSize: 12.0,
                   fontWeight: FontWeight.w700,
+                  letterSpacing: -0.2,
                 ),
                 textAlign: TextAlign.center,
                 maxLines: 1,
@@ -658,7 +730,6 @@ class _PitchPlayerCard extends StatelessWidget {
 
     if (fixtures.isEmpty) return '$points pts';
 
-    final isBench = (pick['position'] as int) > 11;
     int effectivePts = points;
 
     bool anyStarted = fixtures.any((f) => f.started ?? false);
@@ -719,7 +790,19 @@ class _PitchPlayerCard extends StatelessWidget {
     );
   }
 
-  Color _ptsBadgeColor(BuildContext context, _CardState state, int pts) {
+  Color _ptsBadgeColor(
+    BuildContext context,
+    _CardState state,
+    int pts, {
+    bool isMatchLive = false,
+    bool isMatchFinished = false,
+  }) {
+    if (isMatchLive) {
+      return const Color(0xFF059669);
+    }
+    if (isMatchFinished) {
+      return Colors.black.withAlpha(160);
+    }
     switch (state) {
       case _CardState.captain:
         return AppColors.of(context).accent;
@@ -730,10 +813,9 @@ class _PitchPlayerCard extends StatelessWidget {
       case _CardState.good:
         return const Color(0xFF34D399);
       case _CardState.bench:
-        return AppColors.of(context).primary.withAlpha(90);
+        return AppColors.of(context).primary.withAlpha(110);
       case _CardState.regular:
-        return AppColors.of(context).primary.withAlpha(160);
+        return AppColors.of(context).primary.withAlpha(180);
     }
-    return AppColors.of(context).primary.withAlpha(160);
   }
 }

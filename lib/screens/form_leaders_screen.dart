@@ -80,18 +80,18 @@ class FormLeadersScreen extends StatelessWidget {
                                   height: 36,
                                   clipBehavior: Clip.antiAlias,
                                   decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
+                                    borderRadius: BorderRadius.circular(8),
                                     color: AppColors.of(context).cardMedium,
                                   ),
                                   child: CachedNetworkImage(
                                     imageUrl: player.photoUrl,
                                     fit: BoxFit.cover,
-                                    placeholder: (_, __) => Icon(
+                                    placeholder: (_, _) => Icon(
                                       Icons.person,
                                       color: AppColors.of(context).textSecondary,
                                       size: 18,
                                     ),
-                                    errorWidget: (_, __, ___) => Icon(
+                                    errorWidget: (_, _, _) => Icon(
                                       Icons.person,
                                       color: AppColors.of(context).textSecondary,
                                       size: 18,

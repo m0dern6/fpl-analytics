@@ -515,7 +515,7 @@ class _PitchPlayer extends StatelessWidget {
                   width: isSub ? 48 : 56,
                   height: isSub ? 48 : 56,
                   decoration: BoxDecoration(
-                    shape: BoxShape.circle,
+                    borderRadius: BorderRadius.circular(8),
                     color: AppColors.of(context).cardDark,
                     border: Border.all(color: posColor, width: 2),
                   ),
@@ -523,12 +523,12 @@ class _PitchPlayer extends StatelessWidget {
                   child: CachedNetworkImage(
                     imageUrl: player.photoUrl,
                     fit: BoxFit.cover,
-                    placeholder: (_, __) => Icon(
+                    placeholder: (_, _) => Icon(
                       Icons.person,
                       color: AppColors.of(context).textSecondary,
                       size: isSub ? 24 : 28,
                     ),
-                    errorWidget: (_, __, ___) => Icon(
+                    errorWidget: (_, _, _) => Icon(
                       Icons.person,
                       color: AppColors.of(context).textSecondary,
                       size: isSub ? 24 : 28,
@@ -567,7 +567,7 @@ class _PitchPlayer extends StatelessWidget {
                     : player.webName,
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 9,
+                  fontSize: 10,
                   fontWeight: FontWeight.w600,
                 ),
                 maxLines: 1,
@@ -575,17 +575,17 @@ class _PitchPlayer extends StatelessWidget {
               ),
             ),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
               decoration: BoxDecoration(
-                color: AppColors.of(context).primary.withAlpha(204),
-                borderRadius: BorderRadius.circular(3),
+                color: AppColors.of(context).primary,
+                borderRadius: BorderRadius.circular(4),
               ),
               child: Text(
-                player.form,
+                '${player.form} pts',
                 style: TextStyle(
                   color: AppColors.of(context).secondary,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w800,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ),

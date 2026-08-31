@@ -24,7 +24,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: 5, vsync: this);
   }
 
   @override
@@ -70,6 +70,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
               tabs: const [
                 Tab(text: 'Form Chart'),
                 Tab(text: 'PPG Ranking'),
+                Tab(text: 'Expected Data (xG/xA)'),
                 Tab(text: 'Heat Map'),
                 Tab(text: 'Radar'),
               ],
@@ -82,6 +83,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
                   children: [
                     _FormChartTab(provider: provider),
                     _PpgRankingTab(provider: provider),
+                    _ExpectedDataTab(provider: provider),
                     const _HeatMapTab(),
                     _RadarTab(provider: provider),
                   ],
@@ -415,7 +417,7 @@ class _FormChartTabState extends State<_FormChartTab> {
       width: 36,
       height: 36,
       decoration: BoxDecoration(
-        shape: BoxShape.circle,
+        borderRadius: BorderRadius.circular(8),
         color: AppColors.of(context).cardMedium,
         border: Border.all(color: posColor, width: 1.5),
       ),
@@ -423,12 +425,12 @@ class _FormChartTabState extends State<_FormChartTab> {
       child: CachedNetworkImage(
         imageUrl: player.photoUrl,
         fit: BoxFit.cover,
-        placeholder: (_, __) => Icon(
+        placeholder: (_, _) => Icon(
           Icons.person,
           color: AppColors.of(context).textSecondary,
           size: 18,
         ),
-        errorWidget: (_, __, ___) => Icon(
+        errorWidget: (_, _, _) => Icon(
           Icons.person,
           color: AppColors.of(context).textSecondary,
           size: 18,
@@ -450,7 +452,7 @@ class _PpgRankingTab extends StatefulWidget {
 
 class _PpgRankingTabState extends State<_PpgRankingTab> {
   int _posFilter = 0;
-  int _limit = 15;
+  final int _limit = 15;
 
   @override
   Widget build(BuildContext context) {
@@ -661,7 +663,7 @@ class _PpgRankingTabState extends State<_PpgRankingTab> {
                 barTouchData: BarTouchData(
                   touchTooltipData: BarTouchTooltipData(
                     getTooltipColor: (_) => AppColors.of(context).cardDark,
-                    getTooltipItem: (group, _, rod, __) {
+                    getTooltipItem: (group, groupIndex, rod, rodIndex) {
                       if (group.x < 0 || group.x >= players.length) {
                         return null;
                       }
@@ -828,19 +830,19 @@ class _PpgRankingTabState extends State<_PpgRankingTab> {
                       height: 32,
                       clipBehavior: Clip.antiAlias,
                       decoration: BoxDecoration(
-                        shape: BoxShape.circle,
+                        borderRadius: BorderRadius.circular(8),
                         color: AppColors.of(context).cardMedium,
                         border: Border.all(color: posColor, width: 1.5),
                       ),
                       child: CachedNetworkImage(
                         imageUrl: player.photoUrl,
                         fit: BoxFit.cover,
-                        placeholder: (_, __) => Icon(
+                        placeholder: (_, _) => Icon(
                           Icons.person,
                           color: AppColors.of(context).textSecondary,
                           size: 16,
                         ),
-                        errorWidget: (_, __, ___) => Icon(
+                        errorWidget: (_, _, _) => Icon(
                           Icons.person,
                           color: AppColors.of(context).textSecondary,
                           size: 16,
@@ -1358,7 +1360,7 @@ class _RadarTabState extends State<_RadarTab> {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              shape: BoxShape.circle,
+              borderRadius: BorderRadius.circular(8),
               color: AppColors.of(context).cardMedium,
               border: Border.all(color: posColor, width: 1.5),
             ),
@@ -1366,12 +1368,12 @@ class _RadarTabState extends State<_RadarTab> {
             child: CachedNetworkImage(
               imageUrl: player.photoUrl,
               fit: BoxFit.cover,
-              placeholder: (_, __) => Icon(
+              placeholder: (_, _) => Icon(
                 Icons.person,
                 color: AppColors.of(context).textSecondary,
                 size: 18,
               ),
-              errorWidget: (_, __, ___) => Icon(
+              errorWidget: (_, _, _) => Icon(
                 Icons.person,
                 color: AppColors.of(context).textSecondary,
                 size: 18,
@@ -1661,6 +1663,237 @@ class _RadarTabState extends State<_RadarTab> {
             );
           }),
         ],
+      ),
+    );
+  }
+}
+
+// ── Tab 5: Expected Data (xG / xA Delta) ──────────────────────────────────────
+
+class _ExpectedDataTab extends StatefulWidget {
+  final FplProvider provider;
+  const _ExpectedDataTab({required this.provider});
+
+  @override
+  State<_ExpectedDataTab> createState() => _ExpectedDataTabState();
+}
+
+class _ExpectedDataTabState extends State<_ExpectedDataTab> {
+  int _category = 0; // 0: Top xGI, 1: Overperformers (Goals > xG), 2: Underperformers (xG > Goals)
+
+  @override
+  Widget build(BuildContext context) {
+    final players = widget.provider.players.where((p) => p.minutes >= 90).toList();
+
+    List<Player> sorted;
+    if (_category == 0) {
+      sorted = players..sort((a, b) => b.xGI.compareTo(a.xGI));
+    } else if (_category == 1) {
+      sorted = players..sort((a, b) => b.goalsDelta.compareTo(a.goalsDelta));
+    } else {
+      sorted = players..sort((a, b) => a.goalsDelta.compareTo(b.goalsDelta));
+    }
+
+    final topPlayers = sorted.take(25).toList();
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Category selector chips
+          Row(
+            children: [
+              _catChip(0, '🔥 Top xGI Leaders'),
+              const SizedBox(width: 8),
+              _catChip(1, '🎯 Clinical (+xG)'),
+              const SizedBox(width: 8),
+              _catChip(2, '⚡ Due a Goal (-xG)'),
+            ],
+          ),
+          const SizedBox(height: 14),
+
+          // Explanatory note
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.of(context).cardDark,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppColors.of(context).divider),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.info_outline_rounded, size: 16, color: AppColors.of(context).primary),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    _category == 0
+                        ? 'Top players ranked by Expected Goal Involvement (xG + xA)'
+                        : (_category == 1
+                            ? 'Clinical Finishers: scored more actual goals than expected (Goals > xG)'
+                            : 'Unlucky / Due a Goal: high xG accumulated but under-rewarded (xG > Goals)'),
+                    style: TextStyle(
+                      color: AppColors.of(context).textSecondary,
+                      fontSize: 11,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
+
+          // Players List
+          ...topPlayers.asMap().entries.map((entry) {
+            final rank = entry.key + 1;
+            final p = entry.value;
+            final team = widget.provider.getTeamById(p.teamId);
+            final delta = p.goalsDelta;
+            final isPositive = delta > 0;
+            final posColor = getPositionColor(p.elementType);
+
+            return Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              child: InkWell(
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => PlayerDetailScreen(player: p)),
+                ),
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: AppTheme.gradientCard(context: context),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: 22,
+                        child: Text(
+                          '$rank',
+                          style: TextStyle(
+                            color: AppColors.of(context).textSecondary,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      // Photo
+                      Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          color: AppColors.of(context).cardMedium,
+                          border: Border.all(color: posColor.withAlpha(80)),
+                        ),
+                        clipBehavior: Clip.antiAlias,
+                        child: CachedNetworkImage(
+                          imageUrl: p.photoUrl,
+                          fit: BoxFit.cover,
+                          alignment: Alignment.topCenter,
+                          errorWidget: (_, _, _) => const Icon(Icons.person, size: 16),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      // Name & Team
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              p.webName,
+                              style: TextStyle(
+                                color: AppColors.of(context).textPrimary,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            Text(
+                              '${team?.shortName ?? ''} • ${formatPrice(p.nowCost)} • ${p.goals} goals (${p.xG.toStringAsFixed(2)} xG)',
+                              style: TextStyle(
+                                color: AppColors.of(context).textSecondary,
+                                fontSize: 10,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      // Metrics Pill
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: (_category == 0
+                                  ? AppColors.of(context).primary
+                                  : (isPositive ? const Color(0xFF00FF87) : const Color(0xFFF43F5E)))
+                              .withAlpha(20),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: (_category == 0
+                                    ? AppColors.of(context).primary
+                                    : (isPositive ? const Color(0xFF00FF87) : const Color(0xFFF43F5E)))
+                                .withAlpha(80),
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              _category == 0
+                                  ? p.xGI.toStringAsFixed(2)
+                                  : '${isPositive ? '+' : ''}${delta.toStringAsFixed(2)}',
+                              style: TextStyle(
+                                color: _category == 0
+                                    ? AppColors.of(context).primary
+                                    : (isPositive ? const Color(0xFF00FF87) : const Color(0xFFF43F5E)),
+                                fontSize: 13,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                            Text(
+                              _category == 0 ? 'xGI' : 'xG DELTA',
+                              style: TextStyle(
+                                color: AppColors.of(context).textSecondary,
+                                fontSize: 7,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
+  Widget _catChip(int cat, String label) {
+    final isSelected = _category == cat;
+    return GestureDetector(
+      onTap: () => setState(() => _category = cat),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.of(context).primary.withAlpha(30) : AppColors.of(context).cardMedium,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: isSelected ? AppColors.of(context).primary : AppColors.of(context).divider,
+            width: isSelected ? 1.2 : 1,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? AppColors.of(context).primary : AppColors.of(context).textSecondary,
+            fontSize: 11,
+            fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+          ),
+        ),
       ),
     );
   }

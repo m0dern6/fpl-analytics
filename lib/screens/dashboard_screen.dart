@@ -1,8 +1,8 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:fl_chart/fl_chart.dart';
 import '../providers/fpl_provider.dart';
 import '../models/player.dart';
 import '../models/fixture.dart';
@@ -11,16 +11,15 @@ import '../utils/constants.dart';
 import '../utils/formatters.dart';
 import '../widgets/stat_card.dart';
 import '../widgets/loading_widget.dart';
-import '../widgets/difficulty_badge.dart';
+import '../widgets/fixture_card.dart';
+import 'price_changes_screen.dart';
+import 'captain_matrix_screen.dart';
 import 'player_detail_screen.dart';
 import 'gameweek_detail_screen.dart';
-import 'fixture_detail_screen.dart';
 import 'fpl_team_screen.dart';
-import 'my_teams_screen.dart';
-import 'season_trend_detail_screen.dart';
-import 'form_leaders_screen.dart';
 import 'top_performers_screen.dart';
 import 'transfer_activity_screen.dart';
+import 'fixtures_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -101,17 +100,6 @@ class DashboardScreen extends StatelessWidget {
             ),
           ),
         IconButton(
-          tooltip: 'My Teams',
-          icon: Icon(
-            Icons.person_rounded,
-            color: AppColors.of(context).textSecondary,
-          ),
-          onPressed: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const MyTeamsScreen()),
-          ),
-        ),
-        IconButton(
           icon: Icon(
             Icons.refresh_rounded,
             color: AppColors.of(context).textSecondary,
@@ -168,10 +156,44 @@ class DashboardScreen extends StatelessWidget {
   }
 }
 
-class _DashboardContent extends StatelessWidget {
+class _DashboardContent extends StatefulWidget {
   final FplProvider provider;
 
   const _DashboardContent({required this.provider});
+
+  @override
+  State<_DashboardContent> createState() => _DashboardContentState();
+}
+
+class _DashboardContentState extends State<_DashboardContent> {
+  Timer? _liveRefreshTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _startLiveTimer();
+  }
+
+  void _startLiveTimer() {
+    _liveRefreshTimer?.cancel();
+    _liveRefreshTimer = Timer.periodic(const Duration(seconds: 60), (_) {
+      final currentGw = widget.provider.currentGameweek;
+      if (currentGw == null) return;
+      final gwFixtures = widget.provider.getFixturesForGameweek(currentGw.id);
+      final hasLive = gwFixtures.any((f) => f.isLive);
+      if (hasLive) {
+        widget.provider.updateFixturesForGameweek(currentGw.id);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _liveRefreshTimer?.cancel();
+    super.dispose();
+  }
+
+  FplProvider get provider => widget.provider;
 
   @override
   Widget build(BuildContext context) {
@@ -199,8 +221,8 @@ class _DashboardContent extends StatelessWidget {
               _buildCurrentGwBanner(context),
               const SizedBox(height: 12),
               _buildMyFplTeamCard(context),
-              const SizedBox(height: 16),
-              _buildSparklines(context),
+              const SizedBox(height: 10),
+              _buildQuickToolsRow(context),
               const SizedBox(height: 16),
               _buildSectionTitle(context, 'Highlights'),
               const SizedBox(height: 12),
@@ -250,7 +272,21 @@ class _DashboardContent extends StatelessWidget {
               const SizedBox(height: 12),
               _buildTransferSection(context),
               const SizedBox(height: 20),
-              _buildSectionTitle(context, 'Upcoming Fixtures'),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _buildSectionTitle(context, 'Upcoming Fixtures'),
+                  TextButton(
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const FixturesScreen(),
+                      ),
+                    ),
+                    child: const Text('View All'),
+                  ),
+                ],
+              ),
               const SizedBox(height: 12),
               _buildUpcomingFixtures(context),
               const SizedBox(height: 24),
@@ -442,213 +478,97 @@ class _DashboardContent extends StatelessWidget {
         .slideY(begin: 0.06, end: 0);
   }
 
-  // ── Sparklines ────────────────────────────────────────────────────────────
-
-  Widget _buildSparklines(BuildContext context) {
-    final finishedGws = provider.gameweeks
-        .where((gw) => gw.finished && gw.averageEntryScore != null)
-        .toList();
-
-    if (finishedGws.isEmpty) return const SizedBox.shrink();
-
-    final avgScores = finishedGws
-        .map((gw) => gw.averageEntryScore!.toDouble())
-        .toList();
-    final highScores = finishedGws
-        .where((gw) => gw.highestScore != null)
-        .map((gw) => gw.highestScore!.toDouble())
-        .toList();
-    final transfers = finishedGws
-        .map((gw) => gw.transfersMade.toDouble())
-        .toList();
-
-    // Top form players — current PPG trend (top 5 players' PPG as a mini bar)
-    final topByForm = provider.getTopScorersByForm(limit: 5);
-    final formValues = topByForm.map((p) => p.formValue).toList();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildQuickToolsRow(BuildContext context) {
+    return Row(
       children: [
-        _buildSectionTitle(context, 'Season Trends'),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: _buildSparkCard(
-                context,
-                'GW Avg Score',
-                avgScores.isEmpty ? '–' : '${avgScores.last.toInt()} pts',
-                avgScores,
-                AppColors.of(context).primary,
-                Icons.show_chart_rounded,
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) =>
-                        SeasonTrendScreenFactory.avgScore(finishedGws),
-                  ),
-                ),
-              ),
+        Expanded(
+          child: _quickToolButton(
+            context,
+            title: 'Price Changes',
+            subtitle: 'Predicted rises & falls',
+            icon: Icons.trending_up_rounded,
+            color: const Color(0xFF00FF87),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const PriceChangesScreen()),
             ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: _buildSparkCard(
-                context,
-                'GW High Score',
-                highScores.isEmpty ? '–' : '${highScores.last.toInt()} pts',
-                highScores,
-                AppColors.of(context).warning,
-                Icons.emoji_events_rounded,
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) =>
-                        SeasonTrendScreenFactory.highScore(finishedGws),
-                  ),
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
-        const SizedBox(height: 10),
-        Row(
-          children: [
-            Expanded(
-              child: _buildSparkCard(
-                context,
-                'Transfers / GW',
-                transfers.isEmpty
-                    ? '–'
-                    : '${(transfers.last / 1000).toStringAsFixed(0)}k',
-                transfers,
-                AppColors.of(context).accent,
-                Icons.swap_horiz_rounded,
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) =>
-                        SeasonTrendScreenFactory.transfers(finishedGws),
-                  ),
-                ),
-              ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: _quickToolButton(
+            context,
+            title: 'Captain Decider',
+            subtitle: 'AI rating & top picks',
+            icon: Icons.emoji_events_rounded,
+            color: const Color(0xFFFBBF24),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const CaptainMatrixScreen()),
             ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: _buildSparkCard(
-                context,
-                'Top Form (live)',
-                formValues.isEmpty ? '–' : formValues.first.toStringAsFixed(1),
-                formValues,
-                const Color(0xFF34D399),
-                Icons.trending_up_rounded,
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const FormLeadersScreen()),
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildSparkCard(
-    BuildContext context,
-    String title,
-    String value,
-    List<double> data,
-    Color color,
-    IconData icon, {
-    VoidCallback? onTap,
+  Widget _quickToolButton(
+    BuildContext context, {
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
   }) {
-    final hasData = data.length >= 2;
-    return GestureDetector(
+    return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
       child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: AppTheme.gradientCard(context: context),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+        decoration: BoxDecoration(
+          color: AppColors.of(context).cardDark,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: color.withAlpha(60)),
+        ),
+        child: Row(
           children: [
-            Row(
-              children: [
-                Icon(icon, color: color, size: 14),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
+            Container(
+              padding: const EdgeInsets.all(7),
+              decoration: BoxDecoration(
+                color: color.withAlpha(20),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(icon, color: color, size: 16),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
                     title,
                     style: TextStyle(
-                      color: AppColors.of(context).textSecondary,
-                      fontSize: 10,
+                      color: AppColors.of(context).textPrimary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                ),
-                if (onTap != null)
-                  Icon(
-                    Icons.chevron_right_rounded,
-                    color: AppColors.of(context).textSecondary,
-                    size: 14,
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      color: AppColors.of(context).textSecondary,
+                      fontSize: 9,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-              ],
-            ),
-            const SizedBox(height: 6),
-            Text(
-              value,
-              style: TextStyle(
-                color: color,
-                fontSize: 18,
-                fontWeight: FontWeight.w800,
-                letterSpacing: -0.5,
+                ],
               ),
             ),
-            const SizedBox(height: 8),
-            if (hasData)
-              SizedBox(height: 40, child: _buildSparkline(data, color))
-            else
-              const SizedBox(height: 40),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildSparkline(List<double> data, Color color) {
-    final maxVal = data.reduce((a, b) => a > b ? a : b);
-    final minVal = data.reduce((a, b) => a < b ? a : b);
-    final range = (maxVal - minVal).abs();
-    final effectiveRange = range < 0.001 ? 1.0 : range;
-
-    final spots = data.asMap().entries.map((e) {
-      final norm = (e.value - minVal) / effectiveRange;
-      return FlSpot(e.key.toDouble(), norm);
-    }).toList();
-
-    return LineChart(
-      LineChartData(
-        lineBarsData: [
-          LineChartBarData(
-            spots: spots,
-            isCurved: true,
-            color: color,
-            barWidth: 2,
-            dotData: const FlDotData(show: false),
-            belowBarData: BarAreaData(show: true, color: color.withAlpha(40)),
-          ),
-        ],
-        titlesData: const FlTitlesData(
-          leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          bottomTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-        ),
-        gridData: const FlGridData(show: false),
-        borderData: FlBorderData(show: false),
-        lineTouchData: const LineTouchData(enabled: false),
-        minY: -0.05,
-        maxY: 1.05,
       ),
     );
   }
@@ -831,18 +751,18 @@ class _DashboardContent extends StatelessWidget {
                       height: 36,
                       clipBehavior: Clip.antiAlias,
                       decoration: BoxDecoration(
-                        shape: BoxShape.circle,
+                        borderRadius: BorderRadius.circular(8),
                         color: AppColors.of(context).cardMedium,
                       ),
                       child: CachedNetworkImage(
                         imageUrl: player.photoUrl,
                         fit: BoxFit.cover,
-                        placeholder: (_, __) => Icon(
+                        placeholder: (_, _) => Icon(
                           Icons.person,
                           color: AppColors.of(context).textSecondary,
                           size: 18,
                         ),
-                        errorWidget: (_, __, ___) => Icon(
+                        errorWidget: (_, _, _) => Icon(
                           Icons.person,
                           color: AppColors.of(context).textSecondary,
                           size: 18,
@@ -1012,18 +932,18 @@ class _DashboardContent extends StatelessWidget {
                       height: 30,
                       clipBehavior: Clip.antiAlias,
                       decoration: BoxDecoration(
-                        shape: BoxShape.circle,
+                        borderRadius: BorderRadius.circular(8),
                         color: AppColors.of(context).cardMedium,
                       ),
                       child: CachedNetworkImage(
                         imageUrl: p.photoUrl,
                         fit: BoxFit.cover,
-                        placeholder: (_, __) => Icon(
+                        placeholder: (_, _) => Icon(
                           Icons.person,
                           color: AppColors.of(context).textSecondary,
                           size: 14,
                         ),
-                        errorWidget: (_, __, ___) => Icon(
+                        errorWidget: (_, _, _) => Icon(
                           Icons.person,
                           color: AppColors.of(context).textSecondary,
                           size: 14,
@@ -1066,31 +986,29 @@ class _DashboardContent extends StatelessWidget {
 
   Widget _buildUpcomingFixtures(BuildContext context) {
     final gameweek = provider.currentGameweek;
-    final isLive = gameweek != null && gameweek.isCurrent && !gameweek.finished;
 
-    // If GW is live, get only the remaining fixtures for the current GW
-    // Otherwise just get the next upcoming fixtures
-    List<Fixture> upcoming;
-    if (isLive) {
+    List<Fixture> fixturesToShow;
+    if (gameweek != null) {
       final allGwFixtures = provider.fixtures
           .where((f) => f.event == gameweek.id)
           .toList();
-      upcoming = allGwFixtures.where((f) => !f.finished).toList();
-      // If all fixtures in the live game week are somehow finished, default to next
-      if (upcoming.isEmpty) {
-        upcoming = provider.getUpcomingFixtures(limit: 10);
+      if (allGwFixtures.isNotEmpty && (!gameweek.finished || provider.getUpcomingFixtures().isEmpty)) {
+        // Keep ALL fixtures for the current gameweek (finished, live, and upcoming)
+        fixturesToShow = allGwFixtures;
+      } else {
+        fixturesToShow = provider.getUpcomingFixtures(limit: 10);
       }
     } else {
-      upcoming = provider.getUpcomingFixtures(limit: 10);
+      fixturesToShow = provider.getUpcomingFixtures(limit: 10);
     }
 
-    if (upcoming.isEmpty) {
+    if (fixturesToShow.isEmpty) {
       return Container(
         padding: const EdgeInsets.all(20),
         decoration: AppTheme.gradientCard(context: context),
         child: Center(
           child: Text(
-            'No upcoming fixtures',
+            'No fixtures available',
             style: TextStyle(color: AppColors.of(context).textSecondary),
           ),
         ),
@@ -1099,9 +1017,8 @@ class _DashboardContent extends StatelessWidget {
 
     // Group fixtures by day
     final Map<String, List<Fixture>> groupedByDay = {};
-    for (final f in upcoming) {
+    for (final f in fixturesToShow) {
       if (f.kickoffTime == null) continue;
-      // Format to get the day string
       final dateStr = formatDateShort(f.kickoffTime!);
       groupedByDay.putIfAbsent(dateStr, () => []).add(f);
     }
@@ -1122,146 +1039,22 @@ class _DashboardContent extends StatelessWidget {
         ),
       );
       children.addAll(
-        entry.value
-            .map((fixture) => _buildFixtureRow(context, fixture))
-            .toList(),
+        entry.value.map(
+          (fixture) => Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: FixtureCard(
+              fixture: fixture,
+              provider: provider,
+              compact: true,
+            ),
+          ),
+        ),
       );
     }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: children,
-    );
-  }
-
-  String _formatTimeShort(String? timeStr) {
-    if (timeStr == null) return '';
-    try {
-      final time = DateTime.parse(timeStr).toLocal();
-      final hour = time.hour.toString().padLeft(2, '0');
-      final minute = time.minute.toString().padLeft(2, '0');
-      return '$hour:$minute';
-    } catch (_) {
-      return '';
-    }
-  }
-
-  Widget _buildFixtureRow(BuildContext context, Fixture fixture) {
-    final home = provider.getTeamById(fixture.homeTeamId);
-    final away = provider.getTeamById(fixture.awayTeamId);
-
-    return GestureDetector(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => FixtureDetailScreen(
-            fixture: fixture,
-            homeTeam: home,
-            awayTeam: away,
-          ),
-        ),
-      ),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 8),
-        padding: const EdgeInsets.all(12),
-        decoration: AppTheme.gradientCard(context: context),
-        child: Row(
-          children: [
-            Expanded(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Flexible(
-                    child: Text(
-                      home?.shortName ?? '?',
-                      style: TextStyle(
-                        color: AppColors.of(context).textPrimary,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      textAlign: TextAlign.right,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  if (home != null)
-                    CachedNetworkImage(
-                      imageUrl: home.badgeUrl,
-                      width: 26,
-                      height: 26,
-                      fit: BoxFit.contain,
-                      placeholder: (_, __) =>
-                          const SizedBox(width: 26, height: 26),
-                      errorWidget: (_, __, ___) =>
-                          const SizedBox(width: 26, height: 26),
-                    ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: AppColors.of(context).cardMedium,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: fixture.hasResult
-                  ? Text(
-                      '${fixture.homeTeamScore} - ${fixture.awayTeamScore}',
-                      style: TextStyle(
-                        color: AppColors.of(context).textPrimary,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 13,
-                      ),
-                    )
-                  : Text(
-                      _formatTimeShort(fixture.kickoffTime),
-                      style: TextStyle(
-                        color: AppColors.of(context).textSecondary,
-                        fontSize: 12,
-                      ),
-                    ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Row(
-                children: [
-                  if (away != null)
-                    CachedNetworkImage(
-                      imageUrl: away.badgeUrl,
-                      width: 26,
-                      height: 26,
-                      fit: BoxFit.contain,
-                      placeholder: (_, __) =>
-                          const SizedBox(width: 26, height: 26),
-                      errorWidget: (_, __, ___) =>
-                          const SizedBox(width: 26, height: 26),
-                    ),
-                  const SizedBox(width: 6),
-                  Flexible(
-                    child: Text(
-                      away?.shortName ?? '?',
-                      style: TextStyle(
-                        color: AppColors.of(context).textPrimary,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Row(
-              children: [
-                DifficultyBadge(difficulty: fixture.teamHDifficulty, size: 22),
-                const SizedBox(width: 2),
-                DifficultyBadge(difficulty: fixture.teamADifficulty, size: 22),
-              ],
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

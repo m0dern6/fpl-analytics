@@ -155,7 +155,7 @@ class _CompareScreenState extends State<CompareScreen> {
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      shape: BoxShape.circle,
+                      borderRadius: BorderRadius.circular(8),
                       color: AppColors.of(context).cardMedium,
                       border: Border.all(
                         color: getPositionColor(selected.elementType),
@@ -166,12 +166,12 @@ class _CompareScreenState extends State<CompareScreen> {
                     child: CachedNetworkImage(
                       imageUrl: selected.photoUrl,
                       fit: BoxFit.cover,
-                      placeholder: (_, __) => Icon(
+                      placeholder: (_, _) => Icon(
                         Icons.person,
                         color: AppColors.of(context).textSecondary,
                         size: 24,
                       ),
-                      errorWidget: (_, __, ___) => Icon(
+                      errorWidget: (_, _, _) => Icon(
                         Icons.person,
                         color: AppColors.of(context).textSecondary,
                         size: 24,
@@ -201,10 +201,11 @@ class _CompareScreenState extends State<CompareScreen> {
                   GestureDetector(
                     onTap: () {
                       setState(() {
-                        if (label == 'Player A')
+                        if (label == 'Player A') {
                           _playerA = null;
-                        else
+                        } else {
                           _playerB = null;
+                        }
                       });
                       controller.clear();
                       onQueryChanged('');
