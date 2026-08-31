@@ -52,26 +52,26 @@ class DashboardScreen extends StatelessWidget {
       title: Row(
         children: [
           Container(
-            width: 34,
-            height: 34,
+            width: 36,
+            height: 36,
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Color(0xFF00E5A0), Color(0xFF00A87A)],
-              ),
               borderRadius: BorderRadius.circular(10),
-            ),
-            child: const Center(
-              child: Text(
-                'FPL',
-                style: TextStyle(
-                  color: Color(0xFF0C0720),
-                  fontSize: 10,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 0.5,
-                ),
+              border: Border.all(
+                color: AppColors.of(context).primary.withAlpha(80),
+                width: 1.2,
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.of(context).primary.withAlpha(40),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: Image.asset(
+              'assets/images/app_logo.png',
+              fit: BoxFit.cover,
             ),
           ),
           const SizedBox(width: 10),
