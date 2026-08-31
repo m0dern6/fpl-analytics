@@ -29,14 +29,14 @@ class FixtureStat {
   });
 
   factory FixtureStat.fromJson(Map<String, dynamic> json) {
-    List<FixtureStatEntry> _parse(dynamic list) =>
+    List<FixtureStatEntry> parseList(dynamic list) =>
         (list as List<dynamic>? ?? [])
             .map((e) => FixtureStatEntry.fromJson(e as Map<String, dynamic>))
             .toList();
     return FixtureStat(
       identifier: json['identifier'] as String,
-      away: _parse(json['a']),
-      home: _parse(json['h']),
+      away: parseList(json['a']),
+      home: parseList(json['h']),
     );
   }
 }
@@ -106,4 +106,13 @@ class Fixture {
   }
 
   bool get hasResult => homeTeamScore != null && awayTeamScore != null;
+
+  DateTime? get kickoffDateTime =>
+      kickoffTime == null ? null : DateTime.parse(kickoffTime!).toLocal();
+
+  bool get isLive => (started == true) && !finished && !finishedProvisional;
+
+  bool get isFinished => finished || finishedProvisional;
+
+  bool get isUpcoming => !isLive && !isFinished;
 }
