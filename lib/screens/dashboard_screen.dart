@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../providers/fpl_provider.dart';
+import '../models/gameweek.dart';
 import '../models/player.dart';
 import '../models/fixture.dart';
 import '../utils/app_theme.dart';
@@ -13,7 +14,6 @@ import '../widgets/stat_card.dart';
 import '../widgets/loading_widget.dart';
 import '../widgets/fixture_card.dart';
 import 'price_changes_screen.dart';
-import 'captain_matrix_screen.dart';
 import 'player_detail_screen.dart';
 import 'gameweek_detail_screen.dart';
 import 'fpl_team_screen.dart';
@@ -49,35 +49,7 @@ class DashboardScreen extends StatelessWidget {
   AppBar _buildAppBar(BuildContext context, FplProvider provider) {
     return AppBar(
       backgroundColor: AppColors.of(context).secondary,
-      title: Row(
-        children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(
-                color: AppColors.of(context).primary.withAlpha(80),
-                width: 1.2,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.of(context).primary.withAlpha(40),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: Image.asset(
-              'assets/images/app_logo.png',
-              fit: BoxFit.cover,
-            ),
-          ),
-          const SizedBox(width: 10),
-          const Text('FPL Analytics'),
-        ],
-      ),
+      title: const Text('FPL Analytics'),
       actions: [
         if (provider.currentGameweek != null)
           Container(
@@ -272,6 +244,7 @@ class _DashboardContentState extends State<_DashboardContent> {
               const SizedBox(height: 12),
               _buildTransferSection(context),
               const SizedBox(height: 20),
+              _buildActiveChips(context),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -310,13 +283,19 @@ class _DashboardContentState extends State<_DashboardContent> {
       child: Container(
         padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
+          gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xFF160D36), Color(0xFF0D0622)],
+            colors: [
+              AppColors.of(context).primary.withAlpha(20),
+              AppColors.of(context).accent.withAlpha(14),
+            ],
           ),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.of(context).divider, width: 1),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: AppColors.of(context).primary.withAlpha(60),
+            width: 1,
+          ),
         ),
         child: Row(
           children: [
@@ -485,26 +464,12 @@ class _DashboardContentState extends State<_DashboardContent> {
           child: _quickToolButton(
             context,
             title: 'Price Changes',
-            subtitle: 'Predicted rises & falls',
+            subtitle: 'Daily risers & fallers',
             icon: Icons.trending_up_rounded,
             color: const Color(0xFF00FF87),
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const PriceChangesScreen()),
-            ),
-          ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: _quickToolButton(
-            context,
-            title: 'Captain Decider',
-            subtitle: 'AI rating & top picks',
-            icon: Icons.emoji_events_rounded,
-            color: const Color(0xFFFBBF24),
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const CaptainMatrixScreen()),
             ),
           ),
         ),
@@ -575,6 +540,122 @@ class _DashboardContentState extends State<_DashboardContent> {
 
   Widget _buildSectionTitle(BuildContext context, String title) {
     return AppTheme.sectionTitle(context, title);
+  }
+
+  Widget _buildActiveChips(BuildContext context) {
+
+
+    Widget buildChipGroup(Gameweek? gw, String label) {
+      if (gw == null || gw.chipPlays.isEmpty) return const SizedBox.shrink();
+
+      final chipWidgets = gw.chipPlays.map((chip) {
+        return Container(
+          width: (MediaQuery.of(context).size.width - 44) / 2,
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: AppColors.of(context).cardDark,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: AppColors.of(context).divider),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.stars_rounded,
+                    color: AppColors.of(context).primary,
+                    size: 14,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    'GW${gw.id}',
+                    style: TextStyle(
+                      color: AppColors.of(context).textSecondary,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                chip.displayName,
+                style: TextStyle(
+                  color: AppColors.of(context).textPrimary,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w800,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 2),
+              Text(
+                formatNumber(chip.numPlayed),
+                style: TextStyle(
+                  color: AppColors.of(context).primary,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        );
+      }).toList();
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: Text(
+              label,
+              style: TextStyle(
+                color: AppColors.of(context).textPrimary,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: chipWidgets,
+          ),
+          const SizedBox(height: 16),
+        ],
+      );
+    }
+
+    final currentGw = provider.gameweeks.where((gw) => gw.isCurrent).firstOrNull;
+    final nextGw = provider.gameweeks.where((gw) => gw.isNext).firstOrNull;
+
+    final hasCurrent = currentGw != null && currentGw.chipPlays.isNotEmpty;
+    final hasNext = nextGw != null && nextGw.chipPlays.isNotEmpty;
+
+    if (!hasCurrent && !hasNext) return const SizedBox.shrink();
+
+    final String currentLabel = currentGw != null 
+        ? (currentGw.finished ? 'Finished (GW${currentGw.id})' : 'Ongoing (GW${currentGw.id})')
+        : 'Ongoing';
+    
+    final String nextLabel = nextGw != null 
+        ? 'Upcoming (GW${nextGw.id})' 
+        : 'Upcoming';
+
+    final currentGroup = buildChipGroup(currentGw, currentLabel);
+    final upcomingGroup = buildChipGroup(nextGw, nextLabel);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionTitle(context, 'Active Chips'),
+        const SizedBox(height: 12),
+        currentGroup,
+        upcomingGroup,
+      ],
+    );
   }
 
   Widget _buildStatsGrid(

@@ -43,6 +43,8 @@ class Player {
   final int penaltiesSaved;
   final int penaltiesMissed;
   final int eventPoints;
+  final int costChangeEvent;
+  final int costChangeStart;
 
   const Player({
     required this.id,
@@ -89,6 +91,8 @@ class Player {
     this.penaltiesSaved = 0,
     this.penaltiesMissed = 0,
     this.eventPoints = 0,
+    this.costChangeEvent = 0,
+    this.costChangeStart = 0,
   });
 
   factory Player.fromJson(Map<String, dynamic> json) {
@@ -136,6 +140,8 @@ class Player {
       penaltiesSaved: json['penalties_saved'] as int? ?? 0,
       penaltiesMissed: json['penalties_missed'] as int? ?? 0,
       eventPoints: json['event_points'] as int? ?? 0,
+      costChangeEvent: json['cost_change_event'] as int? ?? 0,
+      costChangeStart: json['cost_change_start'] as int? ?? 0,
     );
   }
 

@@ -3,6 +3,10 @@ import 'package:provider/provider.dart';
 import '../providers/fpl_provider.dart';
 import '../providers/user_teams_provider.dart';
 import '../utils/constants.dart';
+import 'package:flutter/foundation.dart';
+import 'dart:io';
+import 'package:in_app_update/in_app_update.dart';
+
 import 'dashboard_screen.dart';
 import 'players_screen.dart';
 import 'stats_leaders_screen.dart';
@@ -33,7 +37,26 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<FplProvider>().loadAllData(forceRefresh: true);
       context.read<UserTeamsProvider>().loadTeams();
+      _checkForUpdate();
     });
+  }
+
+  Future<void> _checkForUpdate() async {
+    try {
+      if (!kIsWeb && Platform.isAndroid) {
+        final info = await InAppUpdate.checkForUpdate();
+        if (info.updateAvailability == UpdateAvailability.updateAvailable) {
+          if (info.immediateUpdateAllowed) {
+            await InAppUpdate.performImmediateUpdate();
+          } else if (info.flexibleUpdateAllowed) {
+            await InAppUpdate.startFlexibleUpdate();
+            await InAppUpdate.completeFlexibleUpdate();
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('Update check failed: $e');
+    }
   }
 
   @override

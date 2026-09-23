@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import '../utils/constants.dart';
 import '../providers/theme_provider.dart';
 import 'price_changes_screen.dart';
-import 'captain_matrix_screen.dart';
 import 'fpl_team_screen.dart';
 import 'fixture_difficulty_screen.dart';
 import 'stats_leaders_screen.dart';
@@ -26,16 +25,6 @@ class MoreScreen extends StatelessWidget {
         onTap: () => Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => const PriceChangesScreen()),
-        ),
-      ),
-      _ExploreItem(
-        title: 'Captain Decider',
-        subtitle: 'AI rating & top picks matrix',
-        icon: Icons.emoji_events_rounded,
-        iconColor: const Color(0xFFFBBF24),
-        onTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const CaptainMatrixScreen()),
         ),
       ),
       _ExploreItem(

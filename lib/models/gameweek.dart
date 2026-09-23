@@ -16,7 +16,7 @@ class Gameweek {
   final int? mostCaptained;
   final int? mostViceCaptained;
   final int transfersMade;
-  final int chipPlays;
+  final List<ChipPlay> chipPlays;
 
   const Gameweek({
     required this.id,
@@ -36,7 +36,7 @@ class Gameweek {
     this.mostCaptained,
     this.mostViceCaptained,
     this.transfersMade = 0,
-    this.chipPlays = 0,
+    this.chipPlays = const [],
   });
 
   factory Gameweek.fromJson(Map<String, dynamic> json) {
@@ -58,6 +58,10 @@ class Gameweek {
       mostCaptained: json['most_captained'] as int?,
       mostViceCaptained: json['most_vice_captained'] as int?,
       transfersMade: json['transfers_made'] as int? ?? 0,
+      chipPlays: (json['chip_plays'] as List<dynamic>?)
+              ?.map((e) => ChipPlay.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
     );
   }
 
@@ -66,5 +70,36 @@ class Gameweek {
     if (isCurrent) return 'Active';
     if (isNext) return 'Next';
     return 'Upcoming';
+  }
+}
+
+class ChipPlay {
+  final String name;
+  final int numPlayed;
+
+  const ChipPlay({required this.name, required this.numPlayed});
+
+  factory ChipPlay.fromJson(Map<String, dynamic> json) {
+    return ChipPlay(
+      name: json['chip_name'] as String? ?? '',
+      numPlayed: json['num_played'] as int? ?? 0,
+    );
+  }
+
+  String get displayName {
+    switch (name) {
+      case 'bboost':
+        return 'Bench Boost';
+      case '3xc':
+        return 'Triple Captain';
+      case 'freehit':
+        return 'Free Hit';
+      case 'wildcard':
+        return 'Wildcard';
+      default:
+        // Capitalize first letter
+        if (name.isEmpty) return name;
+        return name[0].toUpperCase() + name.substring(1);
+    }
   }
 }

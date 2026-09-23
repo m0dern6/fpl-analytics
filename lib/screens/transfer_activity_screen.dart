@@ -245,26 +245,20 @@ class _TransferActivityScreenState extends State<TransferActivityScreen> {
               }),
             ),
             const SizedBox(width: 8),
-            // GW 1 to GW 38 Pills
-            ...List.generate(_totalGws, (i) {
-              final gwId = i + 1;
-              final isHighlighted = gwId == highlightedGw;
-              final isSelected = _selectedGw == gwId;
-
-              return Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: _buildGwPill(
-                  context,
-                  label: 'GW$gwId',
-                  isSelected: isSelected,
-                  isHighlighted: isHighlighted,
-                  onTap: () => setState(() {
-                    _selectedGw = gwId;
-                    _visibleCount = 20;
-                  }),
-                ),
-              );
-            }),
+            // Current/Target Gameweek Pill
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: _buildGwPill(
+                context,
+                label: 'GW$highlightedGw (Current)',
+                isSelected: _selectedGw == highlightedGw,
+                isHighlighted: true,
+                onTap: () => setState(() {
+                  _selectedGw = highlightedGw;
+                  _visibleCount = 20;
+                }),
+              ),
+            ),
           ],
         ),
       ),

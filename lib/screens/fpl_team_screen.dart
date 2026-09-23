@@ -288,6 +288,205 @@ class _FplTeamScreenState extends State<FplTeamScreen> {
             const SizedBox(height: 16),
             _buildErrorCard(),
           ],
+          _buildVisualGuide(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildVisualGuide() {
+    return Container(
+      margin: const EdgeInsets.only(top: 24),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.of(context).cardDark,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.of(context).divider),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.help_outline_rounded, color: AppColors.of(context).textSecondary, size: 20),
+              const SizedBox(width: 10),
+              Text(
+                'How to find your Team ID?',
+                style: TextStyle(
+                  color: AppColors.of(context).textPrimary,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          
+          // Step 1
+          _buildGuideStep(
+            step: '1',
+            title: 'Go to the official FPL website',
+            description: 'Log in to your account at fantasy.premierleague.com on your browser.',
+            visual: null,
+          ),
+          
+          // Step 2
+          _buildGuideStep(
+            step: '2',
+            title: 'Navigate to the Points tab',
+            description: 'Click on the "Points" tab from the main navigation menu.',
+            visual: Container(
+              margin: const EdgeInsets.only(top: 12),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF00FF87), Color(0xFF02E07B)],
+                ),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  const Text('Status', style: TextStyle(color: Color(0xFF37003C), fontWeight: FontWeight.w600, fontSize: 12)),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF37003C), 
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Text('Points', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 12)),
+                  ),
+                  const Text('Pick Team', style: TextStyle(color: Color(0xFF37003C), fontWeight: FontWeight.w600, fontSize: 12)),
+                  const Text('Transfers', style: TextStyle(color: Color(0xFF37003C), fontWeight: FontWeight.w600, fontSize: 12)),
+                ],
+              ),
+            ),
+          ),
+          
+          // Step 3
+          _buildGuideStep(
+            step: '3',
+            title: 'Find the ID in the URL',
+            description: 'Check your browser\'s address bar. Your Team ID is the number right after "entry/".',
+            isLast: true,
+            visual: Container(
+              margin: const EdgeInsets.only(top: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: AppColors.of(context).background,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppColors.of(context).divider),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.lock_rounded, size: 14, color: Color(0xFF34D399)),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: RichText(
+                        text: TextSpan(
+                          style: TextStyle(
+                            color: AppColors.of(context).textSecondary, 
+                            fontSize: 13,
+                            fontFamily: 'monospace',
+                          ),
+                          children: [
+                            const TextSpan(text: 'fantasy.premierleague.com/entry/'),
+                            TextSpan(
+                              text: '123456', 
+                              style: TextStyle(
+                                color: AppColors.of(context).primary, 
+                                fontWeight: FontWeight.w900, 
+                                backgroundColor: AppColors.of(context).primary.withAlpha(40),
+                              ),
+                            ),
+                            const TextSpan(text: '/event/1'),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    ).animate().fadeIn(duration: 400.ms, delay: 100.ms).slideY(begin: 0.1, end: 0);
+  }
+
+  Widget _buildGuideStep({
+    required String step,
+    required String title,
+    required String description,
+    Widget? visual,
+    bool isLast = false,
+  }) {
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Column(
+            children: [
+              Container(
+                width: 26,
+                height: 26,
+                decoration: BoxDecoration(
+                  color: AppColors.of(context).primary.withAlpha(30),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: AppColors.of(context).primary.withAlpha(100), width: 1.5),
+                ),
+                child: Center(
+                  child: Text(
+                    step,
+                    style: TextStyle(
+                      color: AppColors.of(context).primary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+              ),
+              if (!isLast)
+                Expanded(
+                  child: Container(
+                    width: 2,
+                    color: AppColors.of(context).primary.withAlpha(40),
+                    margin: const EdgeInsets.symmetric(vertical: 4),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      color: AppColors.of(context).textPrimary,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    description,
+                    style: TextStyle(
+                      color: AppColors.of(context).textSecondary,
+                      fontSize: 12,
+                      height: 1.4,
+                    ),
+                  ),
+                  if (visual != null) visual,
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
