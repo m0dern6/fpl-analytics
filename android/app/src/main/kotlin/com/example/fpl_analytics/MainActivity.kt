@@ -1,4 +1,4 @@
-package com.example.fpl_analytics
+package com.fpl.analytics
 
 import io.flutter.embedding.android.FlutterActivity
 
