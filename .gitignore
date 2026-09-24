@@ -50,3 +50,7 @@ ios/Runner/GoogleService-Info.plist
 lib/firebase_options.dart
 firebase.json
 .firebaserc
+
+# Android Keystore and Properties
+*.jks
+key.properties
